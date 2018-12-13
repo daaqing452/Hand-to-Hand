@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_grey"
+    android:padding="@dimen/box_inset_layout_padding"
+    tools:context=".MainActivity"
+    tools:deviceIds="wear">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/inner_frame_layout_padding"
+        app:boxedEdges="all">
+
+        <TextView
+            android:id="@+id/text0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:text="@string/hello_world"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="TextView"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="TextView"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/button_log"
+            android:layout_width="60dp"
+            android:layout_height="37dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="90dp"
+            android:text="LOG/OFF"
+            android:textSize="8sp" />
+
+        <Button
+            android:id="@+id/button_connect"
+            android:layout_width="66dp"
+            android:layout_height="37dp"
+            android:layout_marginLeft="60dp"
+            android:layout_marginTop="90dp"
+            android:width="50dp"
+            android:text="CONNECT"
+            android:textSize="8sp" />
+
+        <EditText
+            android:id="@+id/editIP"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="166.111.139.113"
+            android:textSize="10sp" />
+
+    </FrameLayout>
+</android.support.wear.widget.BoxInsetLayout>

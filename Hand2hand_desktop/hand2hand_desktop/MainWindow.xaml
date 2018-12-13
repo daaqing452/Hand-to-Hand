@@ -1,0 +1,23 @@
+﻿<Window x:Class="hand2hand_desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:hand2hand_desktop"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="353.333" Width="525" ResizeMode="NoResize">
+    <Grid>
+        <TextBlock Margin="21,24,434,271" Text="Server IP:" Height="24"/>
+        <ComboBox Margin="88,18,290,271" Name="uComboIP"></ComboBox>
+        <Button Margin="232,18,229,271" Content="Listen" Click="uButtonListen_Click"></Button>
+        <Button Margin="293,18,168,271" Content="Stop" Click="uButtonStop_Click"/>
+        <TextBlock Margin="354,24,10,271" Name="uTextNetInfo" Height="24" />
+        <TextBox Margin="21,58,292,231" VerticalAlignment="Center" Name="uTextMessage"></TextBox>
+        <Button Margin="293,58,168,231" Content="Log/On" Click="uButtonLogOn_Click" />
+        <Button Margin="354,58,107,231" Content="Log/Off" Click="uButtonLogOff_Click" />
+        <Button Margin="232,58,229,231" Content="Send" Click="uButtonSend_Click" />
+        <ScrollViewer Margin="10,98,10,10" Name="uScrollConsole">
+            <TextBox Name="uTextConsole" TextChanged="uTextConsole_TextChanged" TextWrapping="Wrap"></TextBox>
+        </ScrollViewer>
+    </Grid>
+</Window>
