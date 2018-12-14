@@ -1,3 +1,8 @@
 /papers
 /h2h.pptx
 /hand2hand_related.xlsx
+
+/analysis/venv/Include
+/analysis/venv/Lib
+/analysis/venv/Script
+/analysis/venv/__pycache__

@@ -12,3 +12,6 @@ E:\Hand2hand_desktop\hand2hand_desktop\obj\Debug\hand2hand_desktop.Properties.Re
 E:\Hand2hand_desktop\hand2hand_desktop\obj\Debug\hand2hand_desktop.csproj.GenerateResource.Cache
 E:\Hand2hand_desktop\hand2hand_desktop\obj\Debug\hand2hand_desktop.exe
 E:\Hand2hand_desktop\hand2hand_desktop\obj\Debug\hand2hand_desktop.pdb
+E:\Hand2hand\Hand2hand_desktop\hand2hand_desktop\bin\Debug\hand2hand_desktop.exe.config
+E:\Hand2hand\Hand2hand_desktop\hand2hand_desktop\obj\Debug\hand2hand_desktop.exe
+E:\Hand2hand\Hand2hand_desktop\hand2hand_desktop\obj\Debug\hand2hand_desktop.pdb

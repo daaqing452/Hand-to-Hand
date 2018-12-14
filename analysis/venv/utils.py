@@ -19,7 +19,7 @@ def read_file(filename):
 		if op == 'gyr': gyr.append([t, float(arr[2]), float(arr[3]), float(arr[4])])
 		if op == 'gra': gra.append([t, float(arr[2]), float(arr[3]), float(arr[4])])
 	f.close()
-	return acc, gyr, gra
+	return np.array(acc), np.array(gyr), np.array(gra)
 
 def read_file2(filename):
 	acc = []
@@ -38,12 +38,9 @@ def read_file2(filename):
 		if op == 'gyr': gyr.append([float(arr[1]), float(arr[2]), float(arr[3])])
 		if op == 'gra': gra.append([float(arr[1]), float(arr[2]), float(arr[3])])
 	f.close()
-	acc = np.array(acc)
-	gyr = np.array(gyr)
-	gra = np.array(gra)
-	return acc, gyr, gra
+	return np.array(acc), np.array(gyr), np.array(gra)
 
-def resample(a, stride):
+def resample(a, stride=20):
 	lena = len(a)
 	t = a[0][0]
 	t1 = a[lena-1][0]
@@ -55,4 +52,4 @@ def resample(a, stride):
 		sr = (a[i][0] - t) / (a[i][0] - a[i-1][0])
 		b.append([a[i-1][j] * sr + a[i][j] * sl for j in range(1, len(a[i]))])
 		t += stride
-	return b
+	return np.array(b)
