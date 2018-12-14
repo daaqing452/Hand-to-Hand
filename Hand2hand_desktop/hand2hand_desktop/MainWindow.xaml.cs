@@ -56,7 +56,7 @@ namespace hand2hand_desktop {
     }
 
     public class Server :INotifyPropertyChanged {
-        const int PORT = 929;
+        const int PORT = 9299;
         public TcpListener listener;
         public Thread threadListen;
         public bool listening = false;

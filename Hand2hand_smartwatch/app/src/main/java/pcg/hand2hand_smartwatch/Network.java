@@ -11,7 +11,7 @@ import java.net.Socket;
 
 public class Network {
     MainActivity father;
-    public final static int PORT = 929;
+    public final static int PORT = 9299;
     Socket socket;
     BufferedReader reader;
     PrintWriter writer;

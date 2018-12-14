@@ -2,6 +2,7 @@ import numpy as np
 
 
 def read_file(filename):
+	t_first = -1
 	acc = []
 	gyr = []
 	gra = []
@@ -14,6 +15,11 @@ def read_file(filename):
 			break
 		arr = s[:-1].split(' ')
 		t = int(arr[0])
+		if t_first == -1:
+			t_first = t
+			t = 0
+		else:
+			t -= t_first
 		op = arr[1]
 		if op == 'acc': acc.append([t, float(arr[2]), float(arr[3]), float(arr[4])])
 		if op == 'gyr': gyr.append([t, float(arr[2]), float(arr[3]), float(arr[4])])
