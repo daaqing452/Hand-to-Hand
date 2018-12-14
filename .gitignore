@@ -4,5 +4,5 @@
 
 /analysis/venv/Include
 /analysis/venv/Lib
-/analysis/venv/Script
+/analysis/venv/Scripts
 /analysis/venv/__pycache__
