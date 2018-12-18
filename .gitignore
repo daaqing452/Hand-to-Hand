@@ -6,3 +6,6 @@
 /analysis/venv/Lib
 /analysis/venv/Scripts
 /analysis/venv/__pycache__
+
+/analysis/data/
+/analysis/log*
