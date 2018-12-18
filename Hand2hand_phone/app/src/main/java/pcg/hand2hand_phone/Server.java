@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+import android.widget.ScrollView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -134,11 +135,12 @@ public class Server {
     }
 
     void addInfo(String s) {
-        info += s + "\n";
+        info += "\n" + s;
         father.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 father.textInfo.setText(info);
+                father.scrollTextInfo.fullScroll(ScrollView.FOCUS_DOWN);
             }
         });
     }

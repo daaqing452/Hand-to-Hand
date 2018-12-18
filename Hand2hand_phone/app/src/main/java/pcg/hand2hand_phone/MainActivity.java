@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -12,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
     EditText textIp, textMessage;
     TextView textInfo;
     Button buttonSetup, buttonSend, buttonSendLogOn, buttonSendLogOff;
+    ScrollView scrollTextInfo;
 
     Server server;
 
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         buttonSend = findViewById(R.id.button_send);
         buttonSendLogOn = findViewById(R.id.button_send_logon);
         buttonSendLogOff = findViewById(R.id.button_send_logoff);
+        scrollTextInfo = findViewById(R.id.scroll_text_info);
 
         server = new Server(this);
 
