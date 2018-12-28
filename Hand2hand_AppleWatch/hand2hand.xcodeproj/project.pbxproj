@@ -1,0 +1,865 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BFACCE3E21D3601400CCECB2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE3D21D3601400CCECB2 /* AppDelegate.m */; };
+		BFACCE4121D3601400CCECB2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE4021D3601400CCECB2 /* ViewController.m */; };
+		BFACCE4421D3601400CCECB2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE4221D3601400CCECB2 /* Main.storyboard */; };
+		BFACCE4621D3601400CCECB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE4521D3601400CCECB2 /* Assets.xcassets */; };
+		BFACCE4921D3601400CCECB2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE4721D3601400CCECB2 /* LaunchScreen.storyboard */; };
+		BFACCE4C21D3601400CCECB2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE4B21D3601400CCECB2 /* main.m */; };
+		BFACCE5621D3601400CCECB2 /* hand2handTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE5521D3601400CCECB2 /* hand2handTests.m */; };
+		BFACCE6121D3601400CCECB2 /* hand2handUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE6021D3601400CCECB2 /* hand2handUITests.m */; };
+		BFACCE6621D3601400CCECB2 /* hand2hand WatchKit App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BFACCE6521D3601400CCECB2 /* hand2hand WatchKit App.app */; };
+		BFACCE6C21D3601400CCECB2 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE6A21D3601400CCECB2 /* Interface.storyboard */; };
+		BFACCE6E21D3601500CCECB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE6D21D3601500CCECB2 /* Assets.xcassets */; };
+		BFACCE7521D3601500CCECB2 /* hand2hand WatchKit Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = BFACCE7421D3601500CCECB2 /* hand2hand WatchKit Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BFACCE7B21D3601500CCECB2 /* InterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE7A21D3601500CCECB2 /* InterfaceController.m */; };
+		BFACCE7E21D3601500CCECB2 /* ExtensionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE7D21D3601500CCECB2 /* ExtensionDelegate.m */; };
+		BFACCE8121D3601500CCECB2 /* NotificationController.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE8021D3601500CCECB2 /* NotificationController.m */; };
+		BFACCE8321D3601500CCECB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE8221D3601500CCECB2 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BFACCE5221D3601400CCECB2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFACCE3121D3601300CCECB2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BFACCE3821D3601300CCECB2;
+			remoteInfo = hand2hand;
+		};
+		BFACCE5D21D3601400CCECB2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFACCE3121D3601300CCECB2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BFACCE3821D3601300CCECB2;
+			remoteInfo = hand2hand;
+		};
+		BFACCE6721D3601400CCECB2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFACCE3121D3601300CCECB2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BFACCE6421D3601400CCECB2;
+			remoteInfo = "hand2hand WatchKit App";
+		};
+		BFACCE7621D3601500CCECB2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFACCE3121D3601300CCECB2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BFACCE7321D3601500CCECB2;
+			remoteInfo = "hand2hand WatchKit Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BFACCE8B21D3601600CCECB2 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				BFACCE7521D3601500CCECB2 /* hand2hand WatchKit Extension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE8F21D3601600CCECB2 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				BFACCE6621D3601400CCECB2 /* hand2hand WatchKit App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		BFACCE3921D3601300CCECB2 /* hand2hand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hand2hand.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFACCE3C21D3601400CCECB2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		BFACCE3D21D3601400CCECB2 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		BFACCE3F21D3601400CCECB2 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		BFACCE4021D3601400CCECB2 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		BFACCE4321D3601400CCECB2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		BFACCE4521D3601400CCECB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BFACCE4821D3601400CCECB2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		BFACCE4A21D3601400CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BFACCE4B21D3601400CCECB2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		BFACCE5121D3601400CCECB2 /* hand2handTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hand2handTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFACCE5521D3601400CCECB2 /* hand2handTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = hand2handTests.m; sourceTree = "<group>"; };
+		BFACCE5721D3601400CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BFACCE5C21D3601400CCECB2 /* hand2handUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hand2handUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFACCE6021D3601400CCECB2 /* hand2handUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = hand2handUITests.m; sourceTree = "<group>"; };
+		BFACCE6221D3601400CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BFACCE6521D3601400CCECB2 /* hand2hand WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hand2hand WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFACCE6B21D3601400CCECB2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
+		BFACCE6D21D3601500CCECB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BFACCE6F21D3601500CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BFACCE7421D3601500CCECB2 /* hand2hand WatchKit Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "hand2hand WatchKit Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFACCE7921D3601500CCECB2 /* InterfaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterfaceController.h; sourceTree = "<group>"; };
+		BFACCE7A21D3601500CCECB2 /* InterfaceController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InterfaceController.m; sourceTree = "<group>"; };
+		BFACCE7C21D3601500CCECB2 /* ExtensionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtensionDelegate.h; sourceTree = "<group>"; };
+		BFACCE7D21D3601500CCECB2 /* ExtensionDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExtensionDelegate.m; sourceTree = "<group>"; };
+		BFACCE7F21D3601500CCECB2 /* NotificationController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationController.h; sourceTree = "<group>"; };
+		BFACCE8021D3601500CCECB2 /* NotificationController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationController.m; sourceTree = "<group>"; };
+		BFACCE8221D3601500CCECB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BFACCE8421D3601600CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BFACCE8521D3601600CCECB2 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BFACCE3621D3601300CCECB2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE4E21D3601400CCECB2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE5921D3601400CCECB2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE7121D3601500CCECB2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BFACCE3021D3601300CCECB2 = {
+			isa = PBXGroup;
+			children = (
+				BFACCE3B21D3601300CCECB2 /* hand2hand */,
+				BFACCE5421D3601400CCECB2 /* hand2handTests */,
+				BFACCE5F21D3601400CCECB2 /* hand2handUITests */,
+				BFACCE6921D3601400CCECB2 /* hand2hand WatchKit App */,
+				BFACCE7821D3601500CCECB2 /* hand2hand WatchKit Extension */,
+				BFACCE3A21D3601300CCECB2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BFACCE3A21D3601300CCECB2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BFACCE3921D3601300CCECB2 /* hand2hand.app */,
+				BFACCE5121D3601400CCECB2 /* hand2handTests.xctest */,
+				BFACCE5C21D3601400CCECB2 /* hand2handUITests.xctest */,
+				BFACCE6521D3601400CCECB2 /* hand2hand WatchKit App.app */,
+				BFACCE7421D3601500CCECB2 /* hand2hand WatchKit Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BFACCE3B21D3601300CCECB2 /* hand2hand */ = {
+			isa = PBXGroup;
+			children = (
+				BFACCE3C21D3601400CCECB2 /* AppDelegate.h */,
+				BFACCE3D21D3601400CCECB2 /* AppDelegate.m */,
+				BFACCE3F21D3601400CCECB2 /* ViewController.h */,
+				BFACCE4021D3601400CCECB2 /* ViewController.m */,
+				BFACCE4221D3601400CCECB2 /* Main.storyboard */,
+				BFACCE4521D3601400CCECB2 /* Assets.xcassets */,
+				BFACCE4721D3601400CCECB2 /* LaunchScreen.storyboard */,
+				BFACCE4A21D3601400CCECB2 /* Info.plist */,
+				BFACCE4B21D3601400CCECB2 /* main.m */,
+			);
+			path = hand2hand;
+			sourceTree = "<group>";
+		};
+		BFACCE5421D3601400CCECB2 /* hand2handTests */ = {
+			isa = PBXGroup;
+			children = (
+				BFACCE5521D3601400CCECB2 /* hand2handTests.m */,
+				BFACCE5721D3601400CCECB2 /* Info.plist */,
+			);
+			path = hand2handTests;
+			sourceTree = "<group>";
+		};
+		BFACCE5F21D3601400CCECB2 /* hand2handUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BFACCE6021D3601400CCECB2 /* hand2handUITests.m */,
+				BFACCE6221D3601400CCECB2 /* Info.plist */,
+			);
+			path = hand2handUITests;
+			sourceTree = "<group>";
+		};
+		BFACCE6921D3601400CCECB2 /* hand2hand WatchKit App */ = {
+			isa = PBXGroup;
+			children = (
+				BFACCE6A21D3601400CCECB2 /* Interface.storyboard */,
+				BFACCE6D21D3601500CCECB2 /* Assets.xcassets */,
+				BFACCE6F21D3601500CCECB2 /* Info.plist */,
+			);
+			path = "hand2hand WatchKit App";
+			sourceTree = "<group>";
+		};
+		BFACCE7821D3601500CCECB2 /* hand2hand WatchKit Extension */ = {
+			isa = PBXGroup;
+			children = (
+				BFACCE7921D3601500CCECB2 /* InterfaceController.h */,
+				BFACCE7A21D3601500CCECB2 /* InterfaceController.m */,
+				BFACCE7C21D3601500CCECB2 /* ExtensionDelegate.h */,
+				BFACCE7D21D3601500CCECB2 /* ExtensionDelegate.m */,
+				BFACCE7F21D3601500CCECB2 /* NotificationController.h */,
+				BFACCE8021D3601500CCECB2 /* NotificationController.m */,
+				BFACCE8221D3601500CCECB2 /* Assets.xcassets */,
+				BFACCE8421D3601600CCECB2 /* Info.plist */,
+				BFACCE8521D3601600CCECB2 /* PushNotificationPayload.apns */,
+			);
+			path = "hand2hand WatchKit Extension";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BFACCE3821D3601300CCECB2 /* hand2hand */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BFACCE9021D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2hand" */;
+			buildPhases = (
+				BFACCE3521D3601300CCECB2 /* Sources */,
+				BFACCE3621D3601300CCECB2 /* Frameworks */,
+				BFACCE3721D3601300CCECB2 /* Resources */,
+				BFACCE8F21D3601600CCECB2 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BFACCE6821D3601400CCECB2 /* PBXTargetDependency */,
+			);
+			name = hand2hand;
+			productName = hand2hand;
+			productReference = BFACCE3921D3601300CCECB2 /* hand2hand.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BFACCE5021D3601400CCECB2 /* hand2handTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BFACCE9321D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2handTests" */;
+			buildPhases = (
+				BFACCE4D21D3601400CCECB2 /* Sources */,
+				BFACCE4E21D3601400CCECB2 /* Frameworks */,
+				BFACCE4F21D3601400CCECB2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BFACCE5321D3601400CCECB2 /* PBXTargetDependency */,
+			);
+			name = hand2handTests;
+			productName = hand2handTests;
+			productReference = BFACCE5121D3601400CCECB2 /* hand2handTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BFACCE5B21D3601400CCECB2 /* hand2handUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BFACCE9621D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2handUITests" */;
+			buildPhases = (
+				BFACCE5821D3601400CCECB2 /* Sources */,
+				BFACCE5921D3601400CCECB2 /* Frameworks */,
+				BFACCE5A21D3601400CCECB2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BFACCE5E21D3601400CCECB2 /* PBXTargetDependency */,
+			);
+			name = hand2handUITests;
+			productName = hand2handUITests;
+			productReference = BFACCE5C21D3601400CCECB2 /* hand2handUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		BFACCE6421D3601400CCECB2 /* hand2hand WatchKit App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BFACCE8C21D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2hand WatchKit App" */;
+			buildPhases = (
+				BFACCE6321D3601400CCECB2 /* Resources */,
+				BFACCE8B21D3601600CCECB2 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BFACCE7721D3601500CCECB2 /* PBXTargetDependency */,
+			);
+			name = "hand2hand WatchKit App";
+			productName = "hand2hand WatchKit App";
+			productReference = BFACCE6521D3601400CCECB2 /* hand2hand WatchKit App.app */;
+			productType = "com.apple.product-type.application.watchapp2";
+		};
+		BFACCE7321D3601500CCECB2 /* hand2hand WatchKit Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BFACCE8821D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2hand WatchKit Extension" */;
+			buildPhases = (
+				BFACCE7021D3601500CCECB2 /* Sources */,
+				BFACCE7121D3601500CCECB2 /* Frameworks */,
+				BFACCE7221D3601500CCECB2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "hand2hand WatchKit Extension";
+			productName = "hand2hand WatchKit Extension";
+			productReference = BFACCE7421D3601500CCECB2 /* hand2hand WatchKit Extension.appex */;
+			productType = "com.apple.product-type.watchkit2-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BFACCE3121D3601300CCECB2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "鲁逸沁";
+				TargetAttributes = {
+					BFACCE3821D3601300CCECB2 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					BFACCE5021D3601400CCECB2 = {
+						CreatedOnToolsVersion = 10.1;
+						TestTargetID = BFACCE3821D3601300CCECB2;
+					};
+					BFACCE5B21D3601400CCECB2 = {
+						CreatedOnToolsVersion = 10.1;
+						TestTargetID = BFACCE3821D3601300CCECB2;
+					};
+					BFACCE6421D3601400CCECB2 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					BFACCE7321D3601500CCECB2 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = BFACCE3421D3601300CCECB2 /* Build configuration list for PBXProject "hand2hand" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BFACCE3021D3601300CCECB2;
+			productRefGroup = BFACCE3A21D3601300CCECB2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BFACCE3821D3601300CCECB2 /* hand2hand */,
+				BFACCE5021D3601400CCECB2 /* hand2handTests */,
+				BFACCE5B21D3601400CCECB2 /* hand2handUITests */,
+				BFACCE6421D3601400CCECB2 /* hand2hand WatchKit App */,
+				BFACCE7321D3601500CCECB2 /* hand2hand WatchKit Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BFACCE3721D3601300CCECB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFACCE4921D3601400CCECB2 /* LaunchScreen.storyboard in Resources */,
+				BFACCE4621D3601400CCECB2 /* Assets.xcassets in Resources */,
+				BFACCE4421D3601400CCECB2 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE4F21D3601400CCECB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE5A21D3601400CCECB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE6321D3601400CCECB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFACCE6E21D3601500CCECB2 /* Assets.xcassets in Resources */,
+				BFACCE6C21D3601400CCECB2 /* Interface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE7221D3601500CCECB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFACCE8321D3601500CCECB2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BFACCE3521D3601300CCECB2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFACCE4121D3601400CCECB2 /* ViewController.m in Sources */,
+				BFACCE4C21D3601400CCECB2 /* main.m in Sources */,
+				BFACCE3E21D3601400CCECB2 /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE4D21D3601400CCECB2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFACCE5621D3601400CCECB2 /* hand2handTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE5821D3601400CCECB2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFACCE6121D3601400CCECB2 /* hand2handUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFACCE7021D3601500CCECB2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFACCE7E21D3601500CCECB2 /* ExtensionDelegate.m in Sources */,
+				BFACCE7B21D3601500CCECB2 /* InterfaceController.m in Sources */,
+				BFACCE8121D3601500CCECB2 /* NotificationController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BFACCE5321D3601400CCECB2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BFACCE3821D3601300CCECB2 /* hand2hand */;
+			targetProxy = BFACCE5221D3601400CCECB2 /* PBXContainerItemProxy */;
+		};
+		BFACCE5E21D3601400CCECB2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BFACCE3821D3601300CCECB2 /* hand2hand */;
+			targetProxy = BFACCE5D21D3601400CCECB2 /* PBXContainerItemProxy */;
+		};
+		BFACCE6821D3601400CCECB2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BFACCE6421D3601400CCECB2 /* hand2hand WatchKit App */;
+			targetProxy = BFACCE6721D3601400CCECB2 /* PBXContainerItemProxy */;
+		};
+		BFACCE7721D3601500CCECB2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BFACCE7321D3601500CCECB2 /* hand2hand WatchKit Extension */;
+			targetProxy = BFACCE7621D3601500CCECB2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		BFACCE4221D3601400CCECB2 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BFACCE4321D3601400CCECB2 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		BFACCE4721D3601400CCECB2 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BFACCE4821D3601400CCECB2 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		BFACCE6A21D3601400CCECB2 /* Interface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BFACCE6B21D3601400CCECB2 /* Base */,
+			);
+			name = Interface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		BFACCE8621D3601600CCECB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		BFACCE8721D3601600CCECB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BFACCE8921D3601600CCECB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = "hand2hand WatchKit Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 5.1;
+			};
+			name = Debug;
+		};
+		BFACCE8A21D3601600CCECB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = "hand2hand WatchKit Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 5.1;
+			};
+			name = Release;
+		};
+		BFACCE8D21D3601600CCECB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				IBSC_MODULE = hand2hand_WatchKit_Extension;
+				INFOPLIST_FILE = "hand2hand WatchKit App/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 5.1;
+			};
+			name = Debug;
+		};
+		BFACCE8E21D3601600CCECB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				IBSC_MODULE = hand2hand_WatchKit_Extension;
+				INFOPLIST_FILE = "hand2hand WatchKit App/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 5.1;
+			};
+			name = Release;
+		};
+		BFACCE9121D3601600CCECB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = hand2hand/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BFACCE9221D3601600CCECB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = hand2hand/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BFACCE9421D3601600CCECB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = hand2handTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2handTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hand2hand.app/hand2hand";
+			};
+			name = Debug;
+		};
+		BFACCE9521D3601600CCECB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = hand2handTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2handTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hand2hand.app/hand2hand";
+			};
+			name = Release;
+		};
+		BFACCE9721D3601600CCECB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = hand2handUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2handUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = hand2hand;
+			};
+			name = Debug;
+		};
+		BFACCE9821D3601600CCECB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2V33378F7P;
+				INFOPLIST_FILE = hand2handUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2handUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = hand2hand;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BFACCE3421D3601300CCECB2 /* Build configuration list for PBXProject "hand2hand" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFACCE8621D3601600CCECB2 /* Debug */,
+				BFACCE8721D3601600CCECB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFACCE8821D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2hand WatchKit Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFACCE8921D3601600CCECB2 /* Debug */,
+				BFACCE8A21D3601600CCECB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFACCE8C21D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2hand WatchKit App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFACCE8D21D3601600CCECB2 /* Debug */,
+				BFACCE8E21D3601600CCECB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFACCE9021D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2hand" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFACCE9121D3601600CCECB2 /* Debug */,
+				BFACCE9221D3601600CCECB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFACCE9321D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2handTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFACCE9421D3601600CCECB2 /* Debug */,
+				BFACCE9521D3601600CCECB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFACCE9621D3601600CCECB2 /* Build configuration list for PBXNativeTarget "hand2handUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFACCE9721D3601600CCECB2 /* Debug */,
+				BFACCE9821D3601600CCECB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BFACCE3121D3601300CCECB2 /* Project object */;
+}
