@@ -82,6 +82,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BF07EE7921D60CA5000EED41 /* hand2hand.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = hand2hand.entitlements; sourceTree = "<group>"; };
 		BFACCE3921D3601300CCECB2 /* hand2hand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hand2hand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFACCE3C21D3601400CCECB2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BFACCE3D21D3601400CCECB2 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -173,6 +174,7 @@
 		BFACCE3B21D3601300CCECB2 /* hand2hand */ = {
 			isa = PBXGroup;
 			children = (
+				BF07EE7921D60CA5000EED41 /* hand2hand.entitlements */,
 				BFACCE3C21D3601400CCECB2 /* AppDelegate.h */,
 				BFACCE3D21D3601400CCECB2 /* AppDelegate.m */,
 				BFACCE3F21D3601400CCECB2 /* ViewController.h */,
@@ -333,6 +335,11 @@
 				TargetAttributes = {
 					BFACCE3821D3601300CCECB2 = {
 						CreatedOnToolsVersion = 10.1;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 					BFACCE5021D3601400CCECB2 = {
 						CreatedOnToolsVersion = 10.1;
@@ -698,6 +705,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = hand2hand/hand2hand.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				INFOPLIST_FILE = hand2hand/Info.plist;
@@ -715,6 +723,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = hand2hand/hand2hand.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				INFOPLIST_FILE = hand2hand/Info.plist;

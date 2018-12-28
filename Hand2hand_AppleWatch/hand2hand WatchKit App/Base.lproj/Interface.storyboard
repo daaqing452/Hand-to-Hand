@@ -15,8 +15,16 @@
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController">
                     <items>
                         <label width="136" height="19" alignment="left" text="Label" id="8jH-55-Kdk"/>
-                        <button width="1" alignment="left" title="Button" id="UKS-eV-HmI"/>
+                        <button width="1" alignment="left" title="Button" id="UKS-eV-HmI">
+                            <connections>
+                                <action selector="doClickButton:" destination="AgC-eL-Hgc" id="VRD-wv-Rxb"/>
+                            </connections>
+                        </button>
                     </items>
+                    <connections>
+                        <outlet property="buttonTest" destination="UKS-eV-HmI" id="T2E-1H-PcX"/>
+                        <outlet property="labelTest" destination="8jH-55-Kdk" id="KIT-Vi-H90"/>
+                    </connections>
                 </controller>
             </objects>
             <point key="canvasLocation" x="220" y="345"/>

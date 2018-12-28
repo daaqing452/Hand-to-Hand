@@ -11,12 +11,17 @@
 
 @interface InterfaceController ()
 
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
+@property (weak, nonatomic) IBOutlet WKInterfaceLabel *labelTest;
+
+- (IBAction)doClickButton:(id)sender;
+
 @end
 
 
 @implementation InterfaceController
 
-NSString * const SENSOR_DATA_GET = @"pull";
+NSString * const SENSOR_DATA_GET = @"push";
 bool const SENSOR_SHOW_FREQ = false;
 
 -(CMMotionManager *) manager {
@@ -36,6 +41,12 @@ bool const SENSOR_SHOW_FREQ = false;
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
     
+    if ([WCSession isSupported]) {
+        WCSession* session = [WCSession defaultSession];
+        session.delegate = self;
+        [session activateSession];
+    }
+    
     if ([SENSOR_DATA_GET isEqualToString:@"push"]) {
         [self pushAccelerometer];
     } else if ([SENSOR_DATA_GET isEqualToString:@"pull"]) {
@@ -47,6 +58,9 @@ bool const SENSOR_SHOW_FREQ = false;
     // This method is called when watch view controller is no longer visible
     [super didDeactivate];
     
+    if (self.manager.isAccelerometerAvailable) {
+        [self.manager stopAccelerometerUpdates];
+    }
     NSLog(@"bye");
 }
 
@@ -58,11 +72,11 @@ bool const SENSOR_SHOW_FREQ = false;
     [self.manager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData * _Nullable accelerometerData, NSError * _Nullable error) {
         if (error) return;
         CMAcceleration acceleration = accelerometerData.acceleration;
-        NSLog(@"%f__%f__%f", acceleration.x, acceleration.y, acceleration.z);
+        NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
         if (SENSOR_SHOW_FREQ) {
             freqCnt ++;
             float freq = freqCnt / (-[startTime timeIntervalSinceNow]);
-            NSLog(@"accfreq: %f", freq);
+            NSLog(@"freqAcc: %f", freq);
         }
     }];
 }
@@ -72,13 +86,17 @@ bool const SENSOR_SHOW_FREQ = false;
         self.manager.accelerometerUpdateInterval = 1/100.0;
         [self.manager startAccelerometerUpdates];
     }
+    [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(getSensorData:) userInfo:nil repeats:YES];
 }
 
-- (void)getAccelerometer {
-    
+- (void)getSensorData:(NSTimer *)timer {
+    CMAccelerometerData *data = self.manager.accelerometerData;
+    CMAcceleration acceleration = data.acceleration;
+    NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
+}
+
+- (IBAction)doClickButton:(id)sender {
+    [self.labelTest setText:@"hehe"];
 }
 
 @end
-
-
-

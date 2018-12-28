@@ -9,11 +9,13 @@
 #import <WatchKit/WatchKit.h>
 #import <Foundation/Foundation.h>
 #import <CoreMotion/CoreMotion.h>
+#import <WatchConnectivity/WatchConnectivity.h>
 
 @interface InterfaceController : WKInterfaceController
-@property(nonatomic,strong) CMMotionManager *manager;
-- (void)pushAccelerometer;
 
+@property(nonatomic,strong) CMMotionManager *manager;
+
+- (void)pushAccelerometer;
 - (void)setSensorDataGetPull;
-- (void)getAccelerometer;
+- (void)getSensorData:(NSTimer *)timer;
 @end
