@@ -60,11 +60,5 @@
             </objects>
             <point key="canvasLocation" x="468" y="345"/>
         </scene>
-        <!--Interface Controller-->
-        <scene sceneID="C0k-RI-nGt">
-            <objects>
-                <controller id="DM0-XO-o9A"/>
-            </objects>
-        </scene>
     </scenes>
 </document>

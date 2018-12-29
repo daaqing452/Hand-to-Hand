@@ -21,7 +21,7 @@
 
 @implementation InterfaceController
 
-NSString * const SENSOR_DATA_GET = @"push";
+NSString * const SENSOR_DATA_GET = @"none";
 bool const SENSOR_SHOW_FREQ = false;
 
 -(CMMotionManager *) manager {
@@ -97,6 +97,33 @@ bool const SENSOR_SHOW_FREQ = false;
 
 - (IBAction)doClickButton:(id)sender {
     [self.labelTest setText:@"hehe"];
+    [self sendToRemote:@{@"message": @"hehe!"}];
+}
+
+
+
+// send
+- (void)sendToRemote:(NSDictionary *)message {
+    WCSession* session = [WCSession defaultSession];
+    [session sendMessage:message replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
+        // no reply?
+    } errorHandler:^(NSError * _Nonnull error) {
+        // do nothing
+    }];
+}
+
+// recv
+- (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)message replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
+    [self alert:message[@"message"]];
+}
+
+// alert
+- (void)alert:(NSString *)message {
+    WKAlertAction *actionDone = [WKAlertAction actionWithTitle:@"完成" style:WKAlertActionStyleDefault handler:^{
+    }];
+    WKAlertAction *actionDestruction = [WKAlertAction actionWithTitle:@"毁灭" style:WKAlertActionStyleDestructive handler:^{
+    }];
+    [self presentAlertControllerWithTitle:@"消息" message:message preferredStyle:WKAlertControllerStyleActionSheet actions:@[actionDone, actionDestruction]];
 }
 
 @end
