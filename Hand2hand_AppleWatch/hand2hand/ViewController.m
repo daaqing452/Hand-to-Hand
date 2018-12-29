@@ -10,6 +10,7 @@
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
+@property (weak, nonatomic) IBOutlet UITextView *textInfo;
 
 @end
 
@@ -24,14 +25,38 @@
         session.delegate = self;
         [session activateSession];
     }
+    
+    [self writeFile];
 }
 
+- (void)writeFile {
+    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSLog(@"watch documentPath = %@", documentPath);
+    
+    NSString *sharePath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
+    NSLog(@"watch sharePath = %@", sharePath);
+    
+    NSString *s = @"";
+    [s stringByAppendingString:documentPath];
+    [s stringByAppendingString:@"\n"];
+    [s stringByAppendingString:sharePath];
+    [self.textInfo setText:s];
+}
+
+
+
+/*
+ * UI
+ */
 - (IBAction)doClickButton:(id)sender {
     [self sendToRemote:@{@"message": @"gogogo!"}];
 }
 
 
 
+/*
+ * communication
+ */
 // send
 - (void)sendToRemote:(NSDictionary *)message {
     WCSession* session = [WCSession defaultSession];

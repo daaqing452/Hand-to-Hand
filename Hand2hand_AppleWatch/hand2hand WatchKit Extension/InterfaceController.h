@@ -13,9 +13,4 @@
 
 @interface InterfaceController : WKInterfaceController
 
-@property(nonatomic,strong) CMMotionManager *manager;
-
-- (void)pushAccelerometer;
-- (void)setSensorDataGetPull;
-- (void)getSensorData:(NSTimer *)timer;
 @end

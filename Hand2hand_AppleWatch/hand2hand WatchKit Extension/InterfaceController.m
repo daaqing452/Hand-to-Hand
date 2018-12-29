@@ -13,6 +13,7 @@
 
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *labelTest;
+@property (strong, nonatomic) CMMotionManager *manager;
 
 - (IBAction)doClickButton:(id)sender;
 
@@ -52,6 +53,8 @@ bool const SENSOR_SHOW_FREQ = false;
     } else if ([SENSOR_DATA_GET isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
     }
+    
+    [self writeFile];
 }
 
 - (void)didDeactivate {
@@ -95,6 +98,32 @@ bool const SENSOR_SHOW_FREQ = false;
     NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
 }
 
+- (void)writeFile {
+    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSLog(@"watch documentPath = %@", documentPath);
+    
+    /*NSString *sharePath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
+    NSLog(@"watch sharePath = %@", sharePath);*/
+    
+    NSString *filePath = [documentPath stringByAppendingPathComponent:@"a.txt"];
+    bool ifsuccess = [@"hello" writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    if (ifsuccess) NSLog(@"write yes"); else NSLog(@"write no");
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:documentPath];
+    NSString *file;
+    while((file = [myDirectoryEnumerator nextObject])) {
+        NSLog(@"file # %@", file);
+        if([[file pathExtension] isEqualToString:@"pat"]) {
+        }
+    }
+}
+
+
+
+/*
+ * UI
+ */
 - (IBAction)doClickButton:(id)sender {
     [self.labelTest setText:@"hehe"];
     [self sendToRemote:@{@"message": @"hehe!"}];
@@ -102,6 +131,9 @@ bool const SENSOR_SHOW_FREQ = false;
 
 
 
+/*
+ * communication
+ */
 // send
 - (void)sendToRemote:(NSDictionary *)message {
     WCSession* session = [WCSession defaultSession];
