@@ -15,13 +15,19 @@
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController">
                     <items>
                         <label width="136" height="19" alignment="left" text="Label" id="8jH-55-Kdk"/>
-                        <button width="1" alignment="left" title="Button" id="UKS-eV-HmI">
+                        <button width="1" alignment="left" title="Test" id="UKS-eV-HmI">
                             <connections>
-                                <action selector="doClickButton:" destination="AgC-eL-Hgc" id="VRD-wv-Rxb"/>
+                                <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="NlM-zp-YBN"/>
+                            </connections>
+                        </button>
+                        <button width="1" alignment="left" title="Log/Off" id="Ekh-rI-yBQ">
+                            <connections>
+                                <action selector="doClickButtonLog:" destination="AgC-eL-Hgc" id="Tjb-Rf-E3U"/>
                             </connections>
                         </button>
                     </items>
                     <connections>
+                        <outlet property="buttonLog" destination="Ekh-rI-yBQ" id="fhv-te-T70"/>
                         <outlet property="buttonTest" destination="UKS-eV-HmI" id="T2E-1H-PcX"/>
                         <outlet property="labelTest" destination="8jH-55-Kdk" id="KIT-Vi-H90"/>
                     </connections>

@@ -26,21 +26,26 @@
         [session activateSession];
     }
     
-    [self writeFile];
+    //[self testPath];
 }
 
-- (void)writeFile {
+- (void)testPath {
     NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSLog(@"watch documentPath = %@", documentPath);
     
-    NSString *sharePath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
-    NSLog(@"watch sharePath = %@", sharePath);
+    NSString *sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
     
-    NSString *s = @"";
-    [s stringByAppendingString:documentPath];
-    [s stringByAppendingString:@"\n"];
-    [s stringByAppendingString:sharePath];
-    [self.textInfo setText:s];
+    [self appendInfo:@"phone documentPath = "];
+    [self appendInfo:documentPath newline:true];
+    [self appendInfo:@"phone sharedPath = "];
+    [self appendInfo:sharedPath newline:true];
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:sharedPath];
+    NSString *file;
+    while((file = [myDirectoryEnumerator nextObject])) {
+        [self appendInfo:@"file "];
+        [self appendInfo:file newline:true];
+    }
 }
 
 
@@ -49,7 +54,20 @@
  * UI
  */
 - (IBAction)doClickButton:(id)sender {
-    [self sendToRemote:@{@"message": @"gogogo!"}];
+    [self sendToRemote:@{@"message": @"test"}];
+}
+
+- (void)appendInfo:(NSString *)newInfo {
+    NSString *s = [self.textInfo text];
+    s = [s stringByAppendingString:newInfo];
+    [self.textInfo setText:s];
+}
+
+- (void)appendInfo:(NSString *)newInfo newline:(bool)newline {
+    if (newline == true) {
+        newInfo = [newInfo stringByAppendingString:@"\n"];
+    }
+    [self appendInfo:newInfo];
 }
 
 
@@ -65,6 +83,11 @@
     } errorHandler:^(NSError * _Nonnull error) {
         // do nothing
     }];
+}
+
+// send message
+- (void)sendMessageToRemote:(NSString *)message {
+    [self sendToRemote:@{@"message": message}];
 }
 
 // recv
