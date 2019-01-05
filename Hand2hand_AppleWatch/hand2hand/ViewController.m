@@ -11,6 +11,9 @@
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
 @property (weak, nonatomic) IBOutlet UITextView *textInfo;
+@property (weak, nonatomic) IBOutlet UIButton *buttonLogOn;
+@property (weak, nonatomic) IBOutlet UIButton *buttonLogOff;
+@property (weak, nonatomic) IBOutlet UILabel *labelTest;
 
 @end
 
@@ -29,7 +32,7 @@
     //[self testPath];
 }
 
-- (void)testPath {
+/*- (void)testPath {
     NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
     NSString *sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
@@ -46,15 +49,23 @@
         [self appendInfo:@"file "];
         [self appendInfo:file newline:true];
     }
-}
+}*/
 
 
 
 /*
  * UI
  */
-- (IBAction)doClickButton:(id)sender {
+- (IBAction)doClickButtonTest:(id)sender {
     [self sendToRemote:@{@"message": @"test"}];
+}
+
+- (IBAction)doClickButtonLogOn:(id)sender {
+    [self sendMessageToRemote:@"log on"];
+}
+
+- (IBAction)doClickButtonLogOff:(id)sender {
+    [self sendMessageToRemote:@"log off"];
 }
 
 - (void)appendInfo:(NSString *)newInfo {
@@ -90,9 +101,22 @@
     [self sendToRemote:@{@"message": message}];
 }
 
+int ccnt = 0;
+
 // recv
-- (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)message replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
-    [self alert:message[@"message"]];
+- (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
+    NSString *op = dict[@"message"];
+    if ([op isEqualToString:@"acc"]) {
+        double x = [dict[@"x"] doubleValue];
+        double y = [dict[@"y"] doubleValue];
+        double z = [dict[@"z"] doubleValue];
+        ccnt++;
+        if (ccnt % 100 == 0) {
+            [self sendMessageToRemote:[NSString stringWithFormat:@"remote %d", ccnt]];
+            //[self.labelTest setText:[NSString stringWithFormat:@"ccnt %d", ccnt]];
+        }
+        //[self.labelTest setText:[NSString stringWithFormat:@"%f %f %f", x, y, z]];
+    }
 }
 
 // alert

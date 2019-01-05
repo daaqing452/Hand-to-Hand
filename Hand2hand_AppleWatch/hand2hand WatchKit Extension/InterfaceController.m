@@ -21,7 +21,7 @@
 
 @implementation InterfaceController
 
-NSString * const SENSOR_DATA_GET = @"none";
+NSString * const SENSOR_DATA_GET = @"push";
 bool const SENSOR_SHOW_FREQ = false;
 
 // log
@@ -70,6 +70,8 @@ NSString *buffer = @"";
     NSLog(@"bye");
 }
 
+int ccnt = 0;
+
 - (void)pushAccelerometer {
     if (!self.manager.isAccelerometerAvailable) return;
     self.manager.accelerometerUpdateInterval = 1/100.0;
@@ -84,8 +86,15 @@ NSString *buffer = @"";
             NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
             NSLog(@"freqAcc: %f", freq);
         }
+        if (logging) {
+            ccnt++;
+            if (ccnt % 100 == 0) {
+                NSLog(@"ccnt %d", ccnt);
+            }
+            [self sendToPhone:@{@"message": @"acc", @"x": [NSNumber numberWithDouble:acceleration.x], @"y": [NSNumber numberWithDouble:acceleration.y], @"z": [NSNumber numberWithDouble:acceleration.z]}];
+        }
     }];
-    NSLog(@"Push ready");
+    NSLog(@"push ready");
 }
 
 - (void)setSensorDataGetPull {
@@ -102,16 +111,18 @@ NSString *buffer = @"";
     NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
 }
 
-- (void)changeLogStatus {
-    if (logging == true) {
-        [self sendMessageToPhone:@"log off"];
+- (void)changeLogStatus:(bool)status {
+    if (status == false) {
         [self.buttonLog setTitle:@"Log/Off"];
         logging = false;
     } else {
-        [self sendMessageToPhone:@"log on"];
         [self.buttonLog setTitle:@"Log/On"];
         logging = true;
     }
+}
+
+- (void)changeLogStatus {
+    [self changeLogStatus:!logging];
 }
 
 /*- (void)testPath {
@@ -158,9 +169,9 @@ NSString *buffer = @"";
  * communication
  */
 // send
-- (void)sendToPhone:(NSDictionary *)message {
+- (void)sendToPhone:(NSDictionary *)dict {
     WCSession* session = [WCSession defaultSession];
-    [session sendMessage:message replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
+    [session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
         // do nothing
@@ -173,9 +184,15 @@ NSString *buffer = @"";
 }
 
 // recv
-- (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)message replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
-    //[self alert:message[@"message"]];
-    NSLog(@"message: %@" , message[@"message"]);
+- (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
+    NSString *op = dict[@"message"];
+    if ([op isEqualToString:@"log on"]) {
+        [self changeLogStatus:true];
+    } else if ([op isEqualToString:@"log off"]) {
+        [self changeLogStatus:false];
+    } else {
+        NSLog(@"%@", op);
+    }
 }
 
 // alert
