@@ -48,17 +48,6 @@ NSString *buffer = @"";
     return _fileManager;
 }
 
-- (WCSession *)session {
-    if (!_session) {
-        if ([WCSession isSupported]) {
-            self.session = [WCSession defaultSession];
-            self.session.delegate = self;
-            [self.session activateSession];
-        }
-    }
-    return _session;
-}
-
 - (NSString *)documentPath {
     if (!_documentPath) {
         self.documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
@@ -82,6 +71,12 @@ NSString *buffer = @"";
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
+    
+    if ([WCSession isSupported]) {
+        self.session = [WCSession defaultSession];
+        self.session.delegate = self;
+        [self.session activateSession];
+    }
     
     if ([SENSOR_DATA_GET isEqualToString:@"push"]) {
         [self pushAccelerometer];
@@ -110,6 +105,7 @@ NSString *buffer = @"";
 - (IBAction)doClickButtonTest:(id)sender {
     [self.labelTest setText:@"test"];
     [self sendMessageToPhone:@"test"];
+    [self writeFile:@"a.txt" content:@"heelo"];
 }
 
 - (IBAction)doClickButtonLog:(id)sender {
@@ -206,7 +202,13 @@ NSString *buffer = @"";
 }
 
 - (void)deleteFiles:(NSString *)path {
-    
+    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
+    NSString *file;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        NSString *filePath = [self.documentPath stringByAppendingPathComponent:file];
+        bool ifSuccess = [self.fileManager removeItemAtPath:filePath error:nil];
+        NSLog(ifSuccess ? @"delete file %@ success": @"delete file %@ fail", file);
+    }
 }
 
 
@@ -215,8 +217,7 @@ NSString *buffer = @"";
  * communication
  */
 - (void)sendToPhone:(NSDictionary *)dict {
-    WCSession* session = [WCSession defaultSession];
-    [session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
+    [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
         // do nothing
@@ -235,7 +236,7 @@ NSString *buffer = @"";
     } else if ([op isEqualToString:@"log off"]) {
         [self changeLogStatus:false];
     } else {
-        NSLog(@"%@", op);
+        NSLog(@"recv message: %@", op);
     }
 }
 

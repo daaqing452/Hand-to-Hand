@@ -10,46 +10,51 @@
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
-@property (weak, nonatomic) IBOutlet UITextView *textInfo;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOn;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOff;
+@property (weak, nonatomic) IBOutlet UITextView *textInfo;
 @property (weak, nonatomic) IBOutlet UILabel *labelTest;
+
+@property (strong, nonatomic) NSFileManager *fileManager;
+@property (strong, nonatomic) WCSession *session;
+@property (strong, nonatomic) NSString *documentPath;
+@property (strong, nonatomic) NSString *sharedPath;
 
 @end
 
 @implementation ViewController
+
+- (NSFileManager *)fileManager {
+    if (!_fileManager) {
+        self.fileManager = [NSFileManager defaultManager];
+    }
+    return _fileManager;
+}
+
+- (NSString *)documentPath {
+    if (!_documentPath) {
+        self.documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    }
+    return _documentPath;
+}
+
+- (NSString *)sharedPath {
+    if (!_sharedPath) {
+        self.sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
+    }
+    return _sharedPath;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
     if ([WCSession isSupported]) {
-        WCSession* session = [WCSession defaultSession];
-        session.delegate = self;
-        [session activateSession];
+        self.session = [WCSession defaultSession];
+        self.session.delegate = self;
+        [self.session activateSession];
     }
-    
-    //[self testPath];
 }
-
-/*- (void)testPath {
-    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    
-    NSString *sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
-    
-    [self appendInfo:@"phone documentPath = "];
-    [self appendInfo:documentPath newline:true];
-    [self appendInfo:@"phone sharedPath = "];
-    [self appendInfo:sharedPath newline:true];
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:sharedPath];
-    NSString *file;
-    while((file = [myDirectoryEnumerator nextObject])) {
-        [self appendInfo:@"file "];
-        [self appendInfo:file newline:true];
-    }
-}*/
 
 
 
@@ -57,7 +62,7 @@
  * UI
  */
 - (IBAction)doClickButtonTest:(id)sender {
-    [self sendToRemote:@{@"message": @"test"}];
+    [self sendMessageToRemote:@"test"];
 }
 
 - (IBAction)doClickButtonLogOn:(id)sender {
@@ -84,11 +89,37 @@
 
 
 /*
+ * file
+ */
+- (void)writeFile:(NSString *)fileName content:(NSString *)content {
+    NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
+    bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    if (ifsuccess) NSLog(@"write file success"); else NSLog(@"write file fail");
+}
+
+- (void)showFiles:(NSString *)path {
+    NSLog(@"show files: %@", path);
+    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
+    NSString *file;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        NSLog(@"file %@", file);
+        if([[file pathExtension] isEqualToString:@"pat"]) {
+            //?
+        }
+    }
+}
+
+- (void)deleteFiles:(NSString *)path {
+    
+}
+
+
+
+/*
  * communication
  */
 - (void)sendToRemote:(NSDictionary *)message {
-    WCSession* session = [WCSession defaultSession];
-    [session sendMessage:message replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
+    [self.session sendMessage:message replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
         // do nothing
@@ -102,7 +133,7 @@
 // recv
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
     NSString *op = dict[@"message"];
-    
+    [self alert:op];
 }
 
 - (void)alert:(NSString *)message {
