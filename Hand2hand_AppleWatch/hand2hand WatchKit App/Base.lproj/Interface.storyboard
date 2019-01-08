@@ -25,9 +25,21 @@
                                 <action selector="doClickButtonLog:" destination="AgC-eL-Hgc" id="Tjb-Rf-E3U"/>
                             </connections>
                         </button>
+                        <button width="1" alignment="left" title="Show Files" id="14h-lw-cMk" userLabel="Button Show Files">
+                            <connections>
+                                <action selector="doClickButtonShowFiles:" destination="AgC-eL-Hgc" id="Grf-cX-z4d"/>
+                            </connections>
+                        </button>
+                        <button width="1" alignment="left" title="Delete Files" id="goU-qR-KaR" userLabel="Button Delete Files">
+                            <connections>
+                                <action selector="doClickButtonDeleteFiles:" destination="AgC-eL-Hgc" id="gVz-YX-f7K"/>
+                            </connections>
+                        </button>
                     </items>
                     <connections>
+                        <outlet property="buttonDeleteFiles" destination="goU-qR-KaR" id="brb-be-OCN"/>
                         <outlet property="buttonLog" destination="Ekh-rI-yBQ" id="fhv-te-T70"/>
+                        <outlet property="buttonShowFiles" destination="14h-lw-cMk" id="ONl-hC-p9o"/>
                         <outlet property="buttonTest" destination="UKS-eV-HmI" id="T2E-1H-PcX"/>
                         <outlet property="labelTest" destination="8jH-55-Kdk" id="KIT-Vi-H90"/>
                     </connections>

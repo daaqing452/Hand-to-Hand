@@ -13,8 +13,15 @@
 
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonLog;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonShowFiles;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonDeleteFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *labelTest;
-@property (strong, nonatomic) CMMotionManager *manager;
+
+@property (strong, nonatomic) CMMotionManager *motionManager;
+@property (strong, nonatomic) NSFileManager *fileManager;
+@property (strong, nonatomic) WCSession *session;
+@property (strong, nonatomic) NSString *documentPath;
+@property (strong, nonatomic) NSString *sharedPath;
 
 @end
 
@@ -24,15 +31,46 @@
 NSString * const SENSOR_DATA_GET = @"push";
 bool const SENSOR_SHOW_FREQ = false;
 
-// log
 bool logging = false;
 NSString *buffer = @"";
 
--(CMMotionManager *) manager {
-    if (!_manager) {
-        self.manager = [[CMMotionManager alloc] init];
+- (CMMotionManager *)motionManager {
+    if (!_motionManager) {
+        self.motionManager = [[CMMotionManager alloc] init];
     }
-    return _manager;
+    return _motionManager;
+}
+
+- (NSFileManager *)fileManager {
+    if (!_fileManager) {
+        self.fileManager = [NSFileManager defaultManager];
+    }
+    return _fileManager;
+}
+
+- (WCSession *)session {
+    if (!_session) {
+        if ([WCSession isSupported]) {
+            self.session = [WCSession defaultSession];
+            self.session.delegate = self;
+            [self.session activateSession];
+        }
+    }
+    return _session;
+}
+
+- (NSString *)documentPath {
+    if (!_documentPath) {
+        self.documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    }
+    return _documentPath;
+}
+
+- (NSString *)sharedPath {
+    if (!_sharedPath) {
+        self.sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
+    }
+    return _sharedPath;
 }
 
 - (void)awakeWithContext:(id)context {
@@ -44,12 +82,6 @@ NSString *buffer = @"";
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
-    
-    if ([WCSession isSupported]) {
-        WCSession* session = [WCSession defaultSession];
-        session.delegate = self;
-        [session activateSession];
-    }
     
     if ([SENSOR_DATA_GET isEqualToString:@"push"]) {
         [self pushAccelerometer];
@@ -64,20 +96,45 @@ NSString *buffer = @"";
     // This method is called when watch view controller is no longer visible
     [super didDeactivate];
     
-    if (self.manager.isAccelerometerAvailable) {
-        [self.manager stopAccelerometerUpdates];
+    if (self.motionManager.isAccelerometerAvailable) {
+        [self.motionManager stopAccelerometerUpdates];
     }
     NSLog(@"bye");
 }
 
-int ccnt = 0;
 
+
+/*
+ * UI
+ */
+- (IBAction)doClickButtonTest:(id)sender {
+    [self.labelTest setText:@"test"];
+    [self sendMessageToPhone:@"test"];
+}
+
+- (IBAction)doClickButtonLog:(id)sender {
+    [self changeLogStatus];
+}
+
+- (IBAction)doClickButtonShowFiles:(id)sender {
+    [self showFiles:self.documentPath];
+}
+
+- (IBAction)doClickButtonDeleteFiles:(id)sender {
+    [self deleteFiles:self.documentPath];
+}
+
+
+
+/*
+ * sensor
+ */
 - (void)pushAccelerometer {
-    if (!self.manager.isAccelerometerAvailable) return;
-    self.manager.accelerometerUpdateInterval = 1/100.0;
+    if (!self.motionManager.isAccelerometerAvailable) return;
+    self.motionManager.accelerometerUpdateInterval = 1/100.0;
     __block int freqCnt = 0;
     NSDate *startTime = [NSDate date];
-    [self.manager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData * _Nullable accelerometerData, NSError * _Nullable error) {
+    [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData * _Nullable accelerometerData, NSError * _Nullable error) {
         if (error) return;
         CMAcceleration acceleration = accelerometerData.acceleration;
         if (SENSOR_SHOW_FREQ) {
@@ -87,30 +144,30 @@ int ccnt = 0;
             NSLog(@"freqAcc: %f", freq);
         }
         if (logging) {
-            ccnt++;
-            if (ccnt % 100 == 0) {
-                NSLog(@"ccnt %d", ccnt);
-            }
-            [self sendToPhone:@{@"message": @"acc", @"x": [NSNumber numberWithDouble:acceleration.x], @"y": [NSNumber numberWithDouble:acceleration.y], @"z": [NSNumber numberWithDouble:acceleration.z]}];
         }
     }];
     NSLog(@"push ready");
 }
 
 - (void)setSensorDataGetPull {
-    if (self.manager.isAccelerometerAvailable) {
-        self.manager.accelerometerUpdateInterval = 1/100.0;
-        [self.manager startAccelerometerUpdates];
+    if (self.motionManager.isAccelerometerAvailable) {
+        self.motionManager.accelerometerUpdateInterval = 1/100.0;
+        [self.motionManager startAccelerometerUpdates];
     }
     [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(getSensorData:) userInfo:nil repeats:YES];
 }
 
 - (void)getSensorData:(NSTimer *)timer {
-    CMAccelerometerData *data = self.manager.accelerometerData;
+    CMAccelerometerData *data = self.motionManager.accelerometerData;
     CMAcceleration acceleration = data.acceleration;
     NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
 }
 
+
+
+/*
+ * log
+ */
 - (void)changeLogStatus:(bool)status {
     if (status == false) {
         [self.buttonLog setTitle:@"Log/Off"];
@@ -125,42 +182,31 @@ int ccnt = 0;
     [self changeLogStatus:!logging];
 }
 
-/*- (void)testPath {
-    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSLog(@"watch documentPath = %@", documentPath);
-    
-    //[[NSFileManager defaultManager] group]
-    
-    NSString *sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
-    NSLog(@"watch sharedPath = %@", sharedPath);
-    
-    NSString *filePath = [sharedPath stringByAppendingPathComponent:@"a.txt"];
-    bool ifsuccess = [@"hello" writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    if (ifsuccess) NSLog(@"write yes"); else NSLog(@"write no");
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:sharedPath];
-    NSString *file;
-    while((file = [myDirectoryEnumerator nextObject])) {
-        NSLog(@"file %@", file);
-        if([[file pathExtension] isEqualToString:@"pat"]) {
-            //xxx
-        }
-    }
-}*/
-
 
 
 /*
- * UI
+ * file
  */
-- (IBAction)doClickButtonTest:(id)sender {
-    [self.labelTest setText:@"test"];
-    //[self sendToPhone:@{@"message": @"test!"}];
+- (void)writeFile:(NSString *)fileName content:(NSString *)content {
+    NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
+    bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    if (ifsuccess) NSLog(@"write file success"); else NSLog(@"write file fail");
 }
 
-- (IBAction)doClickButtonLog:(id)sender {
-    [self changeLogStatus];
+- (void)showFiles:(NSString *)path {
+    NSLog(@"show files: %@", path);
+    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
+    NSString *file;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        NSLog(@"file %@", file);
+        if([[file pathExtension] isEqualToString:@"pat"]) {
+            //?
+        }
+    }
+}
+
+- (void)deleteFiles:(NSString *)path {
+    
 }
 
 
@@ -168,7 +214,6 @@ int ccnt = 0;
 /*
  * communication
  */
-// send
 - (void)sendToPhone:(NSDictionary *)dict {
     WCSession* session = [WCSession defaultSession];
     [session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
@@ -178,7 +223,6 @@ int ccnt = 0;
     }];
 }
 
-// send message
 - (void)sendMessageToPhone:(NSString *)message {
     [self sendToPhone:@{@"message": message}];
 }
@@ -195,7 +239,6 @@ int ccnt = 0;
     }
 }
 
-// alert
 - (void)alert:(NSString *)message {
     WKAlertAction *actionDone = [WKAlertAction actionWithTitle:@"完成" style:WKAlertActionStyleDefault handler:^{
     }];

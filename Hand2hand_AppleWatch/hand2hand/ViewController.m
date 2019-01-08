@@ -86,7 +86,6 @@
 /*
  * communication
  */
-// send
 - (void)sendToRemote:(NSDictionary *)message {
     WCSession* session = [WCSession defaultSession];
     [session sendMessage:message replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
@@ -96,30 +95,16 @@
     }];
 }
 
-// send message
 - (void)sendMessageToRemote:(NSString *)message {
     [self sendToRemote:@{@"message": message}];
 }
 
-int ccnt = 0;
-
 // recv
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
     NSString *op = dict[@"message"];
-    if ([op isEqualToString:@"acc"]) {
-        double x = [dict[@"x"] doubleValue];
-        double y = [dict[@"y"] doubleValue];
-        double z = [dict[@"z"] doubleValue];
-        ccnt++;
-        if (ccnt % 100 == 0) {
-            [self sendMessageToRemote:[NSString stringWithFormat:@"remote %d", ccnt]];
-            //[self.labelTest setText:[NSString stringWithFormat:@"ccnt %d", ccnt]];
-        }
-        //[self.labelTest setText:[NSString stringWithFormat:@"%f %f %f", x, y, z]];
-    }
+    
 }
 
-// alert
 - (void)alert:(NSString *)message {
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"消息" message:message preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *actionCentain = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
