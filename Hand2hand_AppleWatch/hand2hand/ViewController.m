@@ -12,6 +12,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOn;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOff;
+@property (weak, nonatomic) IBOutlet UIButton *buttonShowFiles;
 @property (weak, nonatomic) IBOutlet UITextView *textInfo;
 @property (weak, nonatomic) IBOutlet UILabel *labelTest;
 
@@ -62,28 +63,33 @@
  * UI
  */
 - (IBAction)doClickButtonTest:(id)sender {
-    [self sendMessageToRemote:@"test"];
+    [self sendMessage:@"test"];
+    [self appendInfo:@"test"];
 }
 
 - (IBAction)doClickButtonLogOn:(id)sender {
-    [self sendMessageToRemote:@"log on"];
+    [self sendMessage:@"log on"];
 }
 
 - (IBAction)doClickButtonLogOff:(id)sender {
-    [self sendMessageToRemote:@"log off"];
+    [self sendMessage:@"log off"];
+}
+
+- (IBAction)doClickButtonShowFiles:(id)sender {
+    [self showFiles:self.documentPath];
 }
 
 - (void)appendInfo:(NSString *)newInfo {
-    NSString *s = [self.textInfo text];
-    s = [s stringByAppendingString:newInfo];
-    [self.textInfo setText:s];
+    [self appendInfo:newInfo newline:true];
 }
 
 - (void)appendInfo:(NSString *)newInfo newline:(bool)newline {
     if (newline == true) {
-        newInfo = [newInfo stringByAppendingString:@"\n"];
+        newInfo = [newInfo stringByAppendingString:@"\n\n"];
     }
-    [self appendInfo:newInfo];
+    NSString *s = [self.textInfo text];
+    s = [s stringByAppendingString:newInfo];
+    [self.textInfo setText:s];
 }
 
 
@@ -98,11 +104,11 @@
 }
 
 - (void)showFiles:(NSString *)path {
-    NSLog(@"show files: %@", path);
+    [self appendInfo:[NSString stringWithFormat:@"show files: %@", path]];
     NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
-        NSLog(@"file %@", file);
+        [self appendInfo:[NSString stringWithFormat:@"file %@", file]];
         if([[file pathExtension] isEqualToString:@"pat"]) {
             //?
         }
@@ -118,22 +124,30 @@
 /*
  * communication
  */
-- (void)sendToRemote:(NSDictionary *)message {
-    [self.session sendMessage:message replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
+- (void)sendData:(NSDictionary *)dict {
+    [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
         // do nothing
     }];
 }
 
-- (void)sendMessageToRemote:(NSString *)message {
-    [self sendToRemote:@{@"message": message}];
+- (void)sendMessage:(NSString *)message {
+    [self sendData:@{@"message": message}];
 }
 
-// recv
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
     NSString *op = dict[@"message"];
     [self alert:op];
+}
+
+- (void)session:(nonnull WCSession *)session didReceiveFile:(nonnull WCSessionFile *)file {
+    [self appendInfo:@"recv " newline:false];
+    [self appendInfo:[[file fileURL] path]];
+    NSError *error = nil;
+    bool ifSuccess = [self.fileManager copyItemAtPath:[[file fileURL] path] toPath:[self.documentPath stringByAppendingPathComponent:@"a.txt"] error:&error];
+    [self appendInfo:(ifSuccess ? @"success" : @"fail")];
+    [self appendInfo:[NSString stringWithFormat:@"error %@", error]];
 }
 
 - (void)alert:(NSString *)message {

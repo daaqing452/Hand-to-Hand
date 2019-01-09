@@ -15,6 +15,7 @@
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonLog;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonShowFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonDeleteFiles;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonSendFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *labelTest;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
@@ -104,8 +105,8 @@ NSString *buffer = @"";
  */
 - (IBAction)doClickButtonTest:(id)sender {
     [self.labelTest setText:@"test"];
-    [self sendMessageToPhone:@"test"];
-    [self writeFile:@"a.txt" content:@"heelo"];
+    [self sendMessage:@"test"];
+    [self writeFile:@"a.txt" content:@"hello"];
 }
 
 - (IBAction)doClickButtonLog:(id)sender {
@@ -118,6 +119,10 @@ NSString *buffer = @"";
 
 - (IBAction)doClickButtonDeleteFiles:(id)sender {
     [self deleteFiles:self.documentPath];
+}
+
+- (IBAction)doClickButtonSendFiles:(id)sender {
+    [self sendFile:[self.documentPath stringByAppendingPathComponent:@"a.txt"]];
 }
 
 
@@ -216,7 +221,7 @@ NSString *buffer = @"";
 /*
  * communication
  */
-- (void)sendToPhone:(NSDictionary *)dict {
+- (void)sendData:(NSDictionary *)dict {
     [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
@@ -224,11 +229,16 @@ NSString *buffer = @"";
     }];
 }
 
-- (void)sendMessageToPhone:(NSString *)message {
-    [self sendToPhone:@{@"message": message}];
+- (void)sendMessage:(NSString *)message {
+    [self sendData:@{@"message": message}];
 }
 
-// recv
+- (void)sendFile:(NSString *)filePath {
+    NSLog(@"try send: %@", filePath);
+    NSURL *fileUrl = [NSURL fileURLWithPath:filePath];
+    [self.session transferFile:fileUrl metadata:nil];
+}
+
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
     NSString *op = dict[@"message"];
     if ([op isEqualToString:@"log on"]) {
