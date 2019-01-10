@@ -19,6 +19,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *labelTest;
 
 @property (strong, nonatomic) NSFileManager *fileManager;
+@property (strong, nonatomic) CBCentralManager *centralManager;
 @property (strong, nonatomic) WCSession *session;
 @property (strong, nonatomic) NSString *documentPath;
 @property (strong, nonatomic) NSString *sharedPath;
@@ -48,6 +49,8 @@
     return _sharedPath;
 }
 
+NSMutableArray<CBPeripheral*> *devices;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
@@ -57,6 +60,10 @@
         self.session.delegate = self;
         [self.session activateSession];
     }
+    
+    self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+    
+    devices = [NSMutableArray array];
 }
 
 
@@ -136,7 +143,7 @@
 
 
 /*
- * communication
+ * watch connectivity
  */
 - (void)sendData:(NSDictionary *)dict {
     [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
@@ -171,6 +178,49 @@
     UIAlertAction *actionCentain = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
     [alertController addAction:actionCentain];
     [self presentViewController:alertController animated:YES completion:nil];
+}
+
+
+
+/*
+ * bluetooth
+ */
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central {
+    switch (central.state) {
+        case CBManagerStatePoweredOn:
+            NSLog(@"bluetooth power on");
+            [self startScan];
+            break;
+        case CBManagerStatePoweredOff:
+            NSLog(@"bluetooth power off");
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
+    if ([peripheral.name isEqualToString:@"Watch L"] || [peripheral.name isEqualToString:@"Watch R"]) {
+        NSLog(@"find device: %@", peripheral.name);
+        [devices addObject:peripheral];
+        [self.centralManager connectPeripheral:peripheral options:nil];
+    }
+}
+
+- (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral {
+    NSLog(@"connect device: %@", peripheral.name);
+    [self appendInfo:[NSString stringWithFormat:@"connect device: %@", peripheral.name]];
+}
+
+- (void)startScan {
+    NSLog(@"start scan...");
+    [self.centralManager scanForPeripheralsWithServices:nil options:nil];
+    [self performSelector:@selector(stopScan) withObject:nil afterDelay:5];
+}
+
+- (void)stopScan {
+    NSLog(@"stop scan");
+    [self.centralManager stopScan];
 }
 
 @end

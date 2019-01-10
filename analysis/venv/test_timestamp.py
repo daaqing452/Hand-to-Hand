@@ -29,7 +29,7 @@ f.close()
 t_list[0].sort()
 #t_list[1].sort()
 #t_list[2].sort()
-t_list[0] = np.array(t_list[0])[0:]
+t_list[0] = np.array(t_list[0])[0:] * 1000
 #t_list[1] = np.array(t_list[1])[0:]
 #t_list[2] = np.array(t_list[2])[0:]
 print(t_list[0].min(), t_list[0].max(), t_list[0].mean(), t_list[0].std())

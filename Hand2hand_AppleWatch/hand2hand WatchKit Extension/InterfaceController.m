@@ -239,7 +239,7 @@ NSString *buffer = @"";
 
 
 /*
- * communication
+ * watch connectivity
  */
 - (void)sendData:(NSDictionary *)dict {
     [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
