@@ -7,9 +7,6 @@
 //
 
 #import <WatchKit/WatchKit.h>
-#import <Foundation/Foundation.h>
-#import <CoreMotion/CoreMotion.h>
-#import <WatchConnectivity/WatchConnectivity.h>
 
 @interface InterfaceController : WKInterfaceController
 

@@ -7,9 +7,13 @@
 //
 
 #import "InterfaceController.h"
+#import <CoreMotion/CoreMotion.h>
+#import <CoreBluetooth/CoreBluetooth.h>
+#import <Foundation/Foundation.h>
+#import <WatchConnectivity/WatchConnectivity.h>
 
 
-@interface InterfaceController ()
+@interface InterfaceController () <CBPeripheralManagerDelegate>
 
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonLog;
@@ -20,6 +24,7 @@
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) NSFileManager *fileManager;
+@property (strong, nonatomic) CBPeripheralManager *peripheralManager;
 @property (strong, nonatomic) WCSession *session;
 @property (strong, nonatomic) NSString *documentPath;
 @property (strong, nonatomic) NSString *sharedPath;
@@ -84,6 +89,8 @@ NSString *buffer = @"";
     } else if ([SENSOR_DATA_RETRIVAL isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
     }
+    
+    self.peripheralManager = [[CBPeripheralManager alloc]initWithDelegate:self queue:nil];
     
     NSLog(@"init finished");
 }
@@ -276,6 +283,29 @@ NSString *buffer = @"";
     WKAlertAction *actionDestruction = [WKAlertAction actionWithTitle:@"毁灭" style:WKAlertActionStyleDestructive handler:^{
     }];
     [self presentAlertControllerWithTitle:@"消息" message:message preferredStyle:WKAlertControllerStyleActionSheet actions:@[actionDone, actionDestruction]];
+}
+
+
+
+/*
+ * bluetooth
+ */
+- (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral {
+    switch (peripheral.state) {
+        case CBManagerStatePoweredOn:
+            NSLog(@"bluetooth power on");
+            [self createServices];
+            break;
+        case CBManagerStatePoweredOff:
+            NSLog(@"bluetooth power off");
+        default:
+            break;
+    }
+}
+
+- (void)createServices {
+    CBUUID *CBUUIDCharacteristicUserDescriptionStringUUID = [CBUUID UUIDWithString:CBUUIDCharacteristicUserDescriptionString];
+    
 }
 
 @end

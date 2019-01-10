@@ -7,8 +7,10 @@
 //
 
 #import "ViewController.h"
+#import <CoreBluetooth/CoreBluetooth.h>
+#import <WatchConnectivity/WatchConnectivity.h>
 
-@interface ViewController ()
+@interface ViewController () <CBCentralManagerDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOn;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOff;
@@ -188,11 +190,11 @@ NSMutableArray<CBPeripheral*> *devices;
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central {
     switch (central.state) {
         case CBManagerStatePoweredOn:
-            NSLog(@"bluetooth power on");
+            [self appendInfo:@"bluetooth power on"];
             [self startScan];
             break;
         case CBManagerStatePoweredOff:
-            NSLog(@"bluetooth power off");
+            [self appendInfo:@"bluetooth power off"];
             break;
         default:
             break;
@@ -201,25 +203,33 @@ NSMutableArray<CBPeripheral*> *devices;
 
 - (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
     if ([peripheral.name isEqualToString:@"Watch L"] || [peripheral.name isEqualToString:@"Watch R"]) {
-        NSLog(@"find device: %@", peripheral.name);
+        [self appendInfo:[NSString stringWithFormat:@"find device: %@", peripheral.name]];
         [devices addObject:peripheral];
         [self.centralManager connectPeripheral:peripheral options:nil];
     }
 }
 
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral {
-    NSLog(@"connect device: %@", peripheral.name);
     [self appendInfo:[NSString stringWithFormat:@"connect device: %@", peripheral.name]];
+    [peripheral discoverServices:@[[CBUUID UUIDWithString:@"1234"]]];
+}
+
+- (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
+    [self appendInfo:[NSString stringWithFormat:@"connect device fail: %@ - %@", peripheral.name, error]];
+}
+
+- (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
+    [self appendInfo:[NSString stringWithFormat:@"disconnect device: %@ - %@", peripheral.name, error]];
 }
 
 - (void)startScan {
-    NSLog(@"start scan...");
+    [self appendInfo:@"start scan..."];
     [self.centralManager scanForPeripheralsWithServices:nil options:nil];
     [self performSelector:@selector(stopScan) withObject:nil afterDelay:5];
 }
 
 - (void)stopScan {
-    NSLog(@"stop scan");
+    [self appendInfo:@"stop scan..."];
     [self.centralManager stopScan];
 }
 

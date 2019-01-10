@@ -7,10 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <WatchConnectivity/WatchConnectivity.h>
-#import <CoreBluetooth/CoreBluetooth.h>
 
-@interface ViewController : UIViewController <CBCentralManagerDelegate>
+@interface ViewController : UIViewController
 
 
 @end
