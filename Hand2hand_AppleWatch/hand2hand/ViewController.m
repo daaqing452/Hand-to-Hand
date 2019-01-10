@@ -13,6 +13,8 @@
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOn;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOff;
 @property (weak, nonatomic) IBOutlet UIButton *buttonShowFiles;
+@property (weak, nonatomic) IBOutlet UIButton *buttonDeleteFiles;
+@property (weak, nonatomic) IBOutlet UIButton *buttonClear;
 @property (weak, nonatomic) IBOutlet UITextView *textInfo;
 @property (weak, nonatomic) IBOutlet UILabel *labelTest;
 
@@ -79,6 +81,14 @@
     [self showFiles:self.documentPath];
 }
 
+- (IBAction)doClickButtonDeleteFiles:(id)sender {
+    [self deleteFiles:self.documentPath];
+}
+
+- (IBAction)doClickButtonClear:(id)sender {
+    [self.textInfo setText:@""];
+}
+
 - (void)appendInfo:(NSString *)newInfo {
     [self appendInfo:newInfo newline:true];
 }
@@ -100,7 +110,6 @@
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
     NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
     bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    if (ifsuccess) NSLog(@"write file success"); else NSLog(@"write file fail");
 }
 
 - (void)showFiles:(NSString *)path {
@@ -109,14 +118,17 @@
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
         [self appendInfo:[NSString stringWithFormat:@"file %@", file]];
-        if([[file pathExtension] isEqualToString:@"pat"]) {
-            //?
-        }
     }
 }
 
 - (void)deleteFiles:(NSString *)path {
-    
+    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
+    NSString *file;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        NSString *filePath = [self.documentPath stringByAppendingPathComponent:file];
+        bool ifSuccess = [self.fileManager removeItemAtPath:filePath error:nil];
+        [self appendInfo:[NSString stringWithFormat:@"delete file %@: %@", (ifSuccess ? @"Y" : @"N"), file]];
+    }
 }
 
 
@@ -142,12 +154,14 @@
 }
 
 - (void)session:(nonnull WCSession *)session didReceiveFile:(nonnull WCSessionFile *)file {
-    [self appendInfo:@"recv " newline:false];
-    [self appendInfo:[[file fileURL] path]];
     NSError *error = nil;
-    bool ifSuccess = [self.fileManager copyItemAtPath:[[file fileURL] path] toPath:[self.documentPath stringByAppendingPathComponent:@"a.txt"] error:&error];
-    [self appendInfo:(ifSuccess ? @"success" : @"fail")];
-    [self appendInfo:[NSString stringWithFormat:@"error %@", error]];
+    NSString *filePath = [[file fileURL] path];
+    NSString *fileName = [filePath lastPathComponent];
+    bool ifSuccess = [self.fileManager copyItemAtPath:filePath toPath:[self.documentPath stringByAppendingPathComponent:fileName] error:&error];
+    [self appendInfo:[NSString stringWithFormat:@"recv %@: %@", ifSuccess ? @"Y" : @"N", fileName]];
+    if (!ifSuccess) {
+        [self appendInfo:[NSString stringWithFormat:@"error %@", error]];
+    }
 }
 
 - (void)alert:(NSString *)message {

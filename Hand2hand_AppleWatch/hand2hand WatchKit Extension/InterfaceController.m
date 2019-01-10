@@ -106,7 +106,7 @@ NSString *buffer = @"";
 - (IBAction)doClickButtonTest:(id)sender {
     [self.labelTest setText:@"test"];
     [self sendMessage:@"test"];
-    [self writeFile:@"a.txt" content:@"hello"];
+    [self writeFile:@"b.txt" content:@"hi"];
 }
 
 - (IBAction)doClickButtonLog:(id)sender {
@@ -122,7 +122,11 @@ NSString *buffer = @"";
 }
 
 - (IBAction)doClickButtonSendFiles:(id)sender {
-    [self sendFile:[self.documentPath stringByAppendingPathComponent:@"a.txt"]];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:self.documentPath];
+    NSString *file;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        [self sendFile:[self.documentPath stringByAppendingPathComponent:file]];
+    }
 }
 
 
@@ -190,8 +194,8 @@ NSString *buffer = @"";
  */
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
     NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
-    bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    if (ifsuccess) NSLog(@"write file success"); else NSLog(@"write file fail");
+    bool ifSuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    NSLog(@"write file %@: %@", ifSuccess ? @"Y" : @"N", fileName);
 }
 
 - (void)showFiles:(NSString *)path {
@@ -200,9 +204,6 @@ NSString *buffer = @"";
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSLog(@"file %@", file);
-        if([[file pathExtension] isEqualToString:@"pat"]) {
-            //?
-        }
     }
 }
 
@@ -212,7 +213,7 @@ NSString *buffer = @"";
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSString *filePath = [self.documentPath stringByAppendingPathComponent:file];
         bool ifSuccess = [self.fileManager removeItemAtPath:filePath error:nil];
-        NSLog(ifSuccess ? @"delete file %@ success": @"delete file %@ fail", file);
+        NSLog(@"delete file %@: %@", ifSuccess ? @"Y" : @"N", file);
     }
 }
 

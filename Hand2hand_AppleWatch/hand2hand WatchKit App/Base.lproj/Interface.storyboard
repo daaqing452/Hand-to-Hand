@@ -30,14 +30,16 @@
                                 <action selector="doClickButtonShowFiles:" destination="AgC-eL-Hgc" id="Grf-cX-z4d"/>
                             </connections>
                         </button>
-                        <button width="1" alignment="left" title="Delete Files" id="goU-qR-KaR" userLabel="Button Delete Files">
-                            <connections>
-                                <action selector="doClickButtonDeleteFiles:" destination="AgC-eL-Hgc" id="gVz-YX-f7K"/>
-                            </connections>
-                        </button>
                         <button width="1" alignment="left" title="Send Files" id="yLo-gh-7ep" userLabel="Button Send Files">
                             <connections>
                                 <action selector="doClickButtonSendFiles:" destination="AgC-eL-Hgc" id="esh-ct-gPE"/>
+                            </connections>
+                        </button>
+                        <button width="1" alignment="left" title=" " id="zgI-5R-CiO"/>
+                        <button width="1" alignment="left" title="Delete Files" id="goU-qR-KaR" userLabel="Button Delete Files">
+                            <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                            <connections>
+                                <action selector="doClickButtonDeleteFiles:" destination="AgC-eL-Hgc" id="gVz-YX-f7K"/>
                             </connections>
                         </button>
                     </items>
