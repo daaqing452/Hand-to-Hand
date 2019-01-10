@@ -71,10 +71,12 @@
 
 - (IBAction)doClickButtonLogOn:(id)sender {
     [self sendMessage:@"log on"];
+    [self appendInfo:@"log on"];
 }
 
 - (IBAction)doClickButtonLogOff:(id)sender {
     [self sendMessage:@"log off"];
+    [self appendInfo:@"log off"];
 }
 
 - (IBAction)doClickButtonShowFiles:(id)sender {

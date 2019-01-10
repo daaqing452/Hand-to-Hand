@@ -6,6 +6,10 @@
 /analysis/venv/Lib
 /analysis/venv/Scripts
 /analysis/venv/__pycache__
+/analysis/venv/.DS_Store
 
 /analysis/data/
 /analysis/log*
+/analysis/.DS_Store
+
+.DS_Store

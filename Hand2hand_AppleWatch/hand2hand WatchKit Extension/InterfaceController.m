@@ -29,8 +29,8 @@
 
 @implementation InterfaceController
 
-NSString * const SENSOR_DATA_GET = @"push";
-bool const SENSOR_SHOW_FREQ = false;
+NSString * const SENSOR_DATA_RETRIVAL = @"push";
+bool const SENSOR_SHOW_DETAIL = false;
 
 bool logging = false;
 NSString *buffer = @"";
@@ -79,9 +79,9 @@ NSString *buffer = @"";
         [self.session activateSession];
     }
     
-    if ([SENSOR_DATA_GET isEqualToString:@"push"]) {
+    if ([SENSOR_DATA_RETRIVAL isEqualToString:@"push"]) {
         [self pushAccelerometer];
-    } else if ([SENSOR_DATA_GET isEqualToString:@"pull"]) {
+    } else if ([SENSOR_DATA_RETRIVAL isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
     }
     
@@ -142,13 +142,14 @@ NSString *buffer = @"";
     [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData * _Nullable accelerometerData, NSError * _Nullable error) {
         if (error) return;
         CMAcceleration acceleration = accelerometerData.acceleration;
-        if (SENSOR_SHOW_FREQ) {
+        if (SENSOR_SHOW_DETAIL) {
             freqCnt ++;
             float freq = freqCnt / (-[startTime timeIntervalSinceNow]);
             NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
             NSLog(@"freqAcc: %f", freq);
         }
         if (logging) {
+            [self addLogBuffer:[NSString stringWithFormat:@"acc %f %f %f", acceleration.x, acceleration.y, acceleration.z]];
         }
     }];
     NSLog(@"push ready");
@@ -176,6 +177,9 @@ NSString *buffer = @"";
 - (void)changeLogStatus:(bool)status {
     if (status == false) {
         [self.buttonLog setTitle:@"Log/Off"];
+        NSString *fileName = [NSString stringWithFormat:@"log-%@-.txt", [self getTimeString:@"YYYY-MM-dd-HH-mm-ss"]];
+        [self writeFile:fileName content:buffer];
+        buffer = @"";
         logging = false;
     } else {
         [self.buttonLog setTitle:@"Log/On"];
@@ -185,6 +189,21 @@ NSString *buffer = @"";
 
 - (void)changeLogStatus {
     [self changeLogStatus:!logging];
+}
+
+- (void)addLogBuffer:(NSString *)content {
+    double timestamp = [[NSDate date] timeIntervalSince1970];
+    buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"%f %@\n", timestamp, content]];
+    if (arc4random() % 100 == 0) {
+        NSLog(@"buffer: %d", buffer.length);
+    }
+}
+
+- (NSString *)getTimeString:(NSString *)format {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:format];
+    NSDate *now = [NSDate date];
+    return [formatter stringFromDate:now];
 }
 
 
