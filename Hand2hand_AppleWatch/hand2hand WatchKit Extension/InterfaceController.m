@@ -124,7 +124,7 @@ NSMutableArray<CBPeripheral*> *devices;
     if ([communication isEqualToString:@"watch connectivity"]) {
         [self sendMessage:message];
     } else if ([communication isEqualToString:@"core bluetooth"]) {
-        //
+        [self sendMessageToPeripheral:message];
     }
 }
 
@@ -135,7 +135,7 @@ NSMutableArray<CBPeripheral*> *devices;
  */
 - (IBAction)doClickButtonTest:(id)sender {
     [self.label0 setText:@"test"];
-    [self sendMessage:@"test"];
+    [self send:@"test"];
 }
 
 - (IBAction)doClickButtonLog:(id)sender {
@@ -161,6 +161,7 @@ NSMutableArray<CBPeripheral*> *devices;
 - (IBAction)doClickButtonBluetooth:(id)sender {
     self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
     devices = [NSMutableArray array];
+    [self.label1 setText:@"Bluetooth: On"];
 }
 
 
@@ -377,6 +378,9 @@ NSMutableArray<CBPeripheral*> *devices;
     }
 }
 
+CBPeripheral *peri;
+CBCharacteristic *cha;
+
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(nonnull CBService *)service error:(nullable NSError *)error {
     for (CBCharacteristic *characteristic in service.characteristics) {
         NSLog(@"find characristic %@", characteristic.UUID);
@@ -385,7 +389,8 @@ NSMutableArray<CBPeripheral*> *devices;
             //
         }
         if (properties & CBCharacteristicPropertyWrite) {
-            //
+            peri = peripheral;
+            cha = characteristic;
         }
         if (properties & CBCharacteristicPropertyNotify) {
             NSLog(@"subscribe: %@", characteristic.UUID);
@@ -397,6 +402,10 @@ NSMutableArray<CBPeripheral*> *devices;
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
     NSString *command = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];
     [self parseCommand:command];
+}
+
+- (void)sendMessageToPeripheral:(NSString *)message {
+    [peri writeValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:cha type:CBCharacteristicWriteWithoutResponse];
 }
 
 @end

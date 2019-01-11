@@ -15,7 +15,7 @@
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController">
                     <items>
                         <label width="136" height="19" alignment="left" text="Label 0" id="8jH-55-Kdk" userLabel="Label 0"/>
-                        <label width="136" height="19" alignment="left" text="Label 1" id="qDq-hS-n8J" userLabel="Label 1"/>
+                        <label width="136" height="19" alignment="left" text="Bluetooth: Off" id="qDq-hS-n8J" userLabel="Label 1"/>
                         <button width="1" alignment="left" title="Test" id="UKS-eV-HmI">
                             <connections>
                                 <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="NlM-zp-YBN"/>

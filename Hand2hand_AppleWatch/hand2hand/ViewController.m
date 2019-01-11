@@ -172,7 +172,7 @@ NSMutableArray<CBPeripheral*> *devices;
     NSString *filePath = [[file fileURL] path];
     NSString *fileName = [filePath lastPathComponent];
     bool ifSuccess = [self.fileManager copyItemAtPath:filePath toPath:[self.documentPath stringByAppendingPathComponent:fileName] error:&error];
-    [self appendInfo:[NSString stringWithFormat:@"recv %@: %@", ifSuccess ? @"Y" : @"N", fileName]];
+    [self appendInfo:[NSString stringWithFormat:@"recv file %@: %@", ifSuccess ? @"Y" : @"N", fileName]];
     if (!ifSuccess) {
         [self appendInfo:[NSString stringWithFormat:@"error %@", error]];
     }
@@ -193,7 +193,7 @@ NSMutableArray<CBPeripheral*> *devices;
 NSString *const SERVICE_UUID = @"FEF0";
 NSString *const CHARACTERISTIC_UUID_NOTIFY = @"FEF1";
 NSString *const CHARACTERISTIC_UUID_READ_WRITE = @"FEF2";
-CBMutableCharacteristic *subscribedCharacteristic;
+CBMutableCharacteristic *sendCharacteristic;
 
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
@@ -212,9 +212,9 @@ CBMutableCharacteristic *subscribedCharacteristic;
 - (void)createServices {
     CBMutableCharacteristic *characteristicNotify = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_NOTIFY] properties:CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
     
-    CBMutableCharacteristic *characteristicReadWrite = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_READ_WRITE] properties:CBCharacteristicPropertyRead | CBCharacteristicPropertyWrite value:nil permissions:CBAttributePermissionsReadable | CBAttributePermissionsWriteable];
+    CBMutableCharacteristic *characteristicReadWrite = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_READ_WRITE] properties:CBCharacteristicPropertyRead | CBCharacteristicPropertyWrite | CBCharacteristicPropertyWriteWithoutResponse value:nil permissions:CBAttributePermissionsReadable | CBAttributePermissionsWriteable];
     
-    subscribedCharacteristic = characteristicNotify;
+    sendCharacteristic = characteristicNotify;
     
     CBMutableService *service0 = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:SERVICE_UUID] primary:YES];
     [service0 setCharacteristics:@[characteristicNotify, characteristicReadWrite]];
@@ -231,8 +231,14 @@ CBMutableCharacteristic *subscribedCharacteristic;
     [self appendInfo:@"central subscribed!"];
 }
 
+- (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
+    CBATTRequest *request = requests[0];
+    NSString *message = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
+    [self appendInfo:[NSString stringWithFormat:@"cbrecv: %@", message]];
+}
+
 - (void)broadcastMessage:(NSString *)message {
-    [self.peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:subscribedCharacteristic onSubscribedCentrals:nil];
+    [self.peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:sendCharacteristic onSubscribedCentrals:nil];
 }
 
 @end
