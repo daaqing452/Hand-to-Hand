@@ -14,7 +14,8 @@
             <objects>
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController">
                     <items>
-                        <label width="136" height="19" alignment="left" text="Label" id="8jH-55-Kdk"/>
+                        <label width="136" height="19" alignment="left" text="Label 0" id="8jH-55-Kdk" userLabel="Label 0"/>
+                        <label width="136" height="19" alignment="left" text="Label 1" id="qDq-hS-n8J" userLabel="Label 1"/>
                         <button width="1" alignment="left" title="Test" id="UKS-eV-HmI">
                             <connections>
                                 <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="NlM-zp-YBN"/>
@@ -35,21 +36,27 @@
                                 <action selector="doClickButtonSendFiles:" destination="AgC-eL-Hgc" id="esh-ct-gPE"/>
                             </connections>
                         </button>
-                        <button width="1" alignment="left" title=" " id="zgI-5R-CiO"/>
                         <button width="1" alignment="left" title="Delete Files" id="goU-qR-KaR" userLabel="Button Delete Files">
                             <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                             <connections>
                                 <action selector="doClickButtonDeleteFiles:" destination="AgC-eL-Hgc" id="gVz-YX-f7K"/>
                             </connections>
                         </button>
+                        <button width="1" alignment="left" title="Bluetooth" id="1pY-Aj-sIw" userLabel="Button Bluetooth">
+                            <connections>
+                                <action selector="doClickButtonBluetooth:" destination="AgC-eL-Hgc" id="pIr-Ay-fV7"/>
+                            </connections>
+                        </button>
                     </items>
                     <connections>
+                        <outlet property="buttonBluetooth" destination="1pY-Aj-sIw" id="NXh-93-mZa"/>
                         <outlet property="buttonDeleteFiles" destination="goU-qR-KaR" id="brb-be-OCN"/>
                         <outlet property="buttonLog" destination="Ekh-rI-yBQ" id="fhv-te-T70"/>
                         <outlet property="buttonSendFiles" destination="yLo-gh-7ep" id="iys-TD-VYh"/>
                         <outlet property="buttonShowFiles" destination="14h-lw-cMk" id="ONl-hC-p9o"/>
                         <outlet property="buttonTest" destination="UKS-eV-HmI" id="T2E-1H-PcX"/>
-                        <outlet property="labelTest" destination="8jH-55-Kdk" id="KIT-Vi-H90"/>
+                        <outlet property="label0" destination="8jH-55-Kdk" id="Ydw-3r-D4i"/>
+                        <outlet property="label1" destination="qDq-hS-n8J" id="XW4-Iq-KRN"/>
                     </connections>
                 </controller>
             </objects>

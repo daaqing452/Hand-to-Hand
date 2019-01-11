@@ -10,7 +10,8 @@
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <WatchConnectivity/WatchConnectivity.h>
 
-@interface ViewController () <CBCentralManagerDelegate>
+@interface ViewController () <CBPeripheralManagerDelegate>
+
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOn;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOff;
@@ -21,7 +22,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *labelTest;
 
 @property (strong, nonatomic) NSFileManager *fileManager;
-@property (strong, nonatomic) CBCentralManager *centralManager;
+@property (strong, nonatomic) CBPeripheralManager *peripheralManager;
 @property (strong, nonatomic) WCSession *session;
 @property (strong, nonatomic) NSString *documentPath;
 @property (strong, nonatomic) NSString *sharedPath;
@@ -63,9 +64,7 @@ NSMutableArray<CBPeripheral*> *devices;
         [self.session activateSession];
     }
     
-    self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-    
-    devices = [NSMutableArray array];
+    self.peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
 }
 
 
@@ -75,16 +74,19 @@ NSMutableArray<CBPeripheral*> *devices;
  */
 - (IBAction)doClickButtonTest:(id)sender {
     [self sendMessage:@"test"];
+    [self broadcastMessage:@"test"];
     [self appendInfo:@"test"];
 }
 
 - (IBAction)doClickButtonLogOn:(id)sender {
     [self sendMessage:@"log on"];
+    [self broadcastMessage:@"log on"];
     [self appendInfo:@"log on"];
 }
 
 - (IBAction)doClickButtonLogOff:(id)sender {
     [self sendMessage:@"log off"];
+    [self broadcastMessage:@"log off"];
     [self appendInfo:@"log off"];
 }
 
@@ -121,6 +123,7 @@ NSMutableArray<CBPeripheral*> *devices;
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
     NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
     bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [self appendInfo:[NSString stringWithFormat:@"write file %@: %@", ifsuccess ? @"Y" : @"N", fileName]];
 }
 
 - (void)showFiles:(NSString *)path {
@@ -187,11 +190,16 @@ NSMutableArray<CBPeripheral*> *devices;
 /*
  * bluetooth
  */
-- (void)centralManagerDidUpdateState:(CBCentralManager *)central {
-    switch (central.state) {
+NSString *const SERVICE_UUID = @"FEF0";
+NSString *const CHARACTERISTIC_UUID_NOTIFY = @"FEF1";
+NSString *const CHARACTERISTIC_UUID_READ_WRITE = @"FEF2";
+CBMutableCharacteristic *subscribedCharacteristic;
+
+- (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
+    switch (peripheral.state) {
         case CBManagerStatePoweredOn:
             [self appendInfo:@"bluetooth power on"];
-            [self startScan];
+            [self createServices];
             break;
         case CBManagerStatePoweredOff:
             [self appendInfo:@"bluetooth power off"];
@@ -201,36 +209,30 @@ NSMutableArray<CBPeripheral*> *devices;
     }
 }
 
-- (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
-    if ([peripheral.name isEqualToString:@"Watch L"] || [peripheral.name isEqualToString:@"Watch R"]) {
-        [self appendInfo:[NSString stringWithFormat:@"find device: %@", peripheral.name]];
-        [devices addObject:peripheral];
-        [self.centralManager connectPeripheral:peripheral options:nil];
-    }
+- (void)createServices {
+    CBMutableCharacteristic *characteristicNotify = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_NOTIFY] properties:CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
+    
+    CBMutableCharacteristic *characteristicReadWrite = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_READ_WRITE] properties:CBCharacteristicPropertyRead | CBCharacteristicPropertyWrite value:nil permissions:CBAttributePermissionsReadable | CBAttributePermissionsWriteable];
+    
+    subscribedCharacteristic = characteristicNotify;
+    
+    CBMutableService *service0 = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:SERVICE_UUID] primary:YES];
+    [service0 setCharacteristics:@[characteristicNotify, characteristicReadWrite]];
+    
+    [self.peripheralManager addService:service0];
 }
 
-- (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral {
-    [self appendInfo:[NSString stringWithFormat:@"connect device: %@", peripheral.name]];
-    [peripheral discoverServices:@[[CBUUID UUIDWithString:@"1234"]]];
+- (void)peripheralManager:(CBPeripheralManager *)peripheral didAddService:(CBService *)service error:(NSError *)error {
+    [self appendInfo:@"broadcast serivce"];
+    [self.peripheralManager startAdvertising:@{CBAdvertisementDataServiceUUIDsKey: @[[CBUUID UUIDWithString:SERVICE_UUID]],CBAdvertisementDataLocalNameKey:@"hand2hand-second-watch"}];
 }
 
-- (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
-    [self appendInfo:[NSString stringWithFormat:@"connect device fail: %@ - %@", peripheral.name, error]];
+- (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic {
+    [self appendInfo:@"central subscribed!"];
 }
 
-- (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
-    [self appendInfo:[NSString stringWithFormat:@"disconnect device: %@ - %@", peripheral.name, error]];
-}
-
-- (void)startScan {
-    [self appendInfo:@"start scan..."];
-    [self.centralManager scanForPeripheralsWithServices:nil options:nil];
-    [self performSelector:@selector(stopScan) withObject:nil afterDelay:5];
-}
-
-- (void)stopScan {
-    [self appendInfo:@"stop scan..."];
-    [self.centralManager stopScan];
+- (void)broadcastMessage:(NSString *)message {
+    [self.peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:subscribedCharacteristic onSubscribedCentrals:nil];
 }
 
 @end

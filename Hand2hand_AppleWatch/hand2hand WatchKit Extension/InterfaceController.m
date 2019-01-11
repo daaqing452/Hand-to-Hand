@@ -13,18 +13,20 @@
 #import <WatchConnectivity/WatchConnectivity.h>
 
 
-@interface InterfaceController () <CBPeripheralManagerDelegate>
+@interface InterfaceController () <CBCentralManagerDelegate, CBPeripheralDelegate>
 
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonLog;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonShowFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonDeleteFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonSendFiles;
-@property (weak, nonatomic) IBOutlet WKInterfaceLabel *labelTest;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonBluetooth;
+@property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
+@property (weak, nonatomic) IBOutlet WKInterfaceLabel *label1;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) NSFileManager *fileManager;
-@property (strong, nonatomic) CBPeripheralManager *peripheralManager;
+@property (strong, nonatomic) CBCentralManager *centralManager;
 @property (strong, nonatomic) WCSession *session;
 @property (strong, nonatomic) NSString *documentPath;
 @property (strong, nonatomic) NSString *sharedPath;
@@ -37,8 +39,12 @@
 NSString * const SENSOR_DATA_RETRIVAL = @"push";
 bool const SENSOR_SHOW_DETAIL = false;
 
+NSString *communication = @"null";
+
 bool logging = false;
 NSString *buffer = @"";
+
+NSMutableArray<CBPeripheral*> *devices;
 
 - (CMMotionManager *)motionManager {
     if (!_motionManager) {
@@ -82,6 +88,7 @@ NSString *buffer = @"";
         self.session = [WCSession defaultSession];
         self.session.delegate = self;
         [self.session activateSession];
+        communication = @"watch connectivity";
     }
     
     if ([SENSOR_DATA_RETRIVAL isEqualToString:@"push"]) {
@@ -89,8 +96,6 @@ NSString *buffer = @"";
     } else if ([SENSOR_DATA_RETRIVAL isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
     }
-    
-    self.peripheralManager = [[CBPeripheralManager alloc]initWithDelegate:self queue:nil];
     
     NSLog(@"init finished");
 }
@@ -105,15 +110,32 @@ NSString *buffer = @"";
     NSLog(@"bye");
 }
 
+- (void)parseCommand:(NSString *)command {
+    if ([command isEqualToString:@"log on"]) {
+        [self changeLogStatus:true];
+    } else if ([command isEqualToString:@"log off"]) {
+        [self changeLogStatus:false];
+    } else {
+        NSLog(@"recv message: %@", command);
+    }
+}
+
+- (void)send:(NSString *)message {
+    if ([communication isEqualToString:@"watch connectivity"]) {
+        [self sendMessage:message];
+    } else if ([communication isEqualToString:@"core bluetooth"]) {
+        //
+    }
+}
+
 
 
 /*
  * UI
  */
 - (IBAction)doClickButtonTest:(id)sender {
-    [self.labelTest setText:@"test"];
+    [self.label0 setText:@"test"];
     [self sendMessage:@"test"];
-    [self writeFile:@"b.txt" content:@"hi"];
 }
 
 - (IBAction)doClickButtonLog:(id)sender {
@@ -134,6 +156,11 @@ NSString *buffer = @"";
     while ((file = [myDirectoryEnumerator nextObject])) {
         [self sendFile:[self.documentPath stringByAppendingPathComponent:file]];
     }
+}
+
+- (IBAction)doClickButtonBluetooth:(id)sender {
+    self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+    devices = [NSMutableArray array];
 }
 
 
@@ -267,14 +294,7 @@ NSString *buffer = @"";
 }
 
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
-    NSString *op = dict[@"message"];
-    if ([op isEqualToString:@"log on"]) {
-        [self changeLogStatus:true];
-    } else if ([op isEqualToString:@"log off"]) {
-        [self changeLogStatus:false];
-    } else {
-        NSLog(@"recv message: %@", op);
-    }
+    [self parseCommand:dict[@"message"]];
 }
 
 - (void)alert:(NSString *)message {
@@ -290,22 +310,93 @@ NSString *buffer = @"";
 /*
  * bluetooth
  */
-- (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral {
-    switch (peripheral.state) {
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central {
+    switch (central.state) {
         case CBManagerStatePoweredOn:
             NSLog(@"bluetooth power on");
-            [self createServices];
+            //[self appendInfo:@"bluetooth power on"];
+            [self startScan];
             break;
         case CBManagerStatePoweredOff:
             NSLog(@"bluetooth power off");
+            //[self appendInfo:@"bluetooth power off"];
+            break;
         default:
             break;
     }
 }
 
-- (void)createServices {
-    CBUUID *CBUUIDCharacteristicUserDescriptionStringUUID = [CBUUID UUIDWithString:CBUUIDCharacteristicUserDescriptionString];
-    
+- (void)startScan {
+    NSLog(@"start scan...");
+    //[self appendInfo:@"start scan..."];
+    [self.centralManager scanForPeripheralsWithServices:nil options:nil];
+    [self performSelector:@selector(stopScan) withObject:nil afterDelay:5];
+}
+
+- (void)stopScan {
+    NSLog(@"stop scan...");
+    //[self appendInfo:@"stop scan..."];
+    [self.centralManager stopScan];
+}
+
+- (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
+    if ([peripheral.name isEqualToString:@"iPhone LU"]) {
+        NSLog(@"find device: %@", peripheral.name);
+        //[self appendInfo:[NSString stringWithFormat:@"find device: %@", peripheral.name]];
+        [devices addObject:peripheral];
+        [self.centralManager connectPeripheral:peripheral options:nil];
+    }
+}
+
+- (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral {
+    NSLog(@"connect device: %@", peripheral.name);
+    [self.label0 setText:@"connected"];
+    //[self appendInfo:[NSString stringWithFormat:@"connect device: %@", peripheral.name]];
+    peripheral.delegate = self;
+    [peripheral discoverServices:nil];
+    communication = @"core bluetooth";
+}
+
+- (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
+    NSLog(@"connect device fail: %@ - %@", peripheral.name, error);
+    //[self appendInfo:[NSString stringWithFormat:@"connect device fail: %@ - %@", peripheral.name, error]];
+}
+
+- (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
+    NSLog(@"disconnect device: %@ - %@", peripheral.name, error);
+    //[self appendInfo:[NSString stringWithFormat:@"disconnect device: %@ - %@", peripheral.name, error]];
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error {
+    for (CBService *service in peripheral.services) {
+        NSString *uuid = [service.UUID UUIDString];
+        if ([uuid isEqualToString:@"FEF0"]) {
+            NSLog(@"find service: %@", uuid);
+            [peripheral discoverCharacteristics:nil forService:service];
+        }
+    }
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(nonnull CBService *)service error:(nullable NSError *)error {
+    for (CBCharacteristic *characteristic in service.characteristics) {
+        NSLog(@"find characristic %@", characteristic.UUID);
+        CBCharacteristicProperties properties = characteristic.properties;
+        if (properties & CBCharacteristicPropertyRead) {
+            //
+        }
+        if (properties & CBCharacteristicPropertyWrite) {
+            //
+        }
+        if (properties & CBCharacteristicPropertyNotify) {
+            NSLog(@"subscribe: %@", characteristic.UUID);
+            [peripheral setNotifyValue:YES forCharacteristic:characteristic];
+        }
+    }
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
+    NSString *command = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];
+    [self parseCommand:command];
 }
 
 @end
