@@ -10,6 +10,7 @@
 #import <CoreMotion/CoreMotion.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <Foundation/Foundation.h>
+//#import <HealthKit/HealthKit.h>
 #import <WatchConnectivity/WatchConnectivity.h>
 
 
@@ -22,8 +23,8 @@
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonSendFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonBluetooth;
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
-@property (weak, nonatomic) IBOutlet WKInterfaceLabel *label1;
 
+@property (strong, nonatomic) WKInterfaceDevice *device;
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) NSFileManager *fileManager;
 @property (strong, nonatomic) CBCentralManager *centralManager;
@@ -45,6 +46,13 @@ bool logging = false;
 NSString *buffer = @"";
 
 NSMutableArray<CBPeripheral*> *devices;
+
+- (WKInterfaceDevice *)device {
+    if (!_device) {
+        self.device = [WKInterfaceDevice currentDevice];
+    }
+    return _device;
+}
 
 - (CMMotionManager *)motionManager {
     if (!_motionManager) {
@@ -97,6 +105,9 @@ NSMutableArray<CBPeripheral*> *devices;
         [self setSensorDataGetPull];
     }
     
+    CMSensorRecorder *c = [[CMSensorRecorder alloc] init];
+    [c recordAccelerometerForDuration:3];
+    
     NSLog(@"init finished");
 }
 
@@ -104,9 +115,9 @@ NSMutableArray<CBPeripheral*> *devices;
     // This method is called when watch view controller is no longer visible
     [super didDeactivate];
     
-    if (self.motionManager.isAccelerometerAvailable) {
+    /*if (self.motionManager.isAccelerometerAvailable) {
         [self.motionManager stopAccelerometerUpdates];
-    }
+    }*/
     NSLog(@"bye");
 }
 
@@ -161,7 +172,7 @@ NSMutableArray<CBPeripheral*> *devices;
 - (IBAction)doClickButtonBluetooth:(id)sender {
     self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
     devices = [NSMutableArray array];
-    [self.label1 setText:@"Bluetooth: On"];
+    [self.buttonBluetooth setTitle:@"Bluetooth: On"];
 }
 
 
@@ -211,13 +222,13 @@ NSMutableArray<CBPeripheral*> *devices;
  */
 - (void)changeLogStatus:(bool)status {
     if (status == false) {
-        [self.buttonLog setTitle:@"Log/Off"];
-        NSString *fileName = [NSString stringWithFormat:@"log-%@-.txt", [self getTimeString:@"YYYY-MM-dd-HH-mm-ss"]];
+        [self.buttonLog setTitle:@"Log: Off"];
+        NSString *fileName = [NSString stringWithFormat:@"log-%@-%@.txt", [self getTimeString:@"YYYY-MM-dd-HH-mm-ss"], [self.device.name stringByReplacingOccurrencesOfString:@" " withString:@""]];
         [self writeFile:fileName content:buffer];
         buffer = @"";
         logging = false;
     } else {
-        [self.buttonLog setTitle:@"Log/On"];
+        [self.buttonLog setTitle:@"Log: On"];
         logging = true;
     }
 }
@@ -248,6 +259,7 @@ NSMutableArray<CBPeripheral*> *devices;
  */
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
     NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
+    NSLog(@"%@", filePath);
     bool ifSuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
     NSLog(@"write file %@: %@", ifSuccess ? @"Y" : @"N", fileName);
 }
@@ -256,9 +268,12 @@ NSMutableArray<CBPeripheral*> *devices;
     NSLog(@"show files: %@", path);
     NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
     NSString *file;
+    int fileCount = 0;
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSLog(@"file %@", file);
+        fileCount += 1;
     }
+    [self.buttonShowFiles setTitle:[NSString stringWithFormat:@"Show Files: %d", fileCount]];
 }
 
 - (void)deleteFiles:(NSString *)path {
@@ -351,7 +366,7 @@ NSMutableArray<CBPeripheral*> *devices;
 
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral {
     NSLog(@"connect device: %@", peripheral.name);
-    [self.label0 setText:@"connected"];
+    [self.buttonBluetooth setTitle:@"Bluetooth: On(C)"];
     //[self appendInfo:[NSString stringWithFormat:@"connect device: %@", peripheral.name]];
     peripheral.delegate = self;
     [peripheral discoverServices:nil];

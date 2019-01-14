@@ -149,6 +149,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BF14527021EC55BA006C61FB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		BFACCE3021D3601300CCECB2 = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +165,7 @@
 				BFACCE6921D3601400CCECB2 /* hand2hand WatchKit App */,
 				BFACCE7821D3601500CCECB2 /* hand2hand WatchKit Extension */,
 				BFACCE3A21D3601300CCECB2 /* Products */,
+				BF14527021EC55BA006C61FB /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -342,6 +350,12 @@
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
+							};
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.HealthKit = {
+								enabled = 0;
 							};
 						};
 					};

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "../log-2019-01-10-11-43-36-.txt"
+filename = "../log-2019-01-14-14-16-16-WatchL.txt"
 
 t_pre = [0, 0, 0, 0]
 t_list = [[], [], [], []]

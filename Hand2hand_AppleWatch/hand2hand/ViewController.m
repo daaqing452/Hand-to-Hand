@@ -198,11 +198,11 @@ CBMutableCharacteristic *sendCharacteristic;
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
         case CBManagerStatePoweredOn:
-            [self appendInfo:@"bluetooth power on"];
+            [self appendInfo:@"bluetooth peripheral on"];
             [self createServices];
             break;
         case CBManagerStatePoweredOff:
-            [self appendInfo:@"bluetooth power off"];
+            [self appendInfo:@"bluetooth peripheral off"];
             break;
         default:
             break;
@@ -223,12 +223,11 @@ CBMutableCharacteristic *sendCharacteristic;
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didAddService:(CBService *)service error:(NSError *)error {
-    [self appendInfo:@"broadcast serivce"];
     [self.peripheralManager startAdvertising:@{CBAdvertisementDataServiceUUIDsKey: @[[CBUUID UUIDWithString:SERVICE_UUID]],CBAdvertisementDataLocalNameKey:@"hand2hand-second-watch"}];
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic {
-    [self appendInfo:@"central subscribed!"];
+    [self appendInfo:@"second watch connected"];
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
