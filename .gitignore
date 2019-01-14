@@ -7,6 +7,7 @@
 /analysis/venv/Scripts
 /analysis/venv/__pycache__
 /analysis/venv/.DS_Store
+/analysis/venv/*.pyc
 
 /analysis/data/
 /analysis/log*
