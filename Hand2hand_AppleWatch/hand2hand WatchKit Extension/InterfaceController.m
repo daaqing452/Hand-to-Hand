@@ -10,11 +10,11 @@
 #import <CoreMotion/CoreMotion.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <Foundation/Foundation.h>
-//#import <HealthKit/HealthKit.h>
+#import <HealthKit/HealthKit.h>
 #import <WatchConnectivity/WatchConnectivity.h>
 
 
-@interface InterfaceController () <CBCentralManagerDelegate, CBPeripheralDelegate>
+@interface InterfaceController () <CBCentralManagerDelegate, CBPeripheralDelegate, HKWorkoutSessionDelegate>
 
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonLog;
@@ -46,6 +46,8 @@ bool logging = false;
 NSString *buffer = @"";
 
 NSMutableArray<CBPeripheral*> *devices;
+CBPeripheral *subscribedPeripheral;
+CBCharacteristic *subscribedCharacteristic;
 
 - (WKInterfaceDevice *)device {
     if (!_device) {
@@ -85,7 +87,15 @@ NSMutableArray<CBPeripheral*> *devices;
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
     
-    // Configure interface objects here.
+    HKWorkoutConfiguration *workoutConfiguration = [[HKWorkoutConfiguration alloc] init];
+    workoutConfiguration.activityType = HKWorkoutActivityTypeRunning;
+    workoutConfiguration.locationType = HKWorkoutSessionLocationTypeOutdoor;
+    
+    HKHealthStore *healthScore = [[HKHealthStore alloc] init];
+    
+    HKWorkoutSession *workoutSession = [[HKWorkoutSession alloc] initWithHealthStore:healthScore configuration:workoutConfiguration error:nil];
+    
+    [workoutSession startActivityWithDate:[NSDate date]];
 }
 
 - (void)willActivate {
@@ -104,9 +114,6 @@ NSMutableArray<CBPeripheral*> *devices;
     } else if ([SENSOR_DATA_RETRIVAL isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
     }
-    
-    CMSensorRecorder *c = [[CMSensorRecorder alloc] init];
-    [c recordAccelerometerForDuration:3];
     
     NSLog(@"init finished");
 }
@@ -137,6 +144,17 @@ NSMutableArray<CBPeripheral*> *devices;
     } else if ([communication isEqualToString:@"core bluetooth"]) {
         [self sendMessageToPeripheral:message];
     }
+}
+
+- (void)workoutSession:(nonnull HKWorkoutSession *)workoutSession didChangeToState:(HKWorkoutSessionState)toState fromState:(HKWorkoutSessionState)fromState date:(nonnull NSDate *)date {
+}
+
+- (void)workoutSession:(nonnull HKWorkoutSession *)workoutSession didFailWithError:(nonnull NSError *)error {
+    NSLog(@"workout error");
+}
+
+- (void)workoutSession:(HKWorkoutSession *)workoutSession didGenerateEvent:(HKWorkoutEvent *)event {
+    
 }
 
 
@@ -393,9 +411,6 @@ NSMutableArray<CBPeripheral*> *devices;
     }
 }
 
-CBPeripheral *peri;
-CBCharacteristic *cha;
-
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(nonnull CBService *)service error:(nullable NSError *)error {
     for (CBCharacteristic *characteristic in service.characteristics) {
         NSLog(@"find characristic %@", characteristic.UUID);
@@ -404,8 +419,8 @@ CBCharacteristic *cha;
             //
         }
         if (properties & CBCharacteristicPropertyWrite) {
-            peri = peripheral;
-            cha = characteristic;
+            subscribedPeripheral = peripheral;
+            subscribedCharacteristic = characteristic;
         }
         if (properties & CBCharacteristicPropertyNotify) {
             NSLog(@"subscribe: %@", characteristic.UUID);
@@ -420,7 +435,7 @@ CBCharacteristic *cha;
 }
 
 - (void)sendMessageToPeripheral:(NSString *)message {
-    [peri writeValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:cha type:CBCharacteristicWriteWithoutResponse];
+    [subscribedPeripheral writeValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:subscribedCharacteristic type:CBCharacteristicWriteWithoutResponse];
 }
 
 @end

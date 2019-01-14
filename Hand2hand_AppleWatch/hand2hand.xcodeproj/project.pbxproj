@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BFA2E65121EC6F2C0069D6F4 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFA2E65021EC6F2C0069D6F4 /* HealthKit.framework */; };
 		BFACCE3E21D3601400CCECB2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE3D21D3601400CCECB2 /* AppDelegate.m */; };
 		BFACCE4121D3601400CCECB2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE4021D3601400CCECB2 /* ViewController.m */; };
 		BFACCE4421D3601400CCECB2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE4221D3601400CCECB2 /* Main.storyboard */; };
@@ -85,6 +86,7 @@
 		BF07EE7921D60CA5000EED41 /* hand2hand.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = hand2hand.entitlements; sourceTree = "<group>"; };
 		BF2EBB3721DDCEB6005C8223 /* hand2hand WatchKit Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "hand2hand WatchKit Extension.entitlements"; sourceTree = "<group>"; };
 		BF2EBB3821DDCEBE005C8223 /* hand2hand WatchKit App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "hand2hand WatchKit App.entitlements"; sourceTree = "<group>"; };
+		BFA2E65021EC6F2C0069D6F4 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
 		BFACCE3921D3601300CCECB2 /* hand2hand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hand2hand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFACCE3C21D3601400CCECB2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BFACCE3D21D3601400CCECB2 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFA2E65121EC6F2C0069D6F4 /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +155,7 @@
 		BF14527021EC55BA006C61FB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BFA2E65021EC6F2C0069D6F4 /* HealthKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -352,7 +356,7 @@
 								enabled = 1;
 							};
 							com.apple.BackgroundModes = {
-								enabled = 1;
+								enabled = 0;
 							};
 							com.apple.HealthKit = {
 								enabled = 0;
@@ -379,6 +383,12 @@
 						CreatedOnToolsVersion = 10.1;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.BackgroundModes.watchos.extension = {
+								enabled = 1;
+							};
+							com.apple.HealthKit.watchos = {
 								enabled = 1;
 							};
 						};

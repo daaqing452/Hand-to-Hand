@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
-filename = "../log-2019-01-14-14-16-16-WatchL.txt"
+#filename = "../log-2019-01-14-14-16-16-WatchL.txt"
+filename = sys.argv[1]
 
 t_pre = [0, 0, 0, 0]
 t_list = [[], [], [], []]
@@ -35,6 +37,7 @@ t_list[0] = np.array(t_list[0])[0:] * 1000
 print(t_list[0].min(), t_list[0].max(), t_list[0].mean(), t_list[0].std())
 #print(t_list[1].min(), t_list[1].max(), t_list[1].mean(), t_list[1].std())
 #print(t_list[2].min(), t_list[2].max(), t_list[2].mean(), t_list[2].std())
+print(t_list[0][-10:])
 
 plt.subplot(311)
 plt.hist(t_list[0], bins=400)

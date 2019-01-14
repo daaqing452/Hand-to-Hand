@@ -15,7 +15,7 @@ def read_file(filename):
 		if len(s) <= 0:
 			break
 		arr = s[:-1].split(' ')
-		t = int(arr[0])
+		t = float(arr[0])
 		if t_first == -1:
 			t_first = t
 			t = 0
