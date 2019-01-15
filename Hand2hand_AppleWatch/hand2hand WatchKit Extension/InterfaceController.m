@@ -7,8 +7,8 @@
 //
 
 #import "InterfaceController.h"
-#import <CoreMotion/CoreMotion.h>
 #import <CoreBluetooth/CoreBluetooth.h>
+#import <CoreMotion/CoreMotion.h>
 #import <Foundation/Foundation.h>
 #import <HealthKit/HealthKit.h>
 #import <WatchConnectivity/WatchConnectivity.h>
@@ -24,65 +24,40 @@
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonBluetooth;
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
 
-@property (strong, nonatomic) WKInterfaceDevice *device;
 @property (strong, nonatomic) CMMotionManager *motionManager;
-@property (strong, nonatomic) NSFileManager *fileManager;
-@property (strong, nonatomic) CBCentralManager *centralManager;
-@property (strong, nonatomic) WCSession *session;
-@property (strong, nonatomic) NSString *documentPath;
-@property (strong, nonatomic) NSString *sharedPath;
 
 @end
 
 
 @implementation InterfaceController
 
+// general
+WKInterfaceDevice *device;
+NSFileManager *fileManager;
+NSString *documentPath;
+NSString *sharedPath;
+
+// sensor
 NSString * const SENSOR_DATA_RETRIVAL = @"push";
 bool const SENSOR_SHOW_DETAIL = false;
+//CMMotionManager *motionManager;
 
+// communication
+WCSession *wcsession;
 NSString *communication = @"null";
 
+// log
+int const LOG_BUFFER_MAX_SIZE = 16384;
 bool logging = false;
 NSString *buffer = @"";
+NSString *logFileName;
 
-NSMutableArray<CBPeripheral*> *devices;
+// bluetooth
+CBCentralManager *centralManager;
+NSMutableArray<CBPeripheral*> *peripheralDevices;
 CBPeripheral *subscribedPeripheral;
 CBCharacteristic *subscribedCharacteristic;
 
-- (WKInterfaceDevice *)device {
-    if (!_device) {
-        self.device = [WKInterfaceDevice currentDevice];
-    }
-    return _device;
-}
-
-- (CMMotionManager *)motionManager {
-    if (!_motionManager) {
-        self.motionManager = [[CMMotionManager alloc] init];
-    }
-    return _motionManager;
-}
-
-- (NSFileManager *)fileManager {
-    if (!_fileManager) {
-        self.fileManager = [NSFileManager defaultManager];
-    }
-    return _fileManager;
-}
-
-- (NSString *)documentPath {
-    if (!_documentPath) {
-        self.documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    }
-    return _documentPath;
-}
-
-- (NSString *)sharedPath {
-    if (!_sharedPath) {
-        self.sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
-    }
-    return _sharedPath;
-}
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
@@ -102,19 +77,26 @@ CBCharacteristic *subscribedCharacteristic;
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
     
+    device = [WKInterfaceDevice currentDevice];
+    fileManager = [NSFileManager defaultManager];
+    documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
+    
     if ([WCSession isSupported]) {
-        self.session = [WCSession defaultSession];
-        self.session.delegate = self;
-        [self.session activateSession];
+        wcsession = [WCSession defaultSession];
+        wcsession.delegate = self;
+        [wcsession activateSession];
         communication = @"watch connectivity";
     }
     
+    self.motionManager = [[CMMotionManager alloc] init];
     if ([SENSOR_DATA_RETRIVAL isEqualToString:@"push"]) {
         [self pushAccelerometer];
     } else if ([SENSOR_DATA_RETRIVAL isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
     }
     
+    [self.label0 setText:device.name];
     NSLog(@"init finished");
 }
 
@@ -172,24 +154,24 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (IBAction)doClickButtonShowFiles:(id)sender {
-    [self showFiles:self.documentPath];
+    [self showFiles:documentPath];
 }
 
 - (IBAction)doClickButtonDeleteFiles:(id)sender {
-    [self deleteFiles:self.documentPath];
+    [self deleteFiles:documentPath];
 }
 
 - (IBAction)doClickButtonSendFiles:(id)sender {
-    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:self.documentPath];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:documentPath];
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
-        [self sendFile:[self.documentPath stringByAppendingPathComponent:file]];
+        [self sendFile:[documentPath stringByAppendingPathComponent:file]];
     }
 }
 
 - (IBAction)doClickButtonBluetooth:(id)sender {
-    self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-    devices = [NSMutableArray array];
+    centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+    peripheralDevices = [NSMutableArray array];
     [self.buttonBluetooth setTitle:@"Bluetooth: On"];
 }
 
@@ -214,6 +196,10 @@ CBCharacteristic *subscribedCharacteristic;
         }
         if (logging) {
             [self addLogBuffer:[NSString stringWithFormat:@"acc %f %f %f", acceleration.x, acceleration.y, acceleration.z]];
+            if (buffer.length > LOG_BUFFER_MAX_SIZE) {
+                [self writeFile:logFileName content:buffer];
+                buffer = @"";
+            }
         }
     }];
     NSLog(@"push ready");
@@ -240,13 +226,13 @@ CBCharacteristic *subscribedCharacteristic;
  */
 - (void)changeLogStatus:(bool)status {
     if (status == false) {
-        [self.buttonLog setTitle:@"Log: Off"];
-        NSString *fileName = [NSString stringWithFormat:@"log-%@-%@.txt", [self getTimeString:@"YYYY-MM-dd-HH-mm-ss"], [self.device.name stringByReplacingOccurrencesOfString:@" " withString:@""]];
-        [self writeFile:fileName content:buffer];
+        [self writeFile:logFileName content:buffer];
         buffer = @"";
+        [self.buttonLog setTitle:@"Log: Off"];
         logging = false;
     } else {
         [self.buttonLog setTitle:@"Log: On"];
+        logFileName = [NSString stringWithFormat:@"log-%@-%@.txt", [self getTimeString:@"YYYY-MM-dd-HH-mm-ss"], [device.name stringByReplacingOccurrencesOfString:@" " withString:@""]];
         logging = true;
     }
 }
@@ -276,15 +262,21 @@ CBCharacteristic *subscribedCharacteristic;
  * file
  */
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
-    NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
-    NSLog(@"%@", filePath);
-    bool ifSuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    NSLog(@"write file %@: %@", ifSuccess ? @"Y" : @"N", fileName);
+    NSString *filePath = [documentPath stringByAppendingPathComponent:fileName];
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+    if (fileHandle == nil) {
+        bool ifSuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        NSLog(@"write file %@: %@", ifSuccess ? @"Y" : @"N", fileName);
+    } else {
+        [fileHandle truncateFileAtOffset:[fileHandle seekToEndOfFile]];
+        [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
+        [fileHandle closeFile];
+    }
 }
 
 - (void)showFiles:(NSString *)path {
     NSLog(@"show files: %@", path);
-    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:path];
     NSString *file;
     int fileCount = 0;
     while ((file = [myDirectoryEnumerator nextObject])) {
@@ -295,11 +287,11 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)deleteFiles:(NSString *)path {
-    NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:path];
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
-        NSString *filePath = [self.documentPath stringByAppendingPathComponent:file];
-        bool ifSuccess = [self.fileManager removeItemAtPath:filePath error:nil];
+        NSString *filePath = [documentPath stringByAppendingPathComponent:file];
+        bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
         NSLog(@"delete file %@: %@", ifSuccess ? @"Y" : @"N", file);
     }
 }
@@ -310,7 +302,7 @@ CBCharacteristic *subscribedCharacteristic;
  * watch connectivity
  */
 - (void)sendData:(NSDictionary *)dict {
-    [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
+    [wcsession sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
         // do nothing
@@ -324,7 +316,7 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)sendFile:(NSString *)filePath {
     NSLog(@"try send: %@", filePath);
     NSURL *fileUrl = [NSURL fileURLWithPath:filePath];
-    [self.session transferFile:fileUrl metadata:nil];
+    [wcsession transferFile:fileUrl metadata:nil];
 }
 
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
@@ -363,22 +355,22 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)startScan {
     NSLog(@"start scan...");
     //[self appendInfo:@"start scan..."];
-    [self.centralManager scanForPeripheralsWithServices:nil options:nil];
+    [centralManager scanForPeripheralsWithServices:nil options:nil];
     [self performSelector:@selector(stopScan) withObject:nil afterDelay:5];
 }
 
 - (void)stopScan {
     NSLog(@"stop scan...");
     //[self appendInfo:@"stop scan..."];
-    [self.centralManager stopScan];
+    [centralManager stopScan];
 }
 
 - (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
     if ([peripheral.name isEqualToString:@"iPhone LU"]) {
         NSLog(@"find device: %@", peripheral.name);
         //[self appendInfo:[NSString stringWithFormat:@"find device: %@", peripheral.name]];
-        [devices addObject:peripheral];
-        [self.centralManager connectPeripheral:peripheral options:nil];
+        [peripheralDevices addObject:peripheral];
+        [centralManager connectPeripheral:peripheral options:nil];
     }
 }
 
