@@ -154,6 +154,7 @@ NSString *sharedPath;
         [self alert:command];
     } else if ([command isEqualToString:@"test watch connectivity"]) {
         [self sendMessageByWatchConnectivity:@"test watch connectivity success"];
+        UILog(@"watch connectivity connected");
     } else {
         UILog(@"recv from WC: %@", command);
     }

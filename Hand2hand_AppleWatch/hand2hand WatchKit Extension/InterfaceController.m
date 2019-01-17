@@ -309,8 +309,10 @@ CBCharacteristic *subscribedCharacteristic;
     NSString *file;
     int fileCount = 0;
     while ((file = [myDirectoryEnumerator nextObject])) {
-        NSLog(@"file %@", file);
-        fileCount += 1;
+        if ([[file pathExtension] isEqualToString:@"txt"]) {
+            NSLog(@"file %@", file);
+            fileCount += 1;
+        }
     }
     [self.buttonShowFiles setTitle:[NSString stringWithFormat:@"Show Files: %d", fileCount]];
 }
@@ -334,6 +336,7 @@ CBCharacteristic *subscribedCharacteristic;
     [wcsession sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // ignore
     } errorHandler:^(NSError * _Nonnull error) {
+        LBLog(@"error code %d", error.code);
         if ([dict[@"message"] isEqualToString:@"test watch connectivity"]) {
             // cannot connect to paired counterpart, use core bluetooth
             // error.code == 7007
@@ -346,9 +349,13 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)sendFile:(NSString *)filePath {
-    NSLog(@"send file: %@", filePath);
-    NSURL *fileUrl = [NSURL fileURLWithPath:filePath];
-    [wcsession transferFile:fileUrl metadata:nil];
+    if ([communication isEqualToString:@"watch connectivity"]) {
+        NSLog(@"send file: %@", filePath);
+        NSURL *fileUrl = [NSURL fileURLWithPath:filePath];
+        [wcsession transferFile:fileUrl metadata:nil];
+    } else {
+        LBLog(@"cannot send file");
+    }
 }
 
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {

@@ -1,0 +1,16 @@
+踩过的坑
+
+1. iPhone只能和一个Apple Watch连接
+2. 调试的时候，从一个Apple Watch切换到另一个Apple Watch，下一次run就会失败。正确的方法是：
+	* stop task (可能不必要)
+	* clean project (可能不必要)
+	* 关掉iPhone的蓝牙
+	* 在iPhone的Watch App中切换Apple Watch
+	* 打开iPhone的蓝牙
+3. 如果还是run失败，重启大法好。可能的优先级：iPhone > Xcode > Apple Watch > Mac
+4. 使用原生蓝牙接口，Apple Watch只能当center不能当peripheral，只能iPhone当peripheral
+5. WCSession.isReachable基本没什么用，一开始连上以后，断掉蓝牙也是true
+6. 不是什么东西随便写，然后workout一下都会在后台跑
+7. 有一些变量要用@property的方式使用，有一些不用
+8. 在使用原生蓝牙接口的地方，不能使用WCSession那几句话，不然后台不跑了
+9. 

@@ -3,8 +3,8 @@ import numpy as np
 import sys
 from utils import *
 
-filename_l = "../log-20190117-101340-WatchL.txt"
-filename_r = "../log-20190117-101340-WatchR.txt"
+filename_l = "../log-20190117-164840-WatchL.txt"
+filename_r = "../log-20190117-164840-WatchR.txt"
 acc0r, gyr0r, gra0r = read_file(filename_l)
 acc1r, gyr1r, gra1r = read_file(filename_r)
 print(acc0r.shape, acc1r.shape)
