@@ -2,13 +2,15 @@
 //  ViewController.m
 //  hand2hand
 //
-//  Created by 鲁逸沁 on 2018/12/26.
-//  Copyright © 2018年 鲁逸沁. All rights reserved.
+//  Created by Yiqin Lu on 2018/12/26.
+//  Copyright © 2018 Yiqin Lu. All rights reserved.
 //
 
 #import "ViewController.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <WatchConnectivity/WatchConnectivity.h>
+
+#define UILog(format, ...) [self showInfoInUI:[NSString stringWithFormat:(format), ##__VA_ARGS__]]
 
 @interface ViewController () <CBPeripheralManagerDelegate>
 
@@ -69,25 +71,25 @@ NSMutableArray<CBPeripheral*> *devices;
 
 
 
-/*
- * UI
- */
+//
+//  UI
+//
 - (IBAction)doClickButtonTest:(id)sender {
     [self sendMessage:@"test"];
     [self broadcastMessage:@"test"];
-    [self appendInfo:@"test"];
+    UILog(@"test");
 }
 
 - (IBAction)doClickButtonLogOn:(id)sender {
     [self sendMessage:@"log on"];
     [self broadcastMessage:@"log on"];
-    [self appendInfo:@"log on"];
+    [self showInfoInUI:@"log on"];
 }
 
 - (IBAction)doClickButtonLogOff:(id)sender {
     [self sendMessage:@"log off"];
     [self broadcastMessage:@"log off"];
-    [self appendInfo:@"log off"];
+    [self showInfoInUI:@"log off"];
 }
 
 - (IBAction)doClickButtonShowFiles:(id)sender {
@@ -102,11 +104,11 @@ NSMutableArray<CBPeripheral*> *devices;
     [self.textInfo setText:@""];
 }
 
-- (void)appendInfo:(NSString *)newInfo {
-    [self appendInfo:newInfo newline:true];
+- (void)showInfoInUI:(NSString *)newInfo {
+    [self showInfoInUI:newInfo newline:true];
 }
 
-- (void)appendInfo:(NSString *)newInfo newline:(bool)newline {
+- (void)showInfoInUI:(NSString *)newInfo newline:(bool)newline {
     if (newline == true) {
         newInfo = [newInfo stringByAppendingString:@"\n\n"];
     }
@@ -117,21 +119,24 @@ NSMutableArray<CBPeripheral*> *devices;
 
 
 
-/*
- * file
- */
+//
+//  file
+//
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
     NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
     bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    [self appendInfo:[NSString stringWithFormat:@"write file %@: %@", ifsuccess ? @"Y" : @"N", fileName]];
+    UILog(@"write file %@: %@", ifsuccess ? @"Y" : @"N", fileName);
+    //[self showInfoInUI:[NSString stringWithFormat:@"write file %@: %@", ifsuccess ? @"Y" : @"N", fileName]];
 }
 
 - (void)showFiles:(NSString *)path {
-    [self appendInfo:[NSString stringWithFormat:@"show files: %@", path]];
+    [self showInfoInUI:[NSString stringWithFormat:@"show files: %@", path]];
     NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
-        [self appendInfo:[NSString stringWithFormat:@"file %@", file]];
+        if ([[file pathExtension] isEqualToString:@"txt"]) {
+            [self showInfoInUI:[NSString stringWithFormat:@"file %@", file]];
+        }
     }
 }
 
@@ -141,15 +146,15 @@ NSMutableArray<CBPeripheral*> *devices;
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSString *filePath = [self.documentPath stringByAppendingPathComponent:file];
         bool ifSuccess = [self.fileManager removeItemAtPath:filePath error:nil];
-        [self appendInfo:[NSString stringWithFormat:@"delete file %@: %@", (ifSuccess ? @"Y" : @"N"), file]];
+        [self showInfoInUI:[NSString stringWithFormat:@"delete file %@: %@", (ifSuccess ? @"Y" : @"N"), file]];
     }
 }
 
 
 
-/*
- * watch connectivity
- */
+//
+//  watch connectivity
+//
 - (void)sendData:(NSDictionary *)dict {
     [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
@@ -172,9 +177,9 @@ NSMutableArray<CBPeripheral*> *devices;
     NSString *filePath = [[file fileURL] path];
     NSString *fileName = [filePath lastPathComponent];
     bool ifSuccess = [self.fileManager copyItemAtPath:filePath toPath:[self.documentPath stringByAppendingPathComponent:fileName] error:&error];
-    [self appendInfo:[NSString stringWithFormat:@"recv file %@: %@", ifSuccess ? @"Y" : @"N", fileName]];
+    [self showInfoInUI:[NSString stringWithFormat:@"recv file %@: %@", ifSuccess ? @"Y" : @"N", fileName]];
     if (!ifSuccess) {
-        [self appendInfo:[NSString stringWithFormat:@"error %@", error]];
+        [self showInfoInUI:[NSString stringWithFormat:@"error %@", error]];
     }
 }
 
@@ -187,9 +192,9 @@ NSMutableArray<CBPeripheral*> *devices;
 
 
 
-/*
- * bluetooth
- */
+//
+//  core bluetooth
+//
 NSString *const SERVICE_UUID = @"FEF0";
 NSString *const CHARACTERISTIC_UUID_NOTIFY = @"FEF1";
 NSString *const CHARACTERISTIC_UUID_READ_WRITE = @"FEF2";
@@ -198,11 +203,11 @@ CBMutableCharacteristic *sendCharacteristic;
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
         case CBManagerStatePoweredOn:
-            [self appendInfo:@"bluetooth peripheral on"];
+            [self showInfoInUI:@"bluetooth peripheral on"];
             [self createServices];
             break;
         case CBManagerStatePoweredOff:
-            [self appendInfo:@"bluetooth peripheral off"];
+            [self showInfoInUI:@"bluetooth peripheral off"];
             break;
         default:
             break;
@@ -227,13 +232,13 @@ CBMutableCharacteristic *sendCharacteristic;
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic {
-    [self appendInfo:@"second watch connected"];
+    [self showInfoInUI:@"second watch connected"];
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
     CBATTRequest *request = requests[0];
     NSString *message = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
-    [self appendInfo:[NSString stringWithFormat:@"cbrecv: %@", message]];
+    [self showInfoInUI:[NSString stringWithFormat:@"cbrecv: %@", message]];
 }
 
 - (void)broadcastMessage:(NSString *)message {

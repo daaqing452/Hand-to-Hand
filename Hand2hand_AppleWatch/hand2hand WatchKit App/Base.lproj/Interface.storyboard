@@ -15,14 +15,14 @@
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController">
                     <items>
                         <label width="136" height="19" alignment="left" text="Label 0" id="8jH-55-Kdk" userLabel="Label 0"/>
-                        <button width="1" alignment="left" title="Test" id="UKS-eV-HmI">
-                            <connections>
-                                <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="NlM-zp-YBN"/>
-                            </connections>
-                        </button>
                         <button width="1" alignment="left" title="Log: Off" id="Ekh-rI-yBQ">
                             <connections>
                                 <action selector="doClickButtonLog:" destination="AgC-eL-Hgc" id="Tjb-Rf-E3U"/>
+                            </connections>
+                        </button>
+                        <button width="1" alignment="left" title="Bluetooth: Off" id="1pY-Aj-sIw" userLabel="Button Bluetooth">
+                            <connections>
+                                <action selector="doClickButtonBluetooth:" destination="AgC-eL-Hgc" id="pIr-Ay-fV7"/>
                             </connections>
                         </button>
                         <button width="1" alignment="left" title="Show Files" id="14h-lw-cMk" userLabel="Button Show Files">
@@ -41,9 +41,9 @@
                                 <action selector="doClickButtonDeleteFiles:" destination="AgC-eL-Hgc" id="gVz-YX-f7K"/>
                             </connections>
                         </button>
-                        <button width="1" alignment="left" title="Bluetooth: Off" id="1pY-Aj-sIw" userLabel="Button Bluetooth">
+                        <button width="1" alignment="left" title="Test" id="UKS-eV-HmI">
                             <connections>
-                                <action selector="doClickButtonBluetooth:" destination="AgC-eL-Hgc" id="pIr-Ay-fV7"/>
+                                <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="NlM-zp-YBN"/>
                             </connections>
                         </button>
                     </items>

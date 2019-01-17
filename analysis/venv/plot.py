@@ -3,8 +3,8 @@ import numpy as np
 import sys
 from utils import *
 
-filename_l = "../log-2019-01-15-14-22-51-WatchL.txt"
-filename_r = "../log-2019-01-15-14-22-51-WatchR.txt"
+filename_l = "../log-20190117-101340-WatchL.txt"
+filename_r = "../log-20190117-101340-WatchR.txt"
 acc0r, gyr0r, gra0r = read_file(filename_l)
 acc1r, gyr1r, gra1r = read_file(filename_r)
 print(acc0r.shape, acc1r.shape)
@@ -23,14 +23,14 @@ t1.sort()
 print(t0.mean(), t0.std(), t0[-5:])
 print(t1.mean(), t1.std(), t1[-5:])
 
-zl = 0
-zr = 1498
-acc0r = acc0r[zl:zr]
-gyr0r = gyr0r[zl:zr]
-gra0r = gra0r[zl:zr]
-acc1r = acc1r[zl:zr]
-gyr1r = gyr1r[zl:zr]
-gra1r = gra1r[zl:zr]
+#zl = 0
+#zr = 1498
+acc0r = acc0r[:]
+gyr0r = gyr0r[:]
+gra0r = gra0r[:]
+acc1r = acc1r[:]
+gyr1r = gyr1r[:]
+gra1r = gra1r[:]
 
 acc0 = resample(acc0r, 20)
 acc1 = resample(acc1r, 20)

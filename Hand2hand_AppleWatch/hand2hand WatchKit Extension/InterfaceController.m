@@ -2,8 +2,8 @@
 //  InterfaceController.m
 //  hand2hand WatchKit Extension
 //
-//  Created by 鲁逸沁 on 2018/12/26.
-//  Copyright © 2018年 鲁逸沁. All rights reserved.
+//  Created by Yiqin Lu on 2018/12/26.
+//  Copyright © 2018 Yiqin Lu. All rights reserved.
 //
 
 #import "InterfaceController.h"
@@ -12,7 +12,6 @@
 #import <Foundation/Foundation.h>
 #import <HealthKit/HealthKit.h>
 #import <WatchConnectivity/WatchConnectivity.h>
-
 
 @interface InterfaceController () <CBCentralManagerDelegate, CBPeripheralDelegate, HKWorkoutSessionDelegate>
 
@@ -26,33 +25,37 @@
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
 
+@property (strong, nonatomic) HKWorkoutConfiguration *workoutConfiguration;
+@property (strong, nonatomic) HKHealthStore *healthScore;
+@property (strong, nonatomic) HKWorkoutSession *workoutSession;
+
 @end
 
 
 @implementation InterfaceController
 
-// general
+//  general
 WKInterfaceDevice *device;
 NSFileManager *fileManager;
 NSString *documentPath;
 NSString *sharedPath;
 
-// sensor
+//  sensor
 NSString * const SENSOR_DATA_RETRIVAL = @"push";
 bool const SENSOR_SHOW_DETAIL = false;
 //CMMotionManager *motionManager;
 
-// communication
+//  communication
 WCSession *wcsession;
 NSString *communication = @"null";
 
-// log
+//  log
 int const LOG_BUFFER_MAX_SIZE = 16384;
 bool logging = false;
 NSString *buffer = @"";
 NSString *logFileName;
 
-// bluetooth
+//  bluetooth
 CBCentralManager *centralManager;
 NSMutableArray<CBPeripheral*> *peripheralDevices;
 CBPeripheral *subscribedPeripheral;
@@ -61,21 +64,21 @@ CBCharacteristic *subscribedCharacteristic;
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
-    
-    HKWorkoutConfiguration *workoutConfiguration = [[HKWorkoutConfiguration alloc] init];
-    workoutConfiguration.activityType = HKWorkoutActivityTypeRunning;
-    workoutConfiguration.locationType = HKWorkoutSessionLocationTypeOutdoor;
-    
-    HKHealthStore *healthScore = [[HKHealthStore alloc] init];
-    
-    HKWorkoutSession *workoutSession = [[HKWorkoutSession alloc] initWithHealthStore:healthScore configuration:workoutConfiguration error:nil];
-    
-    [workoutSession startActivityWithDate:[NSDate date]];
 }
 
 - (void)willActivate {
     // This method is called when watch view controller is about to be visible to user
     [super willActivate];
+    
+    self.workoutConfiguration = [[HKWorkoutConfiguration alloc] init];
+    self.workoutConfiguration.activityType = HKWorkoutActivityTypeRunning;
+    self.workoutConfiguration.locationType = HKWorkoutSessionLocationTypeOutdoor;
+    
+    self.healthScore = [[HKHealthStore alloc] init];
+    
+    self.workoutSession = [[HKWorkoutSession alloc] initWithHealthStore:self.healthScore configuration:self.workoutConfiguration error:nil];
+    
+    [self.workoutSession startActivityWithDate:[NSDate date]];
     
     device = [WKInterfaceDevice currentDevice];
     fileManager = [NSFileManager defaultManager];
@@ -141,9 +144,9 @@ CBCharacteristic *subscribedCharacteristic;
 
 
 
-/*
- * UI
- */
+//
+//  UI
+//
 - (IBAction)doClickButtonTest:(id)sender {
     [self.label0 setText:@"test"];
     [self send:@"test"];
@@ -177,9 +180,9 @@ CBCharacteristic *subscribedCharacteristic;
 
 
 
-/*
- * sensor
- */
+//
+//  sensor
+//
 - (void)pushAccelerometer {
     if (!self.motionManager.isAccelerometerAvailable) return;
     self.motionManager.accelerometerUpdateInterval = 1/100.0;
@@ -221,9 +224,9 @@ CBCharacteristic *subscribedCharacteristic;
 
 
 
-/*
- * log
- */
+//
+//  log
+//
 - (void)changeLogStatus:(bool)status {
     if (status == false) {
         [self writeFile:logFileName content:buffer];
@@ -232,7 +235,7 @@ CBCharacteristic *subscribedCharacteristic;
         logging = false;
     } else {
         [self.buttonLog setTitle:@"Log: On"];
-        logFileName = [NSString stringWithFormat:@"log-%@-%@.txt", [self getTimeString:@"YYYY-MM-dd-HH-mm-ss"], [device.name stringByReplacingOccurrencesOfString:@" " withString:@""]];
+        logFileName = [NSString stringWithFormat:@"log-%@-%@.txt", [self getTimeString:@"YYYYMMdd-HHmmss"], [device.name stringByReplacingOccurrencesOfString:@" " withString:@""]];
         logging = true;
     }
 }
@@ -258,9 +261,9 @@ CBCharacteristic *subscribedCharacteristic;
 
 
 
-/*
- * file
- */
+//
+//  file
+//
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
     NSString *filePath = [documentPath stringByAppendingPathComponent:fileName];
     NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
@@ -271,6 +274,15 @@ CBCharacteristic *subscribedCharacteristic;
         [fileHandle truncateFileAtOffset:[fileHandle seekToEndOfFile]];
         [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
         [fileHandle closeFile];
+        long long size = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
+        
+        if ([communication isEqualToString:@"watch connectivity"]) {
+            NSLog(@"do write: %lld", size);
+            [self.label0 setText:@"wc"];
+        } else if ([communication isEqualToString:@"core bluetooth"]) {
+            [self sendMessageToPeripheral:[NSString stringWithFormat:@"do write: %lld", size]];
+            [self.label0 setText:@"blue"];
+        }
     }
 }
 
@@ -298,9 +310,9 @@ CBCharacteristic *subscribedCharacteristic;
 
 
 
-/*
- * watch connectivity
- */
+//
+//  watch connectivity
+//
 - (void)sendData:(NSDictionary *)dict {
     [wcsession sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
@@ -333,19 +345,17 @@ CBCharacteristic *subscribedCharacteristic;
 
 
 
-/*
- * bluetooth
- */
+//
+//  bluetooth
+//
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central {
     switch (central.state) {
         case CBManagerStatePoweredOn:
             NSLog(@"bluetooth power on");
-            //[self appendInfo:@"bluetooth power on"];
             [self startScan];
             break;
         case CBManagerStatePoweredOff:
             NSLog(@"bluetooth power off");
-            //[self appendInfo:@"bluetooth power off"];
             break;
         default:
             break;
@@ -354,21 +364,18 @@ CBCharacteristic *subscribedCharacteristic;
 
 - (void)startScan {
     NSLog(@"start scan...");
-    //[self appendInfo:@"start scan..."];
     [centralManager scanForPeripheralsWithServices:nil options:nil];
     [self performSelector:@selector(stopScan) withObject:nil afterDelay:5];
 }
 
 - (void)stopScan {
     NSLog(@"stop scan...");
-    //[self appendInfo:@"stop scan..."];
     [centralManager stopScan];
 }
 
 - (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
     if ([peripheral.name isEqualToString:@"iPhone LU"]) {
         NSLog(@"find device: %@", peripheral.name);
-        //[self appendInfo:[NSString stringWithFormat:@"find device: %@", peripheral.name]];
         [peripheralDevices addObject:peripheral];
         [centralManager connectPeripheral:peripheral options:nil];
     }
@@ -377,7 +384,6 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral {
     NSLog(@"connect device: %@", peripheral.name);
     [self.buttonBluetooth setTitle:@"Bluetooth: On(C)"];
-    //[self appendInfo:[NSString stringWithFormat:@"connect device: %@", peripheral.name]];
     peripheral.delegate = self;
     [peripheral discoverServices:nil];
     communication = @"core bluetooth";
@@ -385,12 +391,10 @@ CBCharacteristic *subscribedCharacteristic;
 
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
     NSLog(@"connect device fail: %@ - %@", peripheral.name, error);
-    //[self appendInfo:[NSString stringWithFormat:@"connect device fail: %@ - %@", peripheral.name, error]];
 }
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
     NSLog(@"disconnect device: %@ - %@", peripheral.name, error);
-    //[self appendInfo:[NSString stringWithFormat:@"disconnect device: %@ - %@", peripheral.name, error]];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error {
