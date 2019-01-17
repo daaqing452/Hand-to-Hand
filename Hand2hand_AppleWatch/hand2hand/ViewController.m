@@ -83,13 +83,13 @@ NSMutableArray<CBPeripheral*> *devices;
 - (IBAction)doClickButtonLogOn:(id)sender {
     [self sendMessage:@"log on"];
     [self broadcastMessage:@"log on"];
-    [self showInfoInUI:@"log on"];
+    UILog(@"log on");
 }
 
 - (IBAction)doClickButtonLogOff:(id)sender {
     [self sendMessage:@"log off"];
     [self broadcastMessage:@"log off"];
-    [self showInfoInUI:@"log off"];
+    UILog(@"log off");
 }
 
 - (IBAction)doClickButtonShowFiles:(id)sender {
@@ -126,16 +126,15 @@ NSMutableArray<CBPeripheral*> *devices;
     NSString *filePath = [self.documentPath stringByAppendingPathComponent:fileName];
     bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
     UILog(@"write file %@: %@", ifsuccess ? @"Y" : @"N", fileName);
-    //[self showInfoInUI:[NSString stringWithFormat:@"write file %@: %@", ifsuccess ? @"Y" : @"N", fileName]];
 }
 
 - (void)showFiles:(NSString *)path {
-    [self showInfoInUI:[NSString stringWithFormat:@"show files: %@", path]];
+    UILog(@"show files: %@", path);
     NSDirectoryEnumerator *myDirectoryEnumerator = [self.fileManager enumeratorAtPath:path];
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
         if ([[file pathExtension] isEqualToString:@"txt"]) {
-            [self showInfoInUI:[NSString stringWithFormat:@"file %@", file]];
+            UILog(@"file %@", file);
         }
     }
 }
@@ -146,7 +145,7 @@ NSMutableArray<CBPeripheral*> *devices;
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSString *filePath = [self.documentPath stringByAppendingPathComponent:file];
         bool ifSuccess = [self.fileManager removeItemAtPath:filePath error:nil];
-        [self showInfoInUI:[NSString stringWithFormat:@"delete file %@: %@", (ifSuccess ? @"Y" : @"N"), file]];
+        UILog(@"delete file %@: %@", ifSuccess ? @"Y" : @"N", file);
     }
 }
 
@@ -177,9 +176,9 @@ NSMutableArray<CBPeripheral*> *devices;
     NSString *filePath = [[file fileURL] path];
     NSString *fileName = [filePath lastPathComponent];
     bool ifSuccess = [self.fileManager copyItemAtPath:filePath toPath:[self.documentPath stringByAppendingPathComponent:fileName] error:&error];
-    [self showInfoInUI:[NSString stringWithFormat:@"recv file %@: %@", ifSuccess ? @"Y" : @"N", fileName]];
+    UILog(@"recv file %@: %@", ifSuccess ? @"Y" : @"N", fileName);
     if (!ifSuccess) {
-        [self showInfoInUI:[NSString stringWithFormat:@"error %@", error]];
+        UILog(@"error %@", error);
     }
 }
 
@@ -203,11 +202,11 @@ CBMutableCharacteristic *sendCharacteristic;
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
         case CBManagerStatePoweredOn:
-            [self showInfoInUI:@"bluetooth peripheral on"];
+            UILog(@"bluetooth peripheral on");
             [self createServices];
             break;
         case CBManagerStatePoweredOff:
-            [self showInfoInUI:@"bluetooth peripheral off"];
+            UILog(@"bluetooth peripheral off");
             break;
         default:
             break;
@@ -232,13 +231,13 @@ CBMutableCharacteristic *sendCharacteristic;
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic {
-    [self showInfoInUI:@"second watch connected"];
+    UILog(@"second watch connected");
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
     CBATTRequest *request = requests[0];
     NSString *message = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
-    [self showInfoInUI:[NSString stringWithFormat:@"cbrecv: %@", message]];
+    UILog(@"cbrecv: %@", message);
 }
 
 - (void)broadcastMessage:(NSString *)message {
