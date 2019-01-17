@@ -13,14 +13,14 @@
 #import <HealthKit/HealthKit.h>
 #import <WatchConnectivity/WatchConnectivity.h>
 
-@interface InterfaceController () <CBCentralManagerDelegate, CBPeripheralDelegate, HKWorkoutSessionDelegate>
+@interface InterfaceController () <WCSessionDelegate, CBCentralManagerDelegate, CBPeripheralDelegate, HKWorkoutSessionDelegate>
 
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonLog;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonShowFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonDeleteFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonSendFiles;
-@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonBluetooth;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonCommunication;
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
@@ -85,12 +85,7 @@ CBCharacteristic *subscribedCharacteristic;
     documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
     
-    if ([WCSession isSupported]) {
-        wcsession = [WCSession defaultSession];
-        wcsession.delegate = self;
-        [wcsession activateSession];
-        communication = @"watch connectivity";
-    }
+    [self startCommunication];
     
     self.motionManager = [[CMMotionManager alloc] init];
     if ([SENSOR_DATA_RETRIVAL isEqualToString:@"push"]) {
@@ -113,6 +108,15 @@ CBCharacteristic *subscribedCharacteristic;
     NSLog(@"bye");
 }
 
+- (void)workoutSession:(nonnull HKWorkoutSession *)workoutSession didChangeToState:(HKWorkoutSessionState)toState fromState:(HKWorkoutSessionState)fromState date:(nonnull NSDate *)date {
+}
+
+- (void)workoutSession:(nonnull HKWorkoutSession *)workoutSession didFailWithError:(nonnull NSError *)error {
+}
+
+- (void)workoutSession:(HKWorkoutSession *)workoutSession didGenerateEvent:(HKWorkoutEvent *)event {
+}
+
 - (void)parseCommand:(NSString *)command {
     if ([command isEqualToString:@"log on"]) {
         [self changeLogStatus:true];
@@ -123,23 +127,46 @@ CBCharacteristic *subscribedCharacteristic;
     }
 }
 
-- (void)send:(NSString *)message {
+- (void)sendMessage:(NSString *)message {
     if ([communication isEqualToString:@"watch connectivity"]) {
-        [self sendMessage:message];
+        [self sendMessageByWatchConnectivity:message];
     } else if ([communication isEqualToString:@"core bluetooth"]) {
-        [self sendMessageToPeripheral:message];
+        [self sendMessageByCoreBluetooth:message];
+    } else {
+        [self.label0 setText:@"error send"];
     }
 }
 
-- (void)workoutSession:(nonnull HKWorkoutSession *)workoutSession didChangeToState:(HKWorkoutSessionState)toState fromState:(HKWorkoutSessionState)fromState date:(nonnull NSDate *)date {
+- (void)changeCommunication:(NSString *)newCommunication {
+    communication = newCommunication;
+    if ([communication isEqualToString:@"watch connectivity"]) {
+        [self.buttonCommunication setTitle:@"Comm: watch con..."];
+    } else if ([communication isEqualToString:@"core bluetooth"]) {
+        [self.buttonCommunication setTitle:@"Comm: core blue..."];
+    } else if ([communication isEqualToString:@"null"]) {
+        [self.buttonCommunication setTitle:@"Comm: null"];
+    } else {
+        [self.buttonCommunication setTitle:@"Comm: error"];
+    }
 }
 
-- (void)workoutSession:(nonnull HKWorkoutSession *)workoutSession didFailWithError:(nonnull NSError *)error {
-    NSLog(@"workout error");
+- (void)startCommunication {
+    if ([communication isEqualToString:@"core bluetooth"]) {
+        [self connectByCoreBluetooth];
+    } else {
+        if ([WCSession isSupported]) {
+            wcsession = [WCSession defaultSession];
+            wcsession.delegate = self;
+            [wcsession activateSession];
+            [self changeCommunication:@"watch connectivity"];
+            [self sendMessage:@"test watch connectivity"];
+        }
+    }
 }
 
-- (void)workoutSession:(HKWorkoutSession *)workoutSession didGenerateEvent:(HKWorkoutEvent *)event {
-    
+- (void)connectByCoreBluetooth {
+    centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+    peripheralDevices = [NSMutableArray array];
 }
 
 
@@ -149,7 +176,7 @@ CBCharacteristic *subscribedCharacteristic;
 //
 - (IBAction)doClickButtonTest:(id)sender {
     [self.label0 setText:@"test"];
-    [self send:@"test"];
+    [self sendMessage:@"test"];
 }
 
 - (IBAction)doClickButtonLog:(id)sender {
@@ -172,10 +199,9 @@ CBCharacteristic *subscribedCharacteristic;
     }
 }
 
-- (IBAction)doClickButtonBluetooth:(id)sender {
-    centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-    peripheralDevices = [NSMutableArray array];
-    [self.buttonBluetooth setTitle:@"Bluetooth: On"];
+- (IBAction)doClickButtonCommunication:(id)sender {
+    [self changeCommunication:@"null"];
+    //[self startCommunication];
 }
 
 
@@ -275,14 +301,7 @@ CBCharacteristic *subscribedCharacteristic;
         [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
         [fileHandle closeFile];
         long long size = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
-        
-        if ([communication isEqualToString:@"watch connectivity"]) {
-            NSLog(@"do write: %lld", size);
-            [self.label0 setText:@"wc"];
-        } else if ([communication isEqualToString:@"core bluetooth"]) {
-            [self sendMessageToPeripheral:[NSString stringWithFormat:@"do write: %lld", size]];
-            [self.label0 setText:@"blue"];
-        }
+        [self sendMessage:[NSString stringWithFormat:@"do write %lld", size]];
     }
 }
 
@@ -313,16 +332,19 @@ CBCharacteristic *subscribedCharacteristic;
 //
 //  watch connectivity
 //
-- (void)sendData:(NSDictionary *)dict {
+- (void)sendDataByWatchConnectivity:(NSDictionary *)dict {
     [wcsession sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
-        // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
-        // do nothing
+        // cannot connect to paired counterpart, use core bluetooth
+        if ([dict[@"message"] isEqualToString:@"test watch connectivity"] && error.code == 7007) {
+            [self changeCommunication:@"null"];
+            [self connectByCoreBluetooth];
+        }
     }];
 }
 
-- (void)sendMessage:(NSString *)message {
-    [self sendData:@{@"message": message}];
+- (void)sendMessageByWatchConnectivity:(NSString *)message {
+    [self sendDataByWatchConnectivity:@{@"message": message}];
 }
 
 - (void)sendFile:(NSString *)filePath {
@@ -335,27 +357,30 @@ CBCharacteristic *subscribedCharacteristic;
     [self parseCommand:dict[@"message"]];
 }
 
-- (void)alert:(NSString *)message {
+- (void)session:(nonnull WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(nullable NSError *)error {
+}
+
+/*- (void)alert:(NSString *)message {
     WKAlertAction *actionDone = [WKAlertAction actionWithTitle:@"完成" style:WKAlertActionStyleDefault handler:^{
     }];
     WKAlertAction *actionDestruction = [WKAlertAction actionWithTitle:@"毁灭" style:WKAlertActionStyleDestructive handler:^{
     }];
     [self presentAlertControllerWithTitle:@"消息" message:message preferredStyle:WKAlertControllerStyleActionSheet actions:@[actionDone, actionDestruction]];
-}
+}*/
 
 
 
 //
-//  bluetooth
+//  core bluetooth
 //
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central {
     switch (central.state) {
         case CBManagerStatePoweredOn:
-            NSLog(@"bluetooth power on");
+            NSLog(@"core bluetooth power on");
             [self startScan];
             break;
         case CBManagerStatePoweredOff:
-            NSLog(@"bluetooth power off");
+            NSLog(@"core bluetooth power off");
             break;
         default:
             break;
@@ -382,11 +407,10 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral {
-    NSLog(@"connect device: %@", peripheral.name);
-    [self.buttonBluetooth setTitle:@"Bluetooth: On(C)"];
     peripheral.delegate = self;
     [peripheral discoverServices:nil];
-    communication = @"core bluetooth";
+    NSLog(@"connect device: %@", peripheral.name);
+    [self changeCommunication:@"core bluetooth"];
 }
 
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
@@ -395,6 +419,7 @@ CBCharacteristic *subscribedCharacteristic;
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
     NSLog(@"disconnect device: %@ - %@", peripheral.name, error);
+    [self changeCommunication:@"null"];
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error {
@@ -430,7 +455,7 @@ CBCharacteristic *subscribedCharacteristic;
     [self parseCommand:command];
 }
 
-- (void)sendMessageToPeripheral:(NSString *)message {
+- (void)sendMessageByCoreBluetooth:(NSString *)message {
     [subscribedPeripheral writeValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:subscribedCharacteristic type:CBCharacteristicWriteWithoutResponse];
 }
 

@@ -75,20 +75,20 @@ NSMutableArray<CBPeripheral*> *devices;
 //  UI
 //
 - (IBAction)doClickButtonTest:(id)sender {
-    [self sendMessage:@"test"];
-    [self broadcastMessage:@"test"];
+    [self sendMessageByWatchConnectivity:@"test"];
+    [self sendMessageByCoreBluetooth:@"test"];
     UILog(@"test");
 }
 
 - (IBAction)doClickButtonLogOn:(id)sender {
-    [self sendMessage:@"log on"];
-    [self broadcastMessage:@"log on"];
+    [self sendMessageByWatchConnectivity:@"log on"];
+    [self sendMessageByCoreBluetooth:@"log on"];
     UILog(@"log on");
 }
 
 - (IBAction)doClickButtonLogOff:(id)sender {
-    [self sendMessage:@"log off"];
-    [self broadcastMessage:@"log off"];
+    [self sendMessageByWatchConnectivity:@"log off"];
+    [self sendMessageByCoreBluetooth:@"log off"];
     UILog(@"log off");
 }
 
@@ -154,7 +154,7 @@ NSMutableArray<CBPeripheral*> *devices;
 //
 //  watch connectivity
 //
-- (void)sendData:(NSDictionary *)dict {
+- (void)sendDataByWatchConnectivity:(NSDictionary *)dict {
     [self.session sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
@@ -162,13 +162,19 @@ NSMutableArray<CBPeripheral*> *devices;
     }];
 }
 
-- (void)sendMessage:(NSString *)message {
-    [self sendData:@{@"message": message}];
+- (void)sendMessageByWatchConnectivity:(NSString *)message {
+    [self sendDataByWatchConnectivity:@{@"message": message}];
 }
 
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
-    NSString *op = dict[@"message"];
-    [self alert:op];
+    NSString *command = dict[@"message"];
+    if ([command isEqualToString:@"test"]) {
+        [self alert:command];
+    } else if ([command isEqualToString:@"test watch connectivity"]) {
+        // ignore
+    } else {
+        UILog(@"recv from WC: %@", command);
+    }
 }
 
 - (void)session:(nonnull WCSession *)session didReceiveFile:(nonnull WCSessionFile *)file {
@@ -202,11 +208,11 @@ CBMutableCharacteristic *sendCharacteristic;
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
         case CBManagerStatePoweredOn:
-            UILog(@"bluetooth peripheral on");
+            UILog(@"core bluetooth power on");
             [self createServices];
             break;
         case CBManagerStatePoweredOff:
-            UILog(@"bluetooth peripheral off");
+            UILog(@"core bluetooth power off");
             break;
         default:
             break;
@@ -231,17 +237,18 @@ CBMutableCharacteristic *sendCharacteristic;
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic {
-    UILog(@"second watch connected");
+    UILog(@"core bluetooth connected");
 }
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
     CBATTRequest *request = requests[0];
     NSString *message = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
-    UILog(@"cbrecv: %@", message);
+    UILog(@"recv from CB: %@", message);
 }
 
-- (void)broadcastMessage:(NSString *)message {
+- (void)sendMessageByCoreBluetooth:(NSString *)message {
     [self.peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:sendCharacteristic onSubscribedCentrals:nil];
 }
+
 
 @end

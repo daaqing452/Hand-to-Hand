@@ -20,9 +20,9 @@
                                 <action selector="doClickButtonLog:" destination="AgC-eL-Hgc" id="Tjb-Rf-E3U"/>
                             </connections>
                         </button>
-                        <button width="1" alignment="left" title="Bluetooth: Off" id="1pY-Aj-sIw" userLabel="Button Bluetooth">
+                        <button width="1" alignment="left" title="Comm: Null" id="1pY-Aj-sIw" userLabel="Button Communication">
                             <connections>
-                                <action selector="doClickButtonBluetooth:" destination="AgC-eL-Hgc" id="pIr-Ay-fV7"/>
+                                <action selector="doClickButtonCommunication:" destination="AgC-eL-Hgc" id="adc-sX-tVZ"/>
                             </connections>
                         </button>
                         <button width="1" alignment="left" title="Show Files" id="14h-lw-cMk" userLabel="Button Show Files">
@@ -48,7 +48,7 @@
                         </button>
                     </items>
                     <connections>
-                        <outlet property="buttonBluetooth" destination="1pY-Aj-sIw" id="NXh-93-mZa"/>
+                        <outlet property="buttonCommunication" destination="1pY-Aj-sIw" id="3pC-us-plV"/>
                         <outlet property="buttonDeleteFiles" destination="goU-qR-KaR" id="brb-be-OCN"/>
                         <outlet property="buttonLog" destination="Ekh-rI-yBQ" id="fhv-te-T70"/>
                         <outlet property="buttonSendFiles" destination="yLo-gh-7ep" id="iys-TD-VYh"/>
