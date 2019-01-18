@@ -54,6 +54,7 @@ bool watchConnectivityTestFlag;
 
 //  log
 int const LOG_BUFFER_MAX_SIZE = 16384;
+bool const LOG_SHOW_FILE_SIZE = true;
 bool logging = false;
 NSString *buffer = @"";
 NSString *logFileName;
@@ -145,8 +146,10 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)connectByCoreBluetooth {
-    centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-    peripheralDevices = [NSMutableArray array];
+    if (centralManager == nil) {
+        centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+        peripheralDevices = [NSMutableArray array];
+    }
 }
 
 - (void)timeredWatchConnectivity:(NSTimer *)timer {
@@ -161,6 +164,9 @@ CBCharacteristic *subscribedCharacteristic;
     if ([communication isEqualToString:@"core bluetooth"]) {
         [self connectByCoreBluetooth];
     } else {
+        wcsession = [WCSession defaultSession];
+        wcsession.delegate = self;
+        [wcsession activateSession];
         watchConnectivityTestFlag = false;
         [self sendMessageByWatchConnectivity:@"test watch connectivity"];
         [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timeredWatchConnectivity:) userInfo:nil repeats:NO];
@@ -298,8 +304,10 @@ CBCharacteristic *subscribedCharacteristic;
         [fileHandle truncateFileAtOffset:[fileHandle seekToEndOfFile]];
         [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
         [fileHandle closeFile];
-        long long size = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
-        [self sendMessage:[NSString stringWithFormat:@"do write %lld", size]];
+        if (LOG_SHOW_FILE_SIZE) {
+            long long size = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
+            [self sendMessage:[NSString stringWithFormat:@"do write %lld", size]];
+        }
     }
 }
 
@@ -336,10 +344,12 @@ CBCharacteristic *subscribedCharacteristic;
     [wcsession sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // ignore
     } errorHandler:^(NSError * _Nonnull error) {
-        LBLog(@"error code %d", error.code);
         if ([dict[@"message"] isEqualToString:@"test watch connectivity"]) {
             // cannot connect to paired counterpart, use core bluetooth
-            // error.code == 7007
+            // error.code
+            //      7007 WatchConnectivity session on paired device is not reachable.
+            //      7012 Message reply took too long.
+            //      7017 Transfer timed out.
         }
     }];
 }
@@ -349,12 +359,11 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)sendFile:(NSString *)filePath {
-    if ([communication isEqualToString:@"watch connectivity"]) {
+    if (true) {
+    //if ([communication isEqualToString:@"watch connectivity"]) {
         NSLog(@"send file: %@", filePath);
         NSURL *fileUrl = [NSURL fileURLWithPath:filePath];
         [wcsession transferFile:fileUrl metadata:nil];
-    } else {
-        LBLog(@"cannot send file");
     }
 }
 
@@ -365,6 +374,9 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)session:(nonnull WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(nullable NSError *)error {
 }
 
+- (void)session:(WCSession *)session didReceiveApplicationContext:(NSDictionary<NSString *,id> *)applicationContext {
+    LBLog(@"did %@", applicationContext[@"message"]);
+}
 
 /*- (void)alert:(NSString *)message {
     WKAlertAction *actionDone = [WKAlertAction actionWithTitle:@"完成" style:WKAlertActionStyleDefault handler:^{
@@ -424,6 +436,7 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error {
+    [peripheralDevices removeObject:peripheral];
     NSLog(@"disconnect device: %@ - %@", peripheral.name, error);
     [self changeCommunication:@"null"];
 }

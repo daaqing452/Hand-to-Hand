@@ -48,6 +48,7 @@ NSString *sharedPath;
     }
     
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
+    UILog(@"init finished");
 }
 
 
@@ -58,7 +59,6 @@ NSString *sharedPath;
 - (IBAction)doClickButtonTest:(id)sender {
     [self sendMessageByWatchConnectivity:@"test"];
     [self sendMessageByCoreBluetooth:@"test"];
-    UILog(@"test");
 }
 
 - (IBAction)doClickButtonLogOn:(id)sender {
@@ -139,7 +139,7 @@ NSString *sharedPath;
     [wcsession sendMessage:dict replyHandler:^(NSDictionary<NSString *,id> * _Nonnull replyMessage) {
         // no reply?
     } errorHandler:^(NSError * _Nonnull error) {
-        // do nothing
+        UILog(@"send error %ld: %@", error.code, error);
     }];
 }
 

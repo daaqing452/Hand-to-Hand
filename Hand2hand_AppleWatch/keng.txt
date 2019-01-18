@@ -1,16 +1,28 @@
 踩过的坑
 
-1. iPhone只能和一个Apple Watch连接
-2. 调试的时候，从一个Apple Watch切换到另一个Apple Watch，下一次run就会失败。正确的方法是：
+# iPhone只能和一个Apple Watch连接
+# 调试的时候，从一个Apple Watch切换到另一个Apple Watch，下一次run就会失败。正确的方法是：
 	* stop task (可能不必要)
 	* clean project (可能不必要)
 	* 关掉iPhone的蓝牙
 	* 在iPhone的Watch App中切换Apple Watch
 	* 打开iPhone的蓝牙
-3. 如果还是run失败，重启大法好。可能的优先级：iPhone > Xcode > Apple Watch > Mac
-4. 使用原生蓝牙接口，Apple Watch只能当center不能当peripheral，只能iPhone当peripheral
-5. WCSession.isReachable基本没什么用，一开始连上以后，断掉蓝牙也是true
-6. 不是什么东西随便写，然后workout一下都会在后台跑
-7. 有一些变量要用@property的方式使用，有一些不用
-8. 在使用原生蓝牙接口的地方，不能使用WCSession那几句话，不然后台不跑了
-9. 
+# 如果还是run失败，重启大法好。可能的优先级：iPhone > Xcode > Apple Watch > Mac
+# 两个Apple Watch调试还是不方便，不直接连接的Apple Watch的调试信息只能显示在界面上
+
+# WCSession只能用在同一次run的Watch App和iPhone App之间，不同次run的iPhone不能给Apple Watch发消息(Watch app is not installed)
+# WCSession.isReachable基本没什么用，一开始连上以后，断掉蓝牙也是true；所以目前使用方法是两次握手+定时器
+# WCSession在断开后可能还能sendMessage并没有错误反馈
+# WCSession传文件会有一定延时
+
+# 使用原生蓝牙接口，Apple Watch只能当center不能当peripheral，只能iPhone当peripheral
+# 在使用原生蓝牙接口的地方，不能每次唤醒都使用WCSession那几句话，不然后台不跑了
+
+# 不是什么东西随便写，然后workout一下都会在后台跑，还跟代码顺序有关系
+# 有一些变量要用@property的方式才能再后台使用，有一些不用
+
+# 利用group共享沙盒貌似需要苹果开发者账号
+
+# 添加控件和代码的mapping
+	* 按住ctrl键 把控件拖到代码里->添加控件变量
+	* 把控件拖到storyboard层级上->添加事件
