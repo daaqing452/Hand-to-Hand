@@ -29,6 +29,29 @@ def read_file(filename):
 	print('t_first:', t_first)
 	return np.array(acc), np.array(gyr), np.array(gra)
 
+def read_file2(filename):
+	t = t0 = -1
+	acc = []
+	att = []
+	rot = []
+	f = open(filename, 'r')
+	line = -1
+	while True:
+		line += 1
+		s = f.readline()
+		if len(s) <= 0:
+			break
+		arr = s[:-1].split(' ')
+		op = arr[0]
+		if op == 'time':
+			if t == -1: t0 = float(arr[1])
+			t = float(arr[1]) - t0
+		if op == 'acc': acc.append([t, float(arr[1]), float(arr[2]), float(arr[3])])
+		if op == 'att': att.append([t, float(arr[1]), float(arr[2]), float(arr[3])])
+		if op == 'rot': rot.append([t, float(arr[1]), float(arr[2]), float(arr[3])])
+	f.close()
+	return np.array(acc), np.array(att), np.array(rot)
+
 def resample(a, stride=20):
 	lena = len(a)
 	t = a[0][0]

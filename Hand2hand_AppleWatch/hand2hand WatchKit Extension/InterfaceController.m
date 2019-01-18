@@ -95,7 +95,7 @@ CBCharacteristic *subscribedCharacteristic;
     
     self.motionManager = [[CMMotionManager alloc] init];
     if ([SENSOR_DATA_RETRIVAL isEqualToString:@"push"]) {
-        [self pushAccelerometer];
+        [self setSensorDataGetPush];
     } else if ([SENSOR_DATA_RETRIVAL isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
     }
@@ -123,12 +123,10 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)sendMessage:(NSString *)message {
-    if ([communication isEqualToString:@"watch connectivity"]) {
-        [self sendMessageByWatchConnectivity:message];
-    } else if ([communication isEqualToString:@"core bluetooth"]) {
+    if ([communication isEqualToString:@"core bluetooth"]) {
         [self sendMessageByCoreBluetooth:message];
     } else {
-        LBLog(@"error send");
+        [self sendMessageByWatchConnectivity:message];
     }
 }
 
@@ -149,6 +147,8 @@ CBCharacteristic *subscribedCharacteristic;
     if (centralManager == nil) {
         centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         peripheralDevices = [NSMutableArray array];
+    } else {
+        [self startScan];
     }
 }
 
@@ -213,29 +213,36 @@ CBCharacteristic *subscribedCharacteristic;
 //
 //  sensor
 //
-- (void)pushAccelerometer {
-    if (!self.motionManager.isAccelerometerAvailable) return;
-    self.motionManager.accelerometerUpdateInterval = 1/100.0;
+- (void)setSensorDataGetPush {
+    if (!self.motionManager.deviceMotionAvailable) return;
+    self.motionManager.deviceMotionUpdateInterval = 1/100.0;
     __block int freqCnt = 0;
     NSDate *startTime = [NSDate date];
-    [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData * _Nullable accelerometerData, NSError * _Nullable error) {
+    [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
         if (error) return;
-        CMAcceleration acceleration = accelerometerData.acceleration;
+        CMAcceleration acceleration = motion.userAcceleration;
+        CMAttitude *attitude = motion.attitude;
+        CMRotationRate rotationRate = motion.rotationRate;
+        //CMAcceleration gravity = motion.gravity;
+        //CMCalibratedMagneticField magneticField = motion.magneticField;
         if (SENSOR_SHOW_DETAIL) {
             freqCnt ++;
             float freq = freqCnt / (-[startTime timeIntervalSinceNow]);
-            NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
+            NSLog(@"acc %f %f %f", acceleration.x, acceleration.y, acceleration.z);
             NSLog(@"freqAcc: %f", freq);
         }
         if (logging) {
-            [self addLogBuffer:[NSString stringWithFormat:@"acc %f %f %f", acceleration.x, acceleration.y, acceleration.z]];
+            buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\natt %f %f %f\nrot %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, attitude.pitch, attitude.yaw, attitude.roll, rotationRate.x, rotationRate.y, rotationRate.z]];
+            if (arc4random() % 100 == 0) {
+                NSLog(@"buffer: %d", buffer.length);
+            }
             if (buffer.length > LOG_BUFFER_MAX_SIZE) {
                 [self writeFile:logFileName content:buffer];
                 buffer = @"";
             }
         }
     }];
-    NSLog(@"push accelerometer ready");
+    NSLog(@"push motion ready");
 }
 
 - (void)setSensorDataGetPull {
@@ -247,9 +254,11 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)getSensorData:(NSTimer *)timer {
-    CMAccelerometerData *data = self.motionManager.accelerometerData;
-    CMAcceleration acceleration = data.acceleration;
-    NSLog(@"%f, %f, %f", acceleration.x, acceleration.y, acceleration.z);
+    if (logging) {
+        CMAccelerometerData *accelerationData = self.motionManager.accelerometerData;
+        CMAcceleration acceleration = accelerationData.acceleration;
+        NSLog(@"acc %f %f %f", acceleration.x, acceleration.y, acceleration.z);
+    }
 }
 
 
@@ -272,14 +281,6 @@ CBCharacteristic *subscribedCharacteristic;
 
 - (void)changeLogStatus {
     [self changeLogStatus:!logging];
-}
-
-- (void)addLogBuffer:(NSString *)content {
-    double timestamp = [[NSDate date] timeIntervalSince1970];
-    buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"%f %@\n", timestamp, content]];
-    if (arc4random() % 100 == 0) {
-        NSLog(@"buffer: %d", buffer.length);
-    }
 }
 
 - (NSString *)getTimeString:(NSString *)format {

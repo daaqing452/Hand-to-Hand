@@ -86,7 +86,9 @@ NSString *sharedPath;
 }
 
 - (void)showInfoInUI:(NSString *)newInfo {
-    [self showInfoInUI:newInfo newline:true];
+    dispatch_async(dispatch_get_main_queue(),^{
+        [self showInfoInUI:newInfo newline:true];
+    });
 }
 
 - (void)showInfoInUI:(NSString *)newInfo newline:(bool)newline {
