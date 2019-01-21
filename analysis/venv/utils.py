@@ -52,19 +52,35 @@ def read_file2(filename):
 	f.close()
 	return np.array(acc), np.array(att), np.array(rot)
 
-def resample(a, stride=20):
-	lena = len(a)
-	t = a[0][0]
-	t1 = a[lena-1][0]
+def resample(a, t1=None, stride=20):
+	shape = a.shape
+	t = a[0,0]
+	if t1 is None:
+		t1 = a[shape[0]-1,0]
 	b = []
 	i = 0
 	while t < t1:
-		while i < lena and a[i][0] < t: i += 1
-		sl = (t - a[i-1][0]) / (a[i][0] - a[i-1][0])
-		sr = (a[i][0] - t) / (a[i][0] - a[i-1][0])
-		b.append([a[i-1][j] * sr + a[i][j] * sl for j in range(1, len(a[i]))])
+		while i < shape[0] and a[i,0] < t: i += 1
+		sl = (t - a[i-1,0]) / (a[i,0] - a[i-1,0])
+		sr = (a[i,0] - t) / (a[i,0] - a[i-1,0])
+		b.append([a[i-1,j] * sr + a[i,j] * sl for j in range(1, shape[1])])
 		t += stride
-	return np.array(b)
+	b = np.array(b)
+	print(b.shape)
+	return b
+
+def bias(a0, a1, bias0 = 0, bias1 = 0):
+	a0 = a0[bias0:,]
+	a0[:,0] -= a0[0,0]
+	a1 = a1[bias1:,]
+	a1[:,0] -= a1[0,0]
+	return a0, a1
+
+def normalize(a, W=30):
+	shape = a.shape
+	i = 0
+	while i + W < shape[0]:
+		
 
 def highpass_filter(a, btc=0.4, level=3):
     coeff_b, coeff_a = signal.butter(level, btc, 'highpass')
