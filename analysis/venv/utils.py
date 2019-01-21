@@ -76,11 +76,42 @@ def bias(a0, a1, bias0 = 0, bias1 = 0):
 	a1[:,0] -= a1[0,0]
 	return a0, a1
 
-def normalize(a, W=30):
+def conv(a0, a1, window=5, std_threshold=5, amplitude_threshold=9.8):
+    w = window
+    sth = std_threshold
+    ath = amplitude_threshold
+    d = []
+    L = a0.shape[0]
+    for i in range(L):
+        if i + w >= L:
+            d.append(0)
+            continue
+        a = a0[i:i+w]
+        b = a1[i:i+w]
+        a = a - a.mean(axis=0)
+        b = b - b.mean(axis=0)
+        #a = (np.abs(a) > ath) * a
+        #b = (np.abs(b) > ath) * b
+        a = np.linalg.norm(a, axis=1)
+        b = np.linalg.norm(b, axis=1)
+        a = a / max(sth, a.std())
+        b = b / max(sth, a.std())
+        # convolve: full, valid, same
+        c = np.convolve(a, b, 'same')
+        d.append(c.max())
+    return np.array(d)
+
+def windowed_normalize(a, window=30):
 	shape = a.shape
-	i = 0
-	while i + W < shape[0]:
-		
+	w = int(window/2)
+	b = []
+	i = w
+	while i + w < shape[0]:
+		c = a[i - w : i + w]
+		c = (c[w] - c.mean(axis=0)) / c.std(axis=0)
+		b.append(c)
+		i += 1
+	return np.array(b)
 
 def highpass_filter(a, btc=0.4, level=3):
     coeff_b, coeff_a = signal.butter(level, btc, 'highpass')
