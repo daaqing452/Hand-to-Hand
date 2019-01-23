@@ -11,6 +11,11 @@ acc0r = rot0r
 acc1r = rot1r
 
 acc0r, acc1r = bias(acc0r, acc1r, 0, 2)
+'''acc0r = acc0r[4000:4500]
+acc1r = acc1r[4000:4500]
+acc0r[:,0] -= acc0r[0,0]
+acc1r[:,0] -= acc1r[0,0]'''
+
 t1 = min(acc0r[-1,0], acc1r[-1,0])
 acc0 = resample(acc0r, t1, 0.01)
 acc1 = resample(acc1r, t1, 0.01)

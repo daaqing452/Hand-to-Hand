@@ -232,7 +232,7 @@ CBCharacteristic *subscribedCharacteristic;
             NSLog(@"freqAcc: %f", freq);
         }
         if (logging) {
-            buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\natt %f %f %f\nrot %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, attitude.pitch, attitude.yaw, attitude.roll, rotationRate.x, rotationRate.y, rotationRate.z]];
+            buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\natt %f %f %f\nrot %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, attitude.pitch, attitude.roll, attitude.yaw, rotationRate.x, rotationRate.y, rotationRate.z]];
             if (arc4random() % 100 == 0) {
                 NSLog(@"buffer: %d", buffer.length);
             }
