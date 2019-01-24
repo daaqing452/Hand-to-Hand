@@ -7,13 +7,14 @@
 //
 
 #import "ViewController.h"
+#import "MachineLearning.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <WatchConnectivity/WatchConnectivity.h>
 
 #define UILog(format, ...) [self showInfoInUI:[NSString stringWithFormat:(format), ##__VA_ARGS__]]
 
 
-@interface ViewController () <CBPeripheralManagerDelegate>
+@interface ViewController () <WCSessionDelegate, CBPeripheralManagerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
 @property (weak, nonatomic) IBOutlet UIButton *buttonLogOn;
@@ -48,9 +49,12 @@ NSString *sharedPath;
     }
     
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
+    
+    MachineLearning *machineLearning = [[MachineLearning alloc] init];
+    [machineLearning createSVM];
+    
     UILog(@"init finished");
 }
-
 
 
 //
@@ -172,6 +176,21 @@ NSString *sharedPath;
         UILog(@"error %@", error);
     }
 }
+
+- (void)session:(nonnull WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(nullable NSError *)error {
+    // do nothing
+}
+
+
+- (void)sessionDidBecomeInactive:(nonnull WCSession *)session {
+    // do nothing
+}
+
+
+- (void)sessionDidDeactivate:(nonnull WCSession *)session {
+    // do nothing
+}
+
 
 - (void)alert:(NSString *)message {
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"消息" message:message preferredStyle:UIAlertControllerStyleAlert];

@@ -457,7 +457,7 @@ CBCharacteristic *subscribedCharacteristic;
         NSLog(@"find characristic %@", characteristic.UUID);
         CBCharacteristicProperties properties = characteristic.properties;
         if (properties & CBCharacteristicPropertyRead) {
-            //
+            // do nothing
         }
         if (properties & CBCharacteristicPropertyWrite) {
             subscribedPeripheral = peripheral;
