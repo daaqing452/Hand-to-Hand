@@ -6,7 +6,7 @@
 /analysis/venv/Include
 /analysis/venv/Lib
 /analysis/venv/Scripts
-/analysis/venv/__pycache__
+/analysis/venv/__pycache__/*
 /analysis/venv/.DS_Store
 /analysis/venv/*.pyc
 
