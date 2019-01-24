@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF42CAEB21F9A02D004F6079 /* MachineLearning.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF42CAEA21F9A02D004F6079 /* MachineLearning.mm */; };
+		BF42CAEF21F9A2C7004F6079 /* MakeBuddle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BF42CAEE21F9A2C7004F6079 /* MakeBuddle.bundle */; };
+		BF42CAF121F9AAA8004F6079 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF42CAF021F9AAA8004F6079 /* opencv2.framework */; };
 		BFA2E65121EC6F2C0069D6F4 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFA2E65021EC6F2C0069D6F4 /* HealthKit.framework */; };
 		BFACCE3E21D3601400CCECB2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE3D21D3601400CCECB2 /* AppDelegate.m */; };
 		BFACCE4121D3601400CCECB2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE4021D3601400CCECB2 /* ViewController.m */; };
@@ -86,6 +89,10 @@
 		BF07EE7921D60CA5000EED41 /* hand2hand.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = hand2hand.entitlements; sourceTree = "<group>"; };
 		BF2EBB3721DDCEB6005C8223 /* hand2hand WatchKit Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "hand2hand WatchKit Extension.entitlements"; sourceTree = "<group>"; };
 		BF2EBB3821DDCEBE005C8223 /* hand2hand WatchKit App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "hand2hand WatchKit App.entitlements"; sourceTree = "<group>"; };
+		BF42CAE921F9A02D004F6079 /* MachineLearning.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MachineLearning.h; sourceTree = "<group>"; };
+		BF42CAEA21F9A02D004F6079 /* MachineLearning.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MachineLearning.mm; sourceTree = "<group>"; };
+		BF42CAEE21F9A2C7004F6079 /* MakeBuddle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MakeBuddle.bundle; sourceTree = "<group>"; };
+		BF42CAF021F9AAA8004F6079 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = ../../../../Desktop/opencv2.framework; sourceTree = "<group>"; };
 		BFA2E65021EC6F2C0069D6F4 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
 		BFACCE3921D3601300CCECB2 /* hand2hand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hand2hand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFACCE3C21D3601400CCECB2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -124,6 +131,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF42CAF121F9AAA8004F6079 /* opencv2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +196,10 @@
 		BFACCE3B21D3601300CCECB2 /* hand2hand */ = {
 			isa = PBXGroup;
 			children = (
+				BF42CAF021F9AAA8004F6079 /* opencv2.framework */,
+				BF42CAEE21F9A2C7004F6079 /* MakeBuddle.bundle */,
+				BF42CAE921F9A02D004F6079 /* MachineLearning.h */,
+				BF42CAEA21F9A02D004F6079 /* MachineLearning.mm */,
 				BF07EE7921D60CA5000EED41 /* hand2hand.entitlements */,
 				BFACCE3C21D3601400CCECB2 /* AppDelegate.h */,
 				BFACCE3D21D3601400CCECB2 /* AppDelegate.m */,
@@ -425,6 +437,7 @@
 				BFACCE4921D3601400CCECB2 /* LaunchScreen.storyboard in Resources */,
 				BFACCE4621D3601400CCECB2 /* Assets.xcassets in Resources */,
 				BFACCE4421D3601400CCECB2 /* Main.storyboard in Resources */,
+				BF42CAEF21F9A2C7004F6079 /* MakeBuddle.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,6 +482,7 @@
 				BFACCE4121D3601400CCECB2 /* ViewController.m in Sources */,
 				BFACCE4C21D3601400CCECB2 /* main.m in Sources */,
 				BFACCE3E21D3601400CCECB2 /* AppDelegate.m in Sources */,
+				BF42CAEB21F9A02D004F6079 /* MachineLearning.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -751,6 +765,11 @@
 				CODE_SIGN_ENTITLEMENTS = hand2hand/hand2hand.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/hand2hand",
+				);
+				GCC_INPUT_FILETYPE = automatic;
 				INFOPLIST_FILE = hand2hand/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -769,6 +788,11 @@
 				CODE_SIGN_ENTITLEMENTS = hand2hand/hand2hand.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/hand2hand",
+				);
+				GCC_INPUT_FILETYPE = automatic;
 				INFOPLIST_FILE = hand2hand/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
