@@ -21,13 +21,19 @@ using namespace cv::ml;
 
 @implementation MachineLearning
 
+
+
 - (void)createSVM {
-    Ptr<SVM> svm = SVM::create();
+    // maybe no need for training, just load external opencv model
+    
+    SVM *svm = SVM::create();
     svm->setKernel(SVM::RBF);
     svm->setType(SVM::NU_SVC);
+    Mat *m = new Mat();
+    _InputArray *a = new _InputArray(*m);
+    svm->trainAuto(*a, ROW_SAMPLE, *a);
     
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"MakeBuddle" ofType:@"bundle"];
-    NSLog(@"%@", bundlePath);
+    
 }
 
 @end

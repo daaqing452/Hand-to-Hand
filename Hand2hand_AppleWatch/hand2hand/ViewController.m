@@ -50,8 +50,10 @@ NSString *sharedPath;
     
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     
+    [self readDataFromBundle:@"log-3-WatchL"];
     MachineLearning *machineLearning = [[MachineLearning alloc] init];
     [machineLearning createSVM];
+    
     
     UILog(@"init finished");
 }
@@ -134,6 +136,19 @@ NSString *sharedPath;
         bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
         UILog(@"delete file %@: %@", ifSuccess ? @"Y" : @"N", file);
     }
+}
+
+- (void)readDataFromBundle:(NSString *)fileName {
+    NSBundle *bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"MakeBuddle" ofType:@"bundle"]];
+    NSString *filePath = [bundle pathForResource:fileName ofType:@"txt"];
+    
+    NSLog(@"%@", filePath);
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSData *data = [fileManager contentsAtPath:filePath];
+    NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    
+    NSLog(@"%@", [s substringToIndex:10]);
 }
 
 
