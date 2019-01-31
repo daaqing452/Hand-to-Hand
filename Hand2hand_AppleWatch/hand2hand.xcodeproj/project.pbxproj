@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF42CAEB21F9A02D004F6079 /* MachineLearning.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF42CAEA21F9A02D004F6079 /* MachineLearning.mm */; };
-		BF42CAEF21F9A2C7004F6079 /* MakeBuddle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BF42CAEE21F9A2C7004F6079 /* MakeBuddle.bundle */; };
 		BFA2E65121EC6F2C0069D6F4 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFA2E65021EC6F2C0069D6F4 /* HealthKit.framework */; };
 		BFACCE3E21D3601400CCECB2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE3D21D3601400CCECB2 /* AppDelegate.m */; };
 		BFACCE4121D3601400CCECB2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE4021D3601400CCECB2 /* ViewController.m */; };
@@ -16,8 +14,6 @@
 		BFACCE4621D3601400CCECB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE4521D3601400CCECB2 /* Assets.xcassets */; };
 		BFACCE4921D3601400CCECB2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE4721D3601400CCECB2 /* LaunchScreen.storyboard */; };
 		BFACCE4C21D3601400CCECB2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE4B21D3601400CCECB2 /* main.m */; };
-		BFACCE5621D3601400CCECB2 /* hand2handTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE5521D3601400CCECB2 /* hand2handTests.m */; };
-		BFACCE6121D3601400CCECB2 /* hand2handUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE6021D3601400CCECB2 /* hand2handUITests.m */; };
 		BFACCE6621D3601400CCECB2 /* hand2hand WatchKit App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = BFACCE6521D3601400CCECB2 /* hand2hand WatchKit App.app */; };
 		BFACCE6C21D3601400CCECB2 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE6A21D3601400CCECB2 /* Interface.storyboard */; };
 		BFACCE6E21D3601500CCECB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE6D21D3601500CCECB2 /* Assets.xcassets */; };
@@ -26,7 +22,6 @@
 		BFACCE7E21D3601500CCECB2 /* ExtensionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE7D21D3601500CCECB2 /* ExtensionDelegate.m */; };
 		BFACCE8121D3601500CCECB2 /* NotificationController.m in Sources */ = {isa = PBXBuildFile; fileRef = BFACCE8021D3601500CCECB2 /* NotificationController.m */; };
 		BFACCE8321D3601500CCECB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFACCE8221D3601500CCECB2 /* Assets.xcassets */; };
-		BFB42E9721FEE425004E5103 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFB42E9621FEE425004E5103 /* opencv2.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,9 +84,6 @@
 		BF07EE7921D60CA5000EED41 /* hand2hand.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = hand2hand.entitlements; sourceTree = "<group>"; };
 		BF2EBB3721DDCEB6005C8223 /* hand2hand WatchKit Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "hand2hand WatchKit Extension.entitlements"; sourceTree = "<group>"; };
 		BF2EBB3821DDCEBE005C8223 /* hand2hand WatchKit App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "hand2hand WatchKit App.entitlements"; sourceTree = "<group>"; };
-		BF42CAE921F9A02D004F6079 /* MachineLearning.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MachineLearning.h; sourceTree = "<group>"; };
-		BF42CAEA21F9A02D004F6079 /* MachineLearning.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MachineLearning.mm; sourceTree = "<group>"; };
-		BF42CAEE21F9A2C7004F6079 /* MakeBuddle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MakeBuddle.bundle; sourceTree = "<group>"; };
 		BFA2E65021EC6F2C0069D6F4 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
 		BFACCE3921D3601300CCECB2 /* hand2hand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hand2hand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFACCE3C21D3601400CCECB2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -104,11 +96,7 @@
 		BFACCE4A21D3601400CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFACCE4B21D3601400CCECB2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BFACCE5121D3601400CCECB2 /* hand2handTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hand2handTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BFACCE5521D3601400CCECB2 /* hand2handTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = hand2handTests.m; sourceTree = "<group>"; };
-		BFACCE5721D3601400CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFACCE5C21D3601400CCECB2 /* hand2handUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hand2handUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BFACCE6021D3601400CCECB2 /* hand2handUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = hand2handUITests.m; sourceTree = "<group>"; };
-		BFACCE6221D3601400CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFACCE6521D3601400CCECB2 /* hand2hand WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hand2hand WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFACCE6B21D3601400CCECB2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		BFACCE6D21D3601500CCECB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -123,7 +111,6 @@
 		BFACCE8221D3601500CCECB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BFACCE8421D3601600CCECB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFACCE8521D3601600CCECB2 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
-		BFB42E9621FEE425004E5103 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,7 +118,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFB42E9721FEE425004E5103 /* opencv2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,8 +158,6 @@
 			isa = PBXGroup;
 			children = (
 				BFACCE3B21D3601300CCECB2 /* hand2hand */,
-				BFACCE5421D3601400CCECB2 /* hand2handTests */,
-				BFACCE5F21D3601400CCECB2 /* hand2handUITests */,
 				BFACCE6921D3601400CCECB2 /* hand2hand WatchKit App */,
 				BFACCE7821D3601500CCECB2 /* hand2hand WatchKit Extension */,
 				BFACCE3A21D3601300CCECB2 /* Products */,
@@ -196,10 +180,6 @@
 		BFACCE3B21D3601300CCECB2 /* hand2hand */ = {
 			isa = PBXGroup;
 			children = (
-				BFB42E9621FEE425004E5103 /* opencv2.framework */,
-				BF42CAEE21F9A2C7004F6079 /* MakeBuddle.bundle */,
-				BF42CAE921F9A02D004F6079 /* MachineLearning.h */,
-				BF42CAEA21F9A02D004F6079 /* MachineLearning.mm */,
 				BF07EE7921D60CA5000EED41 /* hand2hand.entitlements */,
 				BFACCE3C21D3601400CCECB2 /* AppDelegate.h */,
 				BFACCE3D21D3601400CCECB2 /* AppDelegate.m */,
@@ -212,24 +192,6 @@
 				BFACCE4B21D3601400CCECB2 /* main.m */,
 			);
 			path = hand2hand;
-			sourceTree = "<group>";
-		};
-		BFACCE5421D3601400CCECB2 /* hand2handTests */ = {
-			isa = PBXGroup;
-			children = (
-				BFACCE5521D3601400CCECB2 /* hand2handTests.m */,
-				BFACCE5721D3601400CCECB2 /* Info.plist */,
-			);
-			path = hand2handTests;
-			sourceTree = "<group>";
-		};
-		BFACCE5F21D3601400CCECB2 /* hand2handUITests */ = {
-			isa = PBXGroup;
-			children = (
-				BFACCE6021D3601400CCECB2 /* hand2handUITests.m */,
-				BFACCE6221D3601400CCECB2 /* Info.plist */,
-			);
-			path = hand2handUITests;
 			sourceTree = "<group>";
 		};
 		BFACCE6921D3601400CCECB2 /* hand2hand WatchKit App */ = {
@@ -437,7 +399,6 @@
 				BFACCE4921D3601400CCECB2 /* LaunchScreen.storyboard in Resources */,
 				BFACCE4621D3601400CCECB2 /* Assets.xcassets in Resources */,
 				BFACCE4421D3601400CCECB2 /* Main.storyboard in Resources */,
-				BF42CAEF21F9A2C7004F6079 /* MakeBuddle.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,7 +443,6 @@
 				BFACCE4121D3601400CCECB2 /* ViewController.m in Sources */,
 				BFACCE4C21D3601400CCECB2 /* main.m in Sources */,
 				BFACCE3E21D3601400CCECB2 /* AppDelegate.m in Sources */,
-				BF42CAEB21F9A02D004F6079 /* MachineLearning.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -490,7 +450,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFACCE5621D3601400CCECB2 /* hand2handTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -498,7 +457,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFACCE6121D3601400CCECB2 /* hand2handUITests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
