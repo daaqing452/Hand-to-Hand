@@ -525,7 +525,7 @@
 		BF9B90022202A61E00CFD2E8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-h2h";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				IBSC_MODULE = Hand2hand_demo_WatchKit_Extension;
@@ -542,7 +542,7 @@
 		BF9B90032202A61E00CFD2E8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-h2h";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				IBSC_MODULE = Hand2hand_demo_WatchKit_Extension;
@@ -559,7 +559,7 @@
 		BF9B90062202A61E00CFD2E8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-h2h";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -580,7 +580,7 @@
 		BF9B90072202A61E00CFD2E8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-h2h";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				FRAMEWORK_SEARCH_PATHS = (

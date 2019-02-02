@@ -59,7 +59,7 @@ bool logging = false;
 NSString *buffer = @"";
 NSString *logFileName;
 
-//  bluetooth
+//  core bluetooth
 CBCentralManager *centralManager;
 NSMutableArray<CBPeripheral*> *peripheralDevices;
 CBPeripheral *subscribedPeripheral;
@@ -76,7 +76,6 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)willActivate {
-    // This method is called when watch view controller is about to be visible to user
     [super willActivate];
     
     self.workoutConfiguration = [[HKWorkoutConfiguration alloc] init];
