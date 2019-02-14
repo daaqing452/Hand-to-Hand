@@ -45,6 +45,15 @@ NSMutableArray<CBPeripheral*> *peripheralDevices;
 CBPeripheral *subscribedPeripheral;
 CBCharacteristic *subscribedCharacteristic;
 
+//  calibration
+//      0 idle
+//      1 listening
+//      2 peak occur
+int calibrationStatus = 0;
+double minValue;
+double calibratedTimestamp = 0;
+double prevCalibratedTimestamp = 0;
+
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
@@ -80,8 +89,11 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)parseCommand:(NSString *)command {
-    if ([command isEqualToString:@"xxx"]) {
-        
+    if ([command isEqualToString:@"test watch connectivity success"]) {
+        watchConnectivityTestFlag = true;
+    } else if ([command isEqualToString:@"start calibration"]) {
+        calibrationStatus = 1;
+        minValue = 0;
     } else {
         NSLog(@"recv: %@", command);
     }
@@ -161,7 +173,27 @@ CBCharacteristic *subscribedCharacteristic;
         CMAcceleration acceleration = motion.userAcceleration;
         CMAttitude *attitude = motion.attitude;
         CMRotationRate rotationRate = motion.rotationRate;
-        NSLog(@"%f %f %f", acceleration.x, attitude.pitch, rotationRate.x);
+        if (fabs(acceleration.x) > 1 || fabs(acceleration.y) > 1 || fabs(acceleration.z) > 1) {
+            NSLog(@"%f %f %f", acceleration.x, acceleration.y, acceleration.z);
+        }
+        
+        // calibration
+        if (calibrationStatus > 0) {
+            double value = acceleration.z;
+            if (value < -5) {
+                calibrationStatus = 2;
+                if (value < minValue) {
+                    minValue = value;
+                    calibratedTimestamp = motion.timestamp;
+                }
+            } else {
+                if (calibrationStatus == 2 && motion.timestamp - calibratedTimestamp > 0.1) {
+                    [self sendMessage:[NSString stringWithFormat:@"calibration time %@: %f", device.name, calibratedTimestamp - prevCalibratedTimestamp]];
+                    prevCalibratedTimestamp = calibratedTimestamp;
+                    calibrationStatus = 0;
+                }
+            }
+        }
     }];
     NSLog(@"push motion ready");
 }

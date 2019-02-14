@@ -17,6 +17,7 @@
 @interface ViewController () <WCSessionDelegate, CBPeripheralManagerDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextView *textInfo;
+@property (weak, nonatomic) IBOutlet UIButton *buttonCalibration;
 
 @end
 
@@ -39,7 +40,7 @@ WCSession *wcsession;
     Classifier *classifier = [[Classifier alloc] initWithSVM];
     [classifier work];
     
-    [self readDataFromBundle:@"log-3-WatchL.txt"];
+    [self readDataFromBundle:@"log-3-WatchL"];
     
     UILog(@"init finished");
 }
@@ -49,6 +50,12 @@ WCSession *wcsession;
 //
 //  UI
 //
+- (IBAction)doClickButtonCalibration:(id)sender {
+    [self sendMessageByWatchConnectivity:@"start calibration"];
+    [self sendMessageByCoreBluetooth:@"start calibration"];
+    UILog(@"start calibration");
+}
+
 - (void)showInfoInUI:(NSString *)newInfo {
     dispatch_async(dispatch_get_main_queue(),^{
         [self showInfoInUI:newInfo newline:true];
@@ -108,7 +115,7 @@ WCSession *wcsession;
         [self sendMessageByWatchConnectivity:@"test watch connectivity success"];
         UILog(@"watch connectivity connected");
     } else {
-        UILog(@"recv from WC: %@", command);
+        UILog(@"recv-WC: %@", command);
     }
 }
 
@@ -182,7 +189,7 @@ CBMutableCharacteristic *sendCharacteristic;
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
     CBATTRequest *request = requests[0];
     NSString *message = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
-    UILog(@"recv from CB: %@", message);
+    UILog(@"recv-CB: %@", message);
 }
 
 - (void)sendMessageByCoreBluetooth:(NSString *)message {

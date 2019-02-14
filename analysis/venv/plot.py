@@ -3,8 +3,8 @@ import numpy as np
 import sys
 from utils import *
 
-filename_l = "../log-hh16hbj-WatchL.txt"
-filename_r = "../log-hh16hbj-WatchR.txt"
+filename_l = "../log-20190202-164123-WatchL.txt"
+filename_r = "../log-20190202-164123-WatchR.txt"
 acc0r, att0r, rot0r = read_file2(filename_l)
 acc1r, att1r, rot1r = read_file2(filename_r)
 print(acc0r.shape, acc1r.shape)
@@ -25,10 +25,10 @@ acc1 = resample(acc1r, t1, 0.01)
 plt.figure()
 for i in range(3):
     plt.subplot(3, 1, i+1)
-    plt.plot(att0r[:, i+1])
+    plt.plot(acc0r[:, i+1])
 for i in range(3):
     plt.subplot(3, 1, i+1)
-    plt.plot(att1r[:, i+1])
+    plt.plot(acc1r[:, i+1])
 
 '''plt.figure()
 for i in range(3):
@@ -46,7 +46,7 @@ for i in range(3):
     plt.subplot(3, 1, i+1)
     plt.plot(acc1[:, i])'''
 
-'''plt.figure()
+plt.figure()
 for i in range(3):
     plt.subplot(3, 1, i+1)
     plt.plot(att0r[:, i+1])
@@ -60,6 +60,6 @@ for i in range(3):
     plt.plot(rot0r[:, i+1])
 for i in range(3):
     plt.subplot(3, 1, i+1)
-    plt.plot(rot1r[:, i+1])'''
+    plt.plot(rot1r[:, i+1])
 
 plt.show()
