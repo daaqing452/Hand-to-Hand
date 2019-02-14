@@ -21,9 +21,9 @@
 		BF9B8FF72202A61D00CFD2E8 /* ExtensionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BF9B8FF62202A61D00CFD2E8 /* ExtensionDelegate.m */; };
 		BF9B8FF92202A61E00CFD2E8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF9B8FF82202A61E00CFD2E8 /* Assets.xcassets */; };
 		BF9B900D2202A73000CFD2E8 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF9B900B2202A72F00CFD2E8 /* opencv2.framework */; };
-		BF9B900E2202A73000CFD2E8 /* MakeBuddle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BF9B900C2202A73000CFD2E8 /* MakeBuddle.bundle */; };
 		BF9B90102202A7E300CFD2E8 /* Classifier.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF9B900F2202A7E300CFD2E8 /* Classifier.mm */; };
 		BFC12A0B22151969003ACE2D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFC12A0A22151969003ACE2D /* HealthKit.framework */; };
+		BFC12A1022153F03003ACE2D /* MakeBuddle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BFC12A0F22153F02003ACE2D /* MakeBuddle.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,12 +91,12 @@
 		BF9B8FF82202A61E00CFD2E8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BF9B8FFA2202A61E00CFD2E8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BF9B900B2202A72F00CFD2E8 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
-		BF9B900C2202A73000CFD2E8 /* MakeBuddle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MakeBuddle.bundle; sourceTree = "<group>"; };
 		BF9B900F2202A7E300CFD2E8 /* Classifier.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Classifier.mm; sourceTree = "<group>"; };
 		BF9B90112202A80500CFD2E8 /* Classifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Classifier.h; sourceTree = "<group>"; };
 		BFC12A042215195A003ACE2D /* Hand2hand_demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Hand2hand_demo.entitlements; sourceTree = "<group>"; };
 		BFC12A0A22151969003ACE2D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
 		BFC12A0C22151969003ACE2D /* Hand2hand_demo WatchKit Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Hand2hand_demo WatchKit Extension.entitlements"; sourceTree = "<group>"; };
+		BFC12A0F22153F02003ACE2D /* MakeBuddle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MakeBuddle.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,7 +144,7 @@
 			isa = PBXGroup;
 			children = (
 				BFC12A042215195A003ACE2D /* Hand2hand_demo.entitlements */,
-				BF9B900C2202A73000CFD2E8 /* MakeBuddle.bundle */,
+				BFC12A0F22153F02003ACE2D /* MakeBuddle.bundle */,
 				BF9B900B2202A72F00CFD2E8 /* opencv2.framework */,
 				BF9B8FCB2202A61B00CFD2E8 /* AppDelegate.h */,
 				BF9B8FCC2202A61B00CFD2E8 /* AppDelegate.m */,
@@ -307,7 +307,7 @@
 				BF9B8FD82202A61C00CFD2E8 /* LaunchScreen.storyboard in Resources */,
 				BF9B8FD52202A61C00CFD2E8 /* Assets.xcassets in Resources */,
 				BF9B8FD32202A61B00CFD2E8 /* Main.storyboard in Resources */,
-				BF9B900E2202A73000CFD2E8 /* MakeBuddle.bundle in Resources */,
+				BFC12A1022153F03003ACE2D /* MakeBuddle.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -24,12 +24,22 @@ using namespace cv::ml;
 
 @implementation Classifier
 
-- (id)initWithSVM {
+- (id)initWithSVM:(NSString *)filePath {
     self = [super init];
     
-    Ptr<SVM> svm = SVM::create();
+    float trainDataC[][2] = {{0,0},{0,1},{1,0},{1,1}};
+    Mat trainData(9, 2, CV_32F, trainDataC);
+    Ptr<SVM> svm = SVM::load([filePath UTF8String]);
+    
+    for (int i = 0; i < 9; i++) {
+        Mat nowData = trainData(Range(i,i+1), Range().all());
+        float result = svm->predict(nowData);
+        NSLog(@"%d: %f", i, result);
+    }
+    
+    /*Ptr<SVM> svm = SVM::create();
     svm->setKernel(SVM::RBF);
-    svm->setType(SVM::NU_SVC);
+    svm->setType(SVM::NU_SVC);*/
     
     NSLog(@"create classifier");
     return self;

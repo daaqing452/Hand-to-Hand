@@ -25,6 +25,7 @@
 @implementation ViewController
 
 WCSession *wcsession;
+NSBundle *bundle;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -37,7 +38,10 @@ WCSession *wcsession;
     
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     
-    Classifier *classifier = [[Classifier alloc] initWithSVM];
+    bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"MakeBuddle" ofType:@"bundle"]];
+    
+    NSString *fileName = [bundle pathForResource:@"a" ofType:@"model"];
+    Classifier *classifier = [[Classifier alloc] initWithSVM:fileName];
     [classifier work];
     
     [self readDataFromBundle:@"log-3-WatchL"];
@@ -76,8 +80,7 @@ WCSession *wcsession;
 //
 //  file
 //
-- (void)readDataFromBundle:(NSString *)fileName {
-    NSBundle *bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"MakeBuddle" ofType:@"bundle"]];
+- (NSString *)readDataFromBundle:(NSString *)fileName {
     NSString *filePath = [bundle pathForResource:fileName ofType:@"txt"];
     
     NSLog(@"%@", filePath);
@@ -87,6 +90,7 @@ WCSession *wcsession;
     NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     NSLog(@"%@", [s substringToIndex:10]);
+    return s;
 }
 
 

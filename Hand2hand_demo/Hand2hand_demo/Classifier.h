@@ -17,7 +17,7 @@
 
 @interface Classifier : NSObject
 
-- (id)initWithSVM;
+- (id)initWithSVM:(NSString *)filePath;
 
 - (void)work;
 
