@@ -174,7 +174,7 @@ double prevCalibratedTimestamp = 0;
         CMAttitude *attitude = motion.attitude;
         CMRotationRate rotationRate = motion.rotationRate;
         if (fabs(acceleration.x) > 1 || fabs(acceleration.y) > 1 || fabs(acceleration.z) > 1) {
-            NSLog(@"%f %f %f", acceleration.x, acceleration.y, acceleration.z);
+            NSLog(@"%f %f %f %f", motion.timestamp, acceleration.x, acceleration.y, acceleration.z);
         }
         
         // calibration
