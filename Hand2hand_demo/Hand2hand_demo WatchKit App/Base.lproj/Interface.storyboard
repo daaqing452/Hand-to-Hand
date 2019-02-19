@@ -20,9 +20,15 @@
                                 <action selector="doClickButtonCommunication:" destination="AgC-eL-Hgc" id="WwI-He-JmL"/>
                             </connections>
                         </button>
+                        <button width="1" alignment="left" title="Test" id="KVS-cT-B5v" userLabel="Button Test">
+                            <connections>
+                                <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="wLD-wy-Btl"/>
+                            </connections>
+                        </button>
                     </items>
                     <connections>
                         <outlet property="buttonCommunication" destination="UNy-GE-XmM" id="k9z-OE-sEq"/>
+                        <outlet property="buttonTest" destination="KVS-cT-B5v" id="4p2-SH-6qe"/>
                         <outlet property="label0" destination="Izw-oB-Ao5" id="DIc-V3-9t7"/>
                     </connections>
                 </controller>

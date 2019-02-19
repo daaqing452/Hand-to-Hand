@@ -49,6 +49,17 @@ NSBundle *bundle;
     UILog(@"init finished");
 }
 
+- (void)parseCommand:(NSString *)command {
+    if ([command isEqualToString:@"test"]) {
+        [self alert:command];
+    } else if ([command isEqualToString:@"test watch connectivity"]) {
+        [self sendMessageByWatchConnectivity:@"test watch connectivity success"];
+        UILog(@"watch connectivity connected");
+    } else {
+        UILog(@"recv: %@", command);
+    }
+}
+
 
 
 //
@@ -112,15 +123,8 @@ NSBundle *bundle;
 
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
     //replyHandler(@{@"message": @"yes"});
-    NSString *command = dict[@"message"];
-    if ([command isEqualToString:@"test"]) {
-        [self alert:command];
-    } else if ([command isEqualToString:@"test watch connectivity"]) {
-        [self sendMessageByWatchConnectivity:@"test watch connectivity success"];
-        UILog(@"watch connectivity connected");
-    } else {
-        UILog(@"recv-WC: %@", command);
-    }
+    NSString *message = dict[@"message"];
+    [self parseCommand:message];
 }
 
 - (void)session:(nonnull WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(nullable NSError *)error {
@@ -193,7 +197,7 @@ CBMutableCharacteristic *sendCharacteristic;
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
     CBATTRequest *request = requests[0];
     NSString *message = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
-    UILog(@"recv-CB: %@", message);
+    [self parseCommand:message];
 }
 
 - (void)sendMessageByCoreBluetooth:(NSString *)message {

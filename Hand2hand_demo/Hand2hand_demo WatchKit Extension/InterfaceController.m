@@ -20,6 +20,7 @@
 
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonCommunication;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) HKWorkoutConfiguration *workoutConfiguration;
@@ -136,7 +137,7 @@ CBCharacteristic *subscribedCharacteristic;
         wcsession.delegate = self;
         [wcsession activateSession];
         watchConnectivityTestFlag = false;
-        [self sendMessageByWatchConnectivity:@"test watch connectivity"];
+        //[self sendMessageByWatchConnectivity:@"test watch connectivity"];
         [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timeredWatchConnectivity:) userInfo:nil repeats:NO];
     }
 }
@@ -151,6 +152,13 @@ CBCharacteristic *subscribedCharacteristic;
     [self startCommunication];
 }
 
+- (IBAction)doClickButtonTest:(id)sender {
+    NSString *sa = @"";
+    for (int i = 0; i < 128; i++) {
+        sa = [sa stringByAppendingString:@"a"];
+    }
+    [self sendMessage:sa];
+}
 
 
 //
