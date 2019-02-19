@@ -45,15 +45,6 @@ NSMutableArray<CBPeripheral*> *peripheralDevices;
 CBPeripheral *subscribedPeripheral;
 CBCharacteristic *subscribedCharacteristic;
 
-//  calibration
-//      0 idle
-//      1 listening
-//      2 peak occur
-int calibrationStatus = 0;
-double minValue;
-double calibratedTimestamp = 0;
-double prevCalibratedTimestamp = 0;
-
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
@@ -80,7 +71,7 @@ double prevCalibratedTimestamp = 0;
     [self setSensorDataGetPush];
     
     LBLog(@"%@", device.name);
-    NSLog(@"init finished");
+    //NSLog(@"init finished");
 }
 
 - (void)didDeactivate {
@@ -92,8 +83,8 @@ double prevCalibratedTimestamp = 0;
     if ([command isEqualToString:@"test watch connectivity success"]) {
         watchConnectivityTestFlag = true;
     } else if ([command isEqualToString:@"start calibration"]) {
-        calibrationStatus = 1;
-        minValue = 0;
+        calibrationState = C_Listening;
+        minValue0 = 0;
     } else {
         NSLog(@"recv: %@", command);
     }
@@ -163,39 +154,149 @@ double prevCalibratedTimestamp = 0;
 
 
 //
-//  sensor
+//  --- sensor ---
 //
+const double REPORT_ACC_THREHOLD = 100;
+
+const double CALIBRATION_ACC_Z_THRESHOLD = -5.0;
+const double CALIBRATION_AFTER_PEAK_TIME = 0.1;
+enum CalibrationStates { C_Idle, C_Listening, C_PeakOccur } calibrationState = C_Idle;
+double minValue0;
+double calibratedTimestamp = 0;
+double prevCalibratedTimestamp = 0;
+
+const double DETECTION_ZERO_THRESHOLD = 2.0;
+const double DETECTION_ZERO1ST_TIME = 0.2;
+const double DETECTION_ZERO2ND_TIME = 0.2;
+const double DETECTION_ROT_X_THRESHOLD_MIN = -15.0;
+const double DETECTION_ROT_X_THRESHOLD_MAX = 12.0;
+const double DETECTION_MAX_BETWEEN_PEAK_TIME = 0.35;
+enum DetectionStates { D_Idle, D_Zero1st, D_MinPeak, D_MaxPeak } detectionState = D_Idle;
+bool zeroing = false;
+double zeroStartTimestamp = -1;
+int zeroId = 0;
+int goodZeroId;
+double minValue1;
+double maxValue1;
+double minPeakTimestamp;
+double maxPeakTimestamp;
+
+enum DetectionStates prevDetectionState = D_MaxPeak;
+
 - (void)setSensorDataGetPush {
     if (!self.motionManager.deviceMotionAvailable) return;
     self.motionManager.deviceMotionUpdateInterval = 1/100.0;
     [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
         if (error) return;
+        
         CMAcceleration acceleration = motion.userAcceleration;
-        CMAttitude *attitude = motion.attitude;
+        //CMAttitude *attitude = motion.attitude;
         CMRotationRate rotationRate = motion.rotationRate;
-        if (fabs(acceleration.x) > 1 || fabs(acceleration.y) > 1 || fabs(acceleration.z) > 1) {
+        double nowTimestamp = motion.timestamp - calibratedTimestamp;
+        
+        if (fabs(acceleration.x) > REPORT_ACC_THREHOLD || fabs(acceleration.y) > REPORT_ACC_THREHOLD || fabs(acceleration.z) > REPORT_ACC_THREHOLD) {
             NSLog(@"%f %f %f %f", motion.timestamp, acceleration.x, acceleration.y, acceleration.z);
         }
         
         // calibration
-        if (calibrationStatus > 0) {
+        if (calibrationState == C_Listening || calibrationState == C_PeakOccur) {
             double value = acceleration.z;
-            if (value < -5) {
-                calibrationStatus = 2;
-                if (value < minValue) {
-                    minValue = value;
+            if (value < CALIBRATION_ACC_Z_THRESHOLD) {
+                calibrationState = C_PeakOccur;
+                if (value < minValue0) {
+                    minValue0 = value;
                     calibratedTimestamp = motion.timestamp;
                 }
             } else {
-                if (calibrationStatus == 2 && motion.timestamp - calibratedTimestamp > 0.1) {
+                if (calibrationState == C_PeakOccur && motion.timestamp - calibratedTimestamp > CALIBRATION_AFTER_PEAK_TIME) {
                     [self sendMessage:[NSString stringWithFormat:@"calibration time %@: %f", device.name, calibratedTimestamp - prevCalibratedTimestamp]];
                     prevCalibratedTimestamp = calibratedTimestamp;
-                    calibrationStatus = 0;
+                    calibrationState = C_Idle;
                 }
             }
         }
+        
+        // detection
+        if (fabs(rotationRate.x) < DETECTION_ZERO_THRESHOLD) {
+            if (!zeroing) {
+                zeroStartTimestamp = nowTimestamp;
+                zeroId++;
+            }
+            zeroing = true;
+        } else {
+            zeroing = false;
+        }
+        switch (detectionState) {
+            case D_Idle:
+                // long zero then listen peak
+                if (zeroing && nowTimestamp - zeroStartTimestamp > DETECTION_ZERO1ST_TIME) {
+                    detectionState = D_Zero1st;
+                    minValue1 = 1;
+                    goodZeroId = zeroId;
+                }
+                break;
+            case D_Zero1st:
+                // find min peak
+                if (rotationRate.x < minValue1) {
+                    minValue1 = rotationRate.x;
+                    minPeakTimestamp = nowTimestamp;
+                }
+                /*if (zeroing && goodZeroId != zeroId) {
+                    NSLog(@"minv %f", minValue1);
+                }*/
+                // zero after min peak
+                if (zeroing && minValue1 < DETECTION_ROT_X_THRESHOLD_MIN) {
+                    detectionState = D_MinPeak;
+                    goodZeroId = zeroId;
+                    maxValue1 = -1;
+                }
+                // zero -> non-zero & no peak -> zero ==> failed
+                if (goodZeroId != zeroId) {
+                    detectionState = D_Idle;
+                }
+                break;
+            case D_MinPeak:
+                // find max peak
+                if (rotationRate.x > maxValue1) {
+                    maxValue1 = rotationRate.x;
+                    maxPeakTimestamp = nowTimestamp;
+                }
+                /*if (zeroing && goodZeroId != zeroId) {
+                    NSLog(@"maxv %f", maxValue1);
+                }*/
+                // zero after max peak
+                if (zeroing && maxValue1 > DETECTION_ROT_X_THRESHOLD_MAX) {
+                    detectionState = D_MaxPeak;
+                    goodZeroId = zeroId;
+                }
+                // zero -> non-zero & no peak -> zero ==> failed
+                if (goodZeroId != zeroId) {
+                    detectionState = D_Idle;
+                }
+                // too long between two peaks
+                if (nowTimestamp - minPeakTimestamp > DETECTION_MAX_BETWEEN_PEAK_TIME) {
+                    detectionState = D_Idle;
+                }
+                break;
+            case D_MaxPeak:
+                // detect success
+                if (nowTimestamp - maxPeakTimestamp > DETECTION_ZERO2ND_TIME) {
+                    NSLog(@"delimiter!\n\n\n\n");
+                    detectionState = D_Idle;
+                }
+                // zero last too short
+                if (!zeroing) {
+                    detectionState = D_Idle;
+                }
+                break;
+        }
+        
+        if (detectionState != prevDetectionState) {
+            NSLog(@"s%d", detectionState);
+        }
+        prevDetectionState = detectionState;
     }];
-    NSLog(@"push motion ready");
+    //NSLog(@"push motion ready");
 }
 
 

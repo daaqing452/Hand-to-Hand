@@ -3,8 +3,8 @@ import numpy as np
 import sys
 from utils import *
 
-filename_l = "../log-20190202-164123-WatchL.txt"
-filename_r = "../log-20190202-164123-WatchR.txt"
+filename_l = "../log-test_delimiter-WatchL.txt"
+filename_r = "../log-test_delimiter-WatchR.txt"
 acc0r, att0r, rot0r = read_file2(filename_l)
 acc1r, att1r, rot1r = read_file2(filename_r)
 print(acc0r.shape, acc1r.shape)
