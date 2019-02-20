@@ -40,12 +40,6 @@ WCSession *wcsession;
 NSString *communication = @"null";
 bool watchConnectivityTestFlag;
 
-//  core bluetooth
-CBCentralManager *centralManager;
-NSMutableArray<CBPeripheral*> *peripheralDevices;
-CBPeripheral *subscribedPeripheral;
-CBCharacteristic *subscribedCharacteristic;
-
 
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
@@ -72,7 +66,7 @@ CBCharacteristic *subscribedCharacteristic;
     [self setSensorDataGetPush];
     
     LBLog(@"%@", device.name);
-    //NSLog(@"init finished");
+    NSLog(@"init finished");
 }
 
 - (void)didDeactivate {
@@ -86,6 +80,8 @@ CBCharacteristic *subscribedCharacteristic;
     } else if ([command isEqualToString:@"start calibration"]) {
         calibrationState = C_Listening;
         minValue0 = 0;
+    } else if ([command isEqualToString:@"hello"]) {
+        LBLog(@"hello");
     } else {
         NSLog(@"recv: %@", command);
     }
@@ -153,11 +149,15 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (IBAction)doClickButtonTest:(id)sender {
+    [self sendMessageByCoreBluetooth:@"test"];
+}
+
+- (void)okok {
     NSString *sa = @"";
-    for (int i = 0; i < 128; i++) {
+    for (int i = 0; i < 96; i++) {
         sa = [sa stringByAppendingString:@"a"];
     }
-    [self sendMessage:sa];
+    [self sendDataByCoreBluetooth:[sa dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 
@@ -173,13 +173,15 @@ double minValue0;
 double calibratedTimestamp = 0;
 double prevCalibratedTimestamp = 0;
 
-const double DETECTION_ZERO_THRESHOLD = 2.0;
+//#define DETECTION_DEBUG
+const double DETECTION_ZERO_THRESHOLD = 3.5;
 const double DETECTION_ZERO1ST_TIME = 0.2;
-const double DETECTION_ZERO2ND_TIME = 0.2;
-const double DETECTION_ROT_X_THRESHOLD_MIN = -15.0;
-const double DETECTION_ROT_X_THRESHOLD_MAX = 12.0;
+const double DETECTION_ZERO2ND_TIME = 0.1;
+const double DETECTION_ROT_X_THRESHOLD_MIN = -10.0;
+const double DETECTION_ROT_X_THRESHOLD_MAX = 10.0;
 const double DETECTION_MAX_BETWEEN_PEAK_TIME = 0.35;
-enum DetectionStates { D_Idle, D_Zero1st, D_MinPeak, D_MaxPeak } detectionState = D_Idle;
+const double DETECTION_ENERGY_THRESHOLD = 300;
+enum DetectionStates { D_Idle, D_Zero1st, D_MinPeak, D_MaxPeak } detectionState = D_Idle, prevDetectionState;
 bool zeroing = false;
 double zeroStartTimestamp = -1;
 int zeroId = 0;
@@ -188,20 +190,23 @@ double minValue1;
 double maxValue1;
 double minPeakTimestamp;
 double maxPeakTimestamp;
-
-enum DetectionStates prevDetectionState = D_MaxPeak;
+double afterPeakEnergy;
 
 - (void)setSensorDataGetPush {
     if (!self.motionManager.deviceMotionAvailable) return;
     self.motionManager.deviceMotionUpdateInterval = 1/100.0;
+    [self initArrays];
+    
+    // push
     [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
         if (error) return;
         
+        // get motion
+        double nowTimestamp = motion.timestamp - calibratedTimestamp;
         CMAcceleration acceleration = motion.userAcceleration;
         //CMAttitude *attitude = motion.attitude;
         CMRotationRate rotationRate = motion.rotationRate;
-        double nowTimestamp = motion.timestamp - calibratedTimestamp;
-        
+        [self addFrame:motion];
         if (fabs(acceleration.x) > REPORT_ACC_THREHOLD || fabs(acceleration.y) > REPORT_ACC_THREHOLD || fabs(acceleration.z) > REPORT_ACC_THREHOLD) {
             NSLog(@"%f %f %f %f", motion.timestamp, acceleration.x, acceleration.y, acceleration.z);
         }
@@ -234,6 +239,7 @@ enum DetectionStates prevDetectionState = D_MaxPeak;
         } else {
             zeroing = false;
         }
+        
         switch (detectionState) {
             case D_Idle:
                 // long zero then listen peak
@@ -249,62 +255,148 @@ enum DetectionStates prevDetectionState = D_MaxPeak;
                     minValue1 = rotationRate.x;
                     minPeakTimestamp = nowTimestamp;
                 }
-                /*if (zeroing && goodZeroId != zeroId) {
+#ifdef DETECTION_DEBUG
+                if (zeroing && goodZeroId != zeroId) {
                     NSLog(@"minv %f", minValue1);
-                }*/
+                }
+#endif
                 // zero after min peak
                 if (zeroing && minValue1 < DETECTION_ROT_X_THRESHOLD_MIN) {
                     detectionState = D_MinPeak;
                     goodZeroId = zeroId;
                     maxValue1 = -1;
+                    break;
                 }
                 // zero -> non-zero & no peak -> zero ==> failed
                 if (goodZeroId != zeroId) {
                     detectionState = D_Idle;
+                    break;
                 }
                 break;
             case D_MinPeak:
                 // find max peak
                 if (rotationRate.x > maxValue1) {
                     maxValue1 = rotationRate.x;
-                    maxPeakTimestamp = nowTimestamp;
                 }
-                /*if (zeroing && goodZeroId != zeroId) {
+#ifdef DETECTION_DEBUG
+                if (zeroing && goodZeroId != zeroId) {
                     NSLog(@"maxv %f", maxValue1);
-                }*/
+                }
+#endif
                 // zero after max peak
                 if (zeroing && maxValue1 > DETECTION_ROT_X_THRESHOLD_MAX) {
                     detectionState = D_MaxPeak;
-                    goodZeroId = zeroId;
+                    maxPeakTimestamp = nowTimestamp;
+                    afterPeakEnergy = 0;
+                    break;
                 }
                 // zero -> non-zero & no peak -> zero ==> failed
                 if (goodZeroId != zeroId) {
                     detectionState = D_Idle;
+                    break;
                 }
                 // too long between two peaks
                 if (nowTimestamp - minPeakTimestamp > DETECTION_MAX_BETWEEN_PEAK_TIME) {
                     detectionState = D_Idle;
+                    break;
                 }
                 break;
             case D_MaxPeak:
-                // detect success
+                // detect after max peak energy
+                afterPeakEnergy += pow(rotationRate.x, 2);
                 if (nowTimestamp - maxPeakTimestamp > DETECTION_ZERO2ND_TIME) {
-                    NSLog(@"delimiter!\n\n\n\n");
-                    detectionState = D_Idle;
-                }
-                // zero last too short
-                if (!zeroing) {
+#ifdef DETECTION_DEBUG
+                    NSLog(@"energy: %f", afterPeakEnergy);
+#endif
+                    if (afterPeakEnergy < DETECTION_ENERGY_THRESHOLD) {
+                        NSLog(@"delimiter!");
+                    }
                     detectionState = D_Idle;
                 }
                 break;
         }
         
+#ifdef DETECTION_DEBUG
         if (detectionState != prevDetectionState) {
             NSLog(@"s%d", detectionState);
         }
         prevDetectionState = detectionState;
+#endif
     }];
     //NSLog(@"push motion ready");
+}
+
+
+
+// feature
+const int MOTION_ARRAY_CAPACITY = 50;
+const int MOTION_ARRAY_CUT_OFF = 25;
+NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attzArray;
+
+- (void)initArrays {
+    accxArray = [[NSMutableArray alloc] init];
+    accyArray = [[NSMutableArray alloc] init];
+    acczArray = [[NSMutableArray alloc] init];
+    attxArray = [[NSMutableArray alloc] init];
+    attyArray = [[NSMutableArray alloc] init];
+    attzArray = [[NSMutableArray alloc] init];
+}
+
+- (void)addFrame:(CMDeviceMotion *)motion {
+    [accxArray addObject:[NSNumber numberWithDouble:motion.userAcceleration.x]];
+    [accyArray addObject:[NSNumber numberWithDouble:motion.userAcceleration.y]];
+    [acczArray addObject:[NSNumber numberWithDouble:motion.userAcceleration.z]];
+    [attxArray addObject:[NSNumber numberWithDouble:motion.attitude.pitch]];
+    [attyArray addObject:[NSNumber numberWithDouble:motion.attitude.roll]];
+    [attzArray addObject:[NSNumber numberWithDouble:motion.attitude.yaw]];
+    if (accxArray.count >= MOTION_ARRAY_CAPACITY) {
+        [self processFrames];
+        [accxArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+        [accyArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+        [acczArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+        [attxArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+        [attyArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+        [attzArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+    }
+}
+
+- (NSArray *)getFeature:(NSArray *)array {
+    double qmin = 1e20, qmax = -1e20, qmean = 0, qstd = 0;
+    for (int i = 0; i < array.count; i++) {
+        double value = [array[i] doubleValue];
+        qmin = fmin(qmin, value);
+        qmax = fmax(qmax, value);
+        qmean += value;
+    }
+    qmean /= array.count;
+    for (int i = 0; i < array.count; i++) {
+        double value = [array[i] doubleValue];
+        qstd += pow(value - qmean, 2);
+    }
+    qstd = sqrt(qstd / array.count);
+    return [NSArray arrayWithObjects:[NSNumber numberWithDouble:qmin], [NSNumber numberWithDouble:qmax], [NSNumber numberWithDouble:qmean], [NSNumber numberWithDouble:qstd], nil];
+}
+
+- (void)processFrames {
+    NSMutableArray *features = [[NSMutableArray alloc] init];
+    [features addObjectsFromArray:[self getFeature:accxArray]];
+    [features addObjectsFromArray:[self getFeature:accyArray]];
+    [features addObjectsFromArray:[self getFeature:acczArray]];
+    [features addObjectsFromArray:[self getFeature:attxArray]];
+    [features addObjectsFromArray:[self getFeature:attyArray]];
+    [features addObjectsFromArray:[self getFeature:attzArray]];
+    int length = features.count * 2;
+    Byte bytes[length];
+    for (int i = 0; i < features.count; i++) {
+        double value = [features[i] doubleValue];
+        int intValue = (int)(value * 1000);
+        intValue = intValue >  32767 ?  32767 : intValue;
+        intValue = intValue < -32768 ? -32768 : intValue;
+        bytes[i * 2 + 0] = (intValue & 0xff00) >> 8;
+        bytes[i * 2 + 1] = intValue & 0x00ff;
+    }
+    NSData *data = [[NSData alloc] initWithBytes:bytes length:length];
+    [self sendDataByCoreBluetooth:data];
 }
 
 
@@ -336,6 +428,14 @@ enum DetectionStates prevDetectionState = D_MaxPeak;
 //
 //  core bluetooth
 //
+
+NSString *const CHARACTERISTIC_UUID_MESSAGE_RECV = @"FEF2";
+NSString *const CHARACTERISTIC_UUID_DATA_RECV = @"FEF3";
+CBCentralManager *centralManager;
+NSMutableArray<CBPeripheral*> *peripheralDevices;
+CBPeripheral *writablePeripheral;
+CBCharacteristic *characteristicMessageRecv, *characteristicDataRecv;
+
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central {
     switch (central.state) {
         case CBManagerStatePoweredOn:
@@ -398,14 +498,15 @@ enum DetectionStates prevDetectionState = D_MaxPeak;
 
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(nonnull CBService *)service error:(nullable NSError *)error {
     for (CBCharacteristic *characteristic in service.characteristics) {
-        NSLog(@"find characristic %@", characteristic.UUID);
         CBCharacteristicProperties properties = characteristic.properties;
         if (properties & CBCharacteristicPropertyRead) {
             // do nothing
         }
         if (properties & CBCharacteristicPropertyWrite) {
-            subscribedPeripheral = peripheral;
-            subscribedCharacteristic = characteristic;
+            NSLog(@"writable: %@", characteristic.UUID);
+            if ([[NSString stringWithFormat:@"%@", characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_MESSAGE_RECV]) characteristicMessageRecv = characteristic;
+            if ([[NSString stringWithFormat:@"%@", characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_DATA_RECV]) characteristicDataRecv = characteristic;
+            writablePeripheral = peripheral;
         }
         if (properties & CBCharacteristicPropertyNotify) {
             NSLog(@"subscribe: %@", characteristic.UUID);
@@ -417,10 +518,16 @@ enum DetectionStates prevDetectionState = D_MaxPeak;
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
     NSString *command = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];
     [self parseCommand:command];
+    if (error) NSLog(@"peripheral error %@", error);
 }
 
+// can only send maximum 512 bytes?
 - (void)sendMessageByCoreBluetooth:(NSString *)message {
-    [subscribedPeripheral writeValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:subscribedCharacteristic type:CBCharacteristicWriteWithoutResponse];
+    [writablePeripheral writeValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:characteristicMessageRecv type:CBCharacteristicWriteWithoutResponse];
+}
+
+- (void)sendDataByCoreBluetooth:(NSData *)data {
+    [writablePeripheral writeValue:data forCharacteristic:characteristicDataRecv type:CBCharacteristicWriteWithoutResponse];
 }
 
 

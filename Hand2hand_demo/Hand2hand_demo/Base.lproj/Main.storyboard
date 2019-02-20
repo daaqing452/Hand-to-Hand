@@ -26,7 +26,7 @@
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="N4b-vw-Yg3">
-                                <rect key="frame" x="16" y="114" width="99" height="37"/>
+                                <rect key="frame" x="16" y="106" width="99" height="45"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
@@ -35,12 +35,34 @@
                                     <action selector="doClickButtonCalibration:" destination="BYZ-38-t0r" eventType="touchUpInside" id="EFh-9s-11l"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a81-bm-MXO" userLabel="Button Clear">
+                                <rect key="frame" x="138" y="106" width="99" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="Clear"/>
+                                <connections>
+                                    <action selector="doClickButtonClear:" destination="BYZ-38-t0r" eventType="touchUpInside" id="BiJ-Hv-DbB"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ejn-oQ-cWm" userLabel="Button Test">
+                                <rect key="frame" x="16" y="53" width="99" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="Test"/>
+                                <connections>
+                                    <action selector="doClickButtonTest:" destination="BYZ-38-t0r" eventType="touchUpInside" id="lv6-1X-tb3"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="Uee-0j-aNJ"/>
                     </view>
                     <connections>
                         <outlet property="buttonCalibration" destination="N4b-vw-Yg3" id="MFA-Jq-y6m"/>
+                        <outlet property="buttonClear" destination="a81-bm-MXO" id="2o4-AP-ImU"/>
+                        <outlet property="buttonTest" destination="Ejn-oQ-cWm" id="njC-jI-sYX"/>
                         <outlet property="textInfo" destination="ITG-Cz-MzG" id="a46-o6-eEV"/>
                     </connections>
                 </viewController>

@@ -201,10 +201,10 @@ NSString *sharedPath;
 //  core bluetooth
 //
 NSString *const SERVICE_UUID = @"FEF0";
-NSString *const CHARACTERISTIC_UUID_NOTIFY = @"FEF1";
-NSString *const CHARACTERISTIC_UUID_READ_WRITE = @"FEF2";
+NSString *const CHARACTERISTIC_UUID_MESSAGE_SEND = @"FEF1";
+NSString *const CHARACTERISTIC_UUID_MESSAGE_RECV = @"FEF2";
 CBPeripheralManager *peripheralManager;
-CBMutableCharacteristic *sendCharacteristic;
+CBMutableCharacteristic *characteristicMessageSend;
 
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
@@ -221,14 +221,12 @@ CBMutableCharacteristic *sendCharacteristic;
 }
 
 - (void)createServices {
-    CBMutableCharacteristic *characteristicNotify = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_NOTIFY] properties:CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
+    characteristicMessageSend = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_MESSAGE_SEND] properties:CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
     
-    CBMutableCharacteristic *characteristicReadWrite = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_READ_WRITE] properties:CBCharacteristicPropertyRead | CBCharacteristicPropertyWrite | CBCharacteristicPropertyWriteWithoutResponse value:nil permissions:CBAttributePermissionsReadable | CBAttributePermissionsWriteable];
-    
-    sendCharacteristic = characteristicNotify;
+    CBMutableCharacteristic *characteristicMessageRecv = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_MESSAGE_RECV] properties:CBCharacteristicPropertyWrite | CBCharacteristicPropertyWriteWithoutResponse value:nil permissions:CBAttributePermissionsWriteable];
     
     CBMutableService *service0 = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:SERVICE_UUID] primary:YES];
-    [service0 setCharacteristics:@[characteristicNotify, characteristicReadWrite]];
+    [service0 setCharacteristics:@[characteristicMessageSend, characteristicMessageRecv]];
     
     [peripheralManager addService:service0];
 }
@@ -248,7 +246,7 @@ CBMutableCharacteristic *sendCharacteristic;
 }
 
 - (void)sendMessageByCoreBluetooth:(NSString *)message {
-    [peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:sendCharacteristic onSubscribedCentrals:nil];
+    [peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:characteristicMessageSend onSubscribedCentrals:nil];
 }
 
 

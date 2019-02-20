@@ -18,6 +18,8 @@
 
 @property (weak, nonatomic) IBOutlet UITextView *textInfo;
 @property (weak, nonatomic) IBOutlet UIButton *buttonCalibration;
+@property (weak, nonatomic) IBOutlet UIButton *buttonTest;
+@property (weak, nonatomic) IBOutlet UIButton *buttonClear;
 
 @end
 
@@ -71,6 +73,14 @@ NSBundle *bundle;
     UILog(@"start calibration");
 }
 
+- (IBAction)doClickButtonTest:(id)sender {
+    [self sendMessageByCoreBluetooth:[NSString stringWithFormat:@"hello %ld", random() % 100]];
+}
+
+- (IBAction)doClickButtonClear:(id)sender {
+    [self.textInfo setText:@""];
+}
+
 - (void)showInfoInUI:(NSString *)newInfo {
     dispatch_async(dispatch_get_main_queue(),^{
         [self showInfoInUI:newInfo newline:true];
@@ -100,7 +110,7 @@ NSBundle *bundle;
     NSData *data = [fileManager contentsAtPath:filePath];
     NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-    NSLog(@"%@", [s substringToIndex:10]);
+    NSLog(@"%@", [s substringToIndex:(random() % 10 + 1)]);
     return s;
 }
 
@@ -154,10 +164,11 @@ NSBundle *bundle;
 //  core bluetooth
 //
 NSString *const SERVICE_UUID = @"FEF0";
-NSString *const CHARACTERISTIC_UUID_NOTIFY = @"FEF1";
-NSString *const CHARACTERISTIC_UUID_READ_WRITE = @"FEF2";
+NSString *const CHARACTERISTIC_UUID_MESSAGE_SEND = @"FEF1";
+NSString *const CHARACTERISTIC_UUID_MESSAGE_RECV = @"FEF2";
+NSString *const CHARACTERISTIC_UUID_DATA_RECV = @"FEF3";
 CBPeripheralManager *peripheralManager;
-CBMutableCharacteristic *sendCharacteristic;
+CBMutableCharacteristic *characteristicMessageSend;
 
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
@@ -174,14 +185,14 @@ CBMutableCharacteristic *sendCharacteristic;
 }
 
 - (void)createServices {
-    CBMutableCharacteristic *characteristicNotify = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_NOTIFY] properties:CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
+    characteristicMessageSend = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_MESSAGE_SEND] properties:CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
     
-    CBMutableCharacteristic *characteristicReadWrite = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_READ_WRITE] properties:CBCharacteristicPropertyRead | CBCharacteristicPropertyWrite | CBCharacteristicPropertyWriteWithoutResponse value:nil permissions:CBAttributePermissionsReadable | CBAttributePermissionsWriteable];
-    
-    sendCharacteristic = characteristicNotify;
+    CBMutableCharacteristic *characteristicMessageRecv = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_MESSAGE_RECV] properties:CBCharacteristicPropertyWrite | CBCharacteristicPropertyWriteWithoutResponse value:nil permissions:CBAttributePermissionsWriteable];
+                                                          
+    CBMutableCharacteristic *characteristicDataRecv = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:CHARACTERISTIC_UUID_DATA_RECV] properties:CBCharacteristicPropertyWrite | CBCharacteristicPropertyWriteWithoutResponse value:nil permissions:CBAttributePermissionsWriteable];
     
     CBMutableService *service0 = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:SERVICE_UUID] primary:YES];
-    [service0 setCharacteristics:@[characteristicNotify, characteristicReadWrite]];
+    [service0 setCharacteristics:@[characteristicMessageSend, characteristicMessageRecv, characteristicDataRecv]];
     
     [peripheralManager addService:service0];
 }
@@ -196,12 +207,17 @@ CBMutableCharacteristic *sendCharacteristic;
 
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
     CBATTRequest *request = requests[0];
-    NSString *message = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
-    [self parseCommand:message];
+    if ([[NSString stringWithFormat:@"%@", request.characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_MESSAGE_RECV]) {
+        NSString *command = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
+        [self parseCommand:command];
+    }
+    if ([[NSString stringWithFormat:@"%@", request.characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_DATA_RECV]) {
+        UILog(@"data %ld: %lu", random() % 100, request.value.length);
+    }
 }
 
 - (void)sendMessageByCoreBluetooth:(NSString *)message {
-    [peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:sendCharacteristic onSubscribedCentrals:nil];
+    [peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:characteristicMessageSend onSubscribedCentrals:nil];
 }
 
 @end
