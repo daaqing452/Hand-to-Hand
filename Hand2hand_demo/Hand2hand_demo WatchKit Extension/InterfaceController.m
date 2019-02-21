@@ -80,6 +80,9 @@ bool watchConnectivityTestFlag;
     } else if ([command isEqualToString:@"start calibration"]) {
         calibrationState = C_Listening;
         minValue0 = 0;
+    } else if ([command isEqualToString:@"start recognition"]) {
+        // need modify
+        recognizing = !recognizing;
     } else if ([command isEqualToString:@"hello"]) {
         LBLog(@"hello");
     } else {
@@ -92,6 +95,14 @@ bool watchConnectivityTestFlag;
         [self sendMessageByCoreBluetooth:message];
     } else {
         [self sendMessageByWatchConnectivity:message];
+    }
+}
+
+- (void)sendData:(NSData *)data {
+    if ([communication isEqualToString:@"core bluetooth"]) {
+        [self sendDataByCoreBluetooth:data];
+    } else {
+        [self sendDataByWatchConnectivity:@{@"message": @"features", @"data": data}];
     }
 }
 
@@ -133,7 +144,7 @@ bool watchConnectivityTestFlag;
         wcsession.delegate = self;
         [wcsession activateSession];
         watchConnectivityTestFlag = false;
-        //[self sendMessageByWatchConnectivity:@"test watch connectivity"];
+        [self sendMessageByWatchConnectivity:@"test watch connectivity"];
         [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timeredWatchConnectivity:) userInfo:nil repeats:NO];
     }
 }
@@ -206,9 +217,12 @@ double afterPeakEnergy;
         CMAcceleration acceleration = motion.userAcceleration;
         //CMAttitude *attitude = motion.attitude;
         CMRotationRate rotationRate = motion.rotationRate;
-        [self addFrame:motion];
         if (fabs(acceleration.x) > REPORT_ACC_THREHOLD || fabs(acceleration.y) > REPORT_ACC_THREHOLD || fabs(acceleration.z) > REPORT_ACC_THREHOLD) {
             NSLog(@"%f %f %f %f", motion.timestamp, acceleration.x, acceleration.y, acceleration.z);
+        }
+        
+        if (recognizing) {
+            [self addFrame:motion];
         }
         
         // calibration
@@ -328,9 +342,10 @@ double afterPeakEnergy;
 
 
 
-// feature
+// recognition
 const int MOTION_ARRAY_CAPACITY = 50;
 const int MOTION_ARRAY_CUT_OFF = 25;
+bool recognizing = false;
 NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attzArray;
 
 - (void)initArrays {
@@ -389,14 +404,17 @@ NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attz
     Byte bytes[length];
     for (int i = 0; i < features.count; i++) {
         double value = [features[i] doubleValue];
-        int intValue = (int)(value * 1000);
+        int intValue = round(value * 1000);
         intValue = intValue >  32767 ?  32767 : intValue;
         intValue = intValue < -32768 ? -32768 : intValue;
         bytes[i * 2 + 0] = (intValue & 0xff00) >> 8;
         bytes[i * 2 + 1] = intValue & 0x00ff;
+        //NSLog(@"%d: %f %d %x %x", i, value, intValue, bytes[i * 2 + 0], bytes[i * 2 + 1]);
     }
     NSData *data = [[NSData alloc] initWithBytes:bytes length:length];
-    [self sendDataByCoreBluetooth:data];
+    NSLog(@"z: %f %f %f %f %f", [features[0] doubleValue], [features[1] doubleValue], [features[2] doubleValue], [features[22] doubleValue], [features[23] doubleValue]);
+    //NSLog(@"zz: %x %x %x %x %x %x %x %x %x %x", bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[44], bytes[45], bytes[46], bytes[47]);
+    [self sendData:data];
 }
 
 

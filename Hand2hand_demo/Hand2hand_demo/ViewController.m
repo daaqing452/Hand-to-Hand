@@ -20,6 +20,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *buttonCalibration;
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
 @property (weak, nonatomic) IBOutlet UIButton *buttonClear;
+@property (weak, nonatomic) IBOutlet UIButton *buttonRecognition;
 
 @end
 
@@ -28,6 +29,7 @@
 
 WCSession *wcsession;
 NSBundle *bundle;
+Classifier *classifier;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -42,11 +44,10 @@ NSBundle *bundle;
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"MakeBuddle" ofType:@"bundle"]];
     
-    NSString *fileName = [bundle pathForResource:@"a" ofType:@"model"];
-    Classifier *classifier = [[Classifier alloc] initWithSVM:fileName];
-    [classifier work];
+    NSString *fileName = [bundle pathForResource:@"opencv" ofType:@"model"];
+    classifier = [[Classifier alloc] initWithSVM:fileName];
     
-    [self readDataFromBundle:@"log-3-WatchL"];
+    [self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
     
     UILog(@"init finished");
 }
@@ -62,6 +63,20 @@ NSBundle *bundle;
     }
 }
 
+- (void)processFrames:(NSData *)data ofType:(NSString *)ofType {
+    NSMutableArray *features = [[NSMutableArray alloc] init];
+    Byte *bytes = (Byte *)data.bytes;
+    unsigned long length = data.length;
+    for (int i = 0; i < length; i++) {
+        short b0 = bytes[i * 2 + 0];
+        short b1 = bytes[i * 2 + 1];
+        short shortValue = (b0 << 8) | b1;
+        double value = shortValue / 1000.0;
+        [features addObject:[NSNumber numberWithDouble:value]];
+    }
+    UILog(@"z: %f %f %f %f %f", [features[0] doubleValue], [features[1] doubleValue], [features[2] doubleValue], [features[22] doubleValue], [features[23] doubleValue]);
+    //[classifier classify:featurues];
+}
 
 
 //
@@ -79,6 +94,11 @@ NSBundle *bundle;
 
 - (IBAction)doClickButtonClear:(id)sender {
     [self.textInfo setText:@""];
+}
+
+- (IBAction)doClickButtonRecognition:(id)sender {
+    [self sendMessageByWatchConnectivity:@"start recognition"];
+    [self sendMessageByCoreBluetooth:@"start recognition"];
 }
 
 - (void)showInfoInUI:(NSString *)newInfo {
@@ -101,8 +121,8 @@ NSBundle *bundle;
 //
 //  file
 //
-- (NSString *)readDataFromBundle:(NSString *)fileName {
-    NSString *filePath = [bundle pathForResource:fileName ofType:@"txt"];
+- (NSString *)readDataFromBundle:(NSString *)fileName ofType:(NSString *)ofType {
+    NSString *filePath = [bundle pathForResource:fileName ofType:ofType];
     
     NSLog(@"%@", filePath);
     
@@ -134,7 +154,11 @@ NSBundle *bundle;
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
     //replyHandler(@{@"message": @"yes"});
     NSString *message = dict[@"message"];
-    [self parseCommand:message];
+    if ([message isEqualToString:@"features"]) {
+        [self processFrames:dict[@"data"] ofType:@"watch"];
+    } else {
+        [self parseCommand:message];
+    }
 }
 
 - (void)session:(nonnull WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(nullable NSError *)error {
@@ -212,7 +236,8 @@ CBMutableCharacteristic *characteristicMessageSend;
         [self parseCommand:command];
     }
     if ([[NSString stringWithFormat:@"%@", request.characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_DATA_RECV]) {
-        UILog(@"data %ld: %lu", random() % 100, request.value.length);
+        UILog(@"parse frames");
+        [self processFrames:request.value ofType:@"core"];
     }
 }
 

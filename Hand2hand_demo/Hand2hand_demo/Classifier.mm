@@ -33,8 +33,8 @@ using namespace cv::ml;
     
     for (int i = 0; i < 9; i++) {
         Mat nowData = trainData(Range(i,i+1), Range().all());
-        float result = svm->predict(nowData);
-        NSLog(@"%d: %f", i, result);
+        /*float result = svm->predict(nowData);
+        NSLog(@"%d: %f", i, result);*/
     }
     
     /*Ptr<SVM> svm = SVM::create();
@@ -45,8 +45,11 @@ using namespace cv::ml;
     return self;
 }
 
-- (void)work {
-    
+- (void)classify:(NSArray *)features {
+    unsigned long length = features.count;
+    double *data = new double[length];
+    for (int i = 0; i < length; i++) data[i] = [features[i] doubleValue];
+    delete[] data;
 }
 
 @end

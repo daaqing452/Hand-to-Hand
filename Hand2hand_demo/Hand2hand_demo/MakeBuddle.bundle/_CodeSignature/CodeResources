@@ -4,28 +4,17 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>a.model</key>
-		<data>
-		yjlm/tsgcxnaOMyHL1Wr2xQ06YE=
-		</data>
 		<key>log-3-WatchL.txt</key>
 		<data>
 		ipdMD0UriFXQh5ZNp26SwqMkb7Y=
 		</data>
+		<key>opencv.model</key>
+		<data>
+		6jmf6FA0ZYv5HrB1jlWyqXRZMyU=
+		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>a.model</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			yjlm/tsgcxnaOMyHL1Wr2xQ06YE=
-			</data>
-			<key>hash2</key>
-			<data>
-			+qxcm9q8VkCdCRXD8/UI0C3dI+oQUmFfFEGjBUc5DmU=
-			</data>
-		</dict>
 		<key>log-3-WatchL.txt</key>
 		<dict>
 			<key>hash</key>
@@ -35,6 +24,17 @@
 			<key>hash2</key>
 			<data>
 			yaF/6Vn1FKLpQQ0lBFKMJOpto0eYOx0lDnwKKT03bOQ=
+			</data>
+		</dict>
+		<key>opencv.model</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			6jmf6FA0ZYv5HrB1jlWyqXRZMyU=
+			</data>
+			<key>hash2</key>
+			<data>
+			W5NjJqmN14nvRD507+hFZk7Wr/4ijDL242IOftFsD78=
 			</data>
 		</dict>
 	</dict>
