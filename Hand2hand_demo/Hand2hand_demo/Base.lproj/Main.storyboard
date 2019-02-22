@@ -46,7 +46,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ejn-oQ-cWm" userLabel="Button Test">
-                                <rect key="frame" x="16" y="53" width="99" height="45"/>
+                                <rect key="frame" x="260" y="53" width="99" height="45"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
@@ -55,14 +55,24 @@
                                     <action selector="doClickButtonTest:" destination="BYZ-38-t0r" eventType="touchUpInside" id="lv6-1X-tb3"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lTC-Y4-eKL" userLabel="Button Recognition">
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lTC-Y4-eKL" userLabel="Button Recognition On">
+                                <rect key="frame" x="16" y="53" width="99" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="Recog. On"/>
+                                <connections>
+                                    <action selector="doClickButtonRecognitionOn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="2ZN-AE-Qgh"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vG3-61-aqz" userLabel="Button Recognition Off">
                                 <rect key="frame" x="138" y="53" width="99" height="45"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <state key="normal" title="Recognition"/>
+                                <state key="normal" title="Recog. Off"/>
                                 <connections>
-                                    <action selector="doClickButtonRecognition:" destination="BYZ-38-t0r" eventType="touchUpInside" id="iTJ-B9-QBA"/>
+                                    <action selector="doClickButtonRecognitionOff:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Fzi-XV-E9K"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -72,7 +82,8 @@
                     <connections>
                         <outlet property="buttonCalibration" destination="N4b-vw-Yg3" id="MFA-Jq-y6m"/>
                         <outlet property="buttonClear" destination="a81-bm-MXO" id="2o4-AP-ImU"/>
-                        <outlet property="buttonRecognition" destination="lTC-Y4-eKL" id="tdx-yM-Wai"/>
+                        <outlet property="buttonRecognitionOff" destination="vG3-61-aqz" id="EfV-ka-Vxu"/>
+                        <outlet property="buttonRecognitionOn" destination="lTC-Y4-eKL" id="JLI-mr-IJv"/>
                         <outlet property="buttonTest" destination="Ejn-oQ-cWm" id="njC-jI-sYX"/>
                         <outlet property="textInfo" destination="ITG-Cz-MzG" id="a46-o6-eEV"/>
                     </connections>

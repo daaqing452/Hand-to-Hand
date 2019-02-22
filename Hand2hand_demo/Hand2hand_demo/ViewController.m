@@ -20,7 +20,8 @@
 @property (weak, nonatomic) IBOutlet UIButton *buttonCalibration;
 @property (weak, nonatomic) IBOutlet UIButton *buttonTest;
 @property (weak, nonatomic) IBOutlet UIButton *buttonClear;
-@property (weak, nonatomic) IBOutlet UIButton *buttonRecognition;
+@property (weak, nonatomic) IBOutlet UIButton *buttonRecognitionOn;
+@property (weak, nonatomic) IBOutlet UIButton *buttonRecognitionOff;
 
 @end
 
@@ -30,6 +31,7 @@
 WCSession *wcsession;
 NSBundle *bundle;
 Classifier *classifier;
+NSMutableArray *featuresLeft = nil, *featuresRight = nil;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -63,19 +65,32 @@ Classifier *classifier;
     }
 }
 
-- (void)processFrames:(NSData *)data ofType:(NSString *)ofType {
+- (void)processFrames:(NSData *)data fromType:(NSString *)fromType {
     NSMutableArray *features = [[NSMutableArray alloc] init];
     Byte *bytes = (Byte *)data.bytes;
     unsigned long length = data.length;
-    for (int i = 0; i < length; i++) {
-        short b0 = bytes[i * 2 + 0];
-        short b1 = bytes[i * 2 + 1];
+    for (int i = 1; i < length; i += 2) {
+        short b0 = bytes[i + 0];
+        short b1 = bytes[i + 1];
         short shortValue = (b0 << 8) | b1;
-        double value = shortValue / 1000.0;
-        [features addObject:[NSNumber numberWithDouble:value]];
+        float value = shortValue / 1000.0;
+        [features addObject:[NSNumber numberWithFloat:value]];
     }
-    UILog(@"z: %f %f %f %f %f", [features[0] doubleValue], [features[1] doubleValue], [features[2] doubleValue], [features[22] doubleValue], [features[23] doubleValue]);
-    //[classifier classify:featurues];
+    if (bytes[0] == 0) {
+        featuresLeft = features;
+    } else if (bytes[0] == 1) {
+        featuresRight = features;
+    } else {
+        UILog(@"recv data from unknown watch");
+    }
+    if (featuresLeft != nil && featuresRight != nil) {
+        [featuresLeft addObjectsFromArray:featuresRight];
+        int result = [classifier classify:featuresLeft];
+        //UILog(@"ans: %d", result);
+        NSLog(@"ans: %d", result);
+        featuresLeft = nil;
+        featuresRight = nil;
+    }
 }
 
 
@@ -96,9 +111,14 @@ Classifier *classifier;
     [self.textInfo setText:@""];
 }
 
-- (IBAction)doClickButtonRecognition:(id)sender {
-    [self sendMessageByWatchConnectivity:@"start recognition"];
-    [self sendMessageByCoreBluetooth:@"start recognition"];
+- (IBAction)doClickButtonRecognitionOn:(id)sender {
+    [self sendMessageByWatchConnectivity:@"recognition on"];
+    [self sendMessageByCoreBluetooth:@"recognition on"];
+}
+
+- (IBAction)doClickButtonRecognitionOff:(id)sender {
+    [self sendMessageByWatchConnectivity:@"recognition off"];
+    [self sendMessageByCoreBluetooth:@"recognition off"];
 }
 
 - (void)showInfoInUI:(NSString *)newInfo {
@@ -155,7 +175,7 @@ Classifier *classifier;
     //replyHandler(@{@"message": @"yes"});
     NSString *message = dict[@"message"];
     if ([message isEqualToString:@"features"]) {
-        [self processFrames:dict[@"data"] ofType:@"watch"];
+        [self processFrames:dict[@"data"] fromType:@"watch connectivity"];
     } else {
         [self parseCommand:message];
     }
@@ -192,7 +212,7 @@ NSString *const CHARACTERISTIC_UUID_MESSAGE_SEND = @"FEF1";
 NSString *const CHARACTERISTIC_UUID_MESSAGE_RECV = @"FEF2";
 NSString *const CHARACTERISTIC_UUID_DATA_RECV = @"FEF3";
 CBPeripheralManager *peripheralManager;
-CBMutableCharacteristic *characteristicMessageSend;
+CBMutableCharacteristic *characteristicMessageSend = nil;
 
 - (void)peripheralManagerDidUpdateState:(nonnull CBPeripheralManager *)peripheral {
     switch (peripheral.state) {
@@ -236,12 +256,12 @@ CBMutableCharacteristic *characteristicMessageSend;
         [self parseCommand:command];
     }
     if ([[NSString stringWithFormat:@"%@", request.characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_DATA_RECV]) {
-        UILog(@"parse frames");
-        [self processFrames:request.value ofType:@"core"];
+        [self processFrames:request.value fromType:@"core bluetooth"];
     }
 }
 
 - (void)sendMessageByCoreBluetooth:(NSString *)message {
+    if (characteristicMessageSend == nil) return;
     [peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:characteristicMessageSend onSubscribedCentrals:nil];
 }
 

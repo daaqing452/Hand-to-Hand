@@ -19,6 +19,6 @@
 
 - (id)initWithSVM:(NSString *)filePath;
 
-- (void)classify:(NSMutableArray *)features;
+- (int)classify:(NSMutableArray *)features;
 
 @end
