@@ -254,7 +254,6 @@ double afterPeakEnergy;
         } else {
             zeroing = false;
         }
-        
         switch (detectionState) {
             case D_Idle:
                 // long zero then listen peak
@@ -324,7 +323,7 @@ double afterPeakEnergy;
                     NSLog(@"energy: %f", afterPeakEnergy);
 #endif
                     if (afterPeakEnergy < DETECTION_ENERGY_THRESHOLD) {
-                        NSLog(@"delimiter!");
+                        [self sendMessage:@"detect delimiter"];
                     }
                     detectionState = D_Idle;
                 }

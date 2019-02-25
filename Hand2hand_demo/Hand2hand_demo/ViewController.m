@@ -33,6 +33,13 @@ NSBundle *bundle;
 Classifier *classifier;
 NSMutableArray *featuresLeft = nil, *featuresRight = nil;
 
+// detect & recognition
+const double DELIMITER_MAX_BETWEEN_TIME = 0.3;
+const double RECOGNITION_EXPIRE_TIME = 3.0;
+double delimiterDateWC = -1, delimiterDateCB = -1;
+double recognitionStartDate = -1;
+double recognizing = false;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -54,14 +61,29 @@ NSMutableArray *featuresLeft = nil, *featuresRight = nil;
     UILog(@"init finished");
 }
 
-- (void)parseCommand:(NSString *)command {
+- (void)parseCommand:(NSString *)command fromType:(NSString *)fromType {
     if ([command isEqualToString:@"test"]) {
         [self alert:command];
     } else if ([command isEqualToString:@"test watch connectivity"]) {
         [self sendMessageByWatchConnectivity:@"test watch connectivity success"];
         UILog(@"watch connectivity connected");
+    } else if ([command isEqualToString:@"detect delimiter"]) {
+        UILog(@"delimiter %@", fromType);
+        double dateNow = [[NSDate date] timeIntervalSince1970];
+        if ([fromType isEqualToString:@"WC"]) {
+            delimiterDateWC = dateNow;
+        } else if ([fromType isEqualToString:@"CB"]) {
+            delimiterDateCB = dateNow;
+        } else {
+            UILog(@"detect delimiter error");
+        }
+        if (fabs(delimiterDateWC - delimiterDateCB) < DELIMITER_MAX_BETWEEN_TIME) {
+            UILog(@"recognition start");
+            recognitionStartDate = dateNow;
+            [self doClickButtonRecognitionOn:nil];
+        }
     } else {
-        UILog(@"recv: %@", command);
+        UILog(@"recv %@: %@", fromType, command);
     }
 }
 
@@ -91,6 +113,13 @@ NSMutableArray *featuresLeft = nil, *featuresRight = nil;
         featuresLeft = nil;
         featuresRight = nil;
     }
+    
+    // expire
+    double dateNow = [[NSDate date] timeIntervalSince1970];
+    if (recognizing && dateNow - recognitionStartDate > RECOGNITION_EXPIRE_TIME) {
+        UILog(@"recognition expire");
+        [self doClickButtonRecognitionOff:nil];
+    }
 }
 
 
@@ -112,11 +141,13 @@ NSMutableArray *featuresLeft = nil, *featuresRight = nil;
 }
 
 - (IBAction)doClickButtonRecognitionOn:(id)sender {
+    recognizing = true;
     [self sendMessageByWatchConnectivity:@"recognition on"];
     [self sendMessageByCoreBluetooth:@"recognition on"];
 }
 
 - (IBAction)doClickButtonRecognitionOff:(id)sender {
+    recognizing = false;
     [self sendMessageByWatchConnectivity:@"recognition off"];
     [self sendMessageByCoreBluetooth:@"recognition off"];
 }
@@ -177,7 +208,7 @@ NSMutableArray *featuresLeft = nil, *featuresRight = nil;
     if ([message isEqualToString:@"features"]) {
         [self processFrames:dict[@"data"] fromType:@"watch connectivity"];
     } else {
-        [self parseCommand:message];
+        [self parseCommand:message fromType:@"WC"];
     }
 }
 
@@ -253,7 +284,7 @@ CBMutableCharacteristic *characteristicMessageSend = nil;
     CBATTRequest *request = requests[0];
     if ([[NSString stringWithFormat:@"%@", request.characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_MESSAGE_RECV]) {
         NSString *command = [[NSString alloc] initWithData:request.value encoding:NSUTF8StringEncoding];
-        [self parseCommand:command];
+        [self parseCommand:command fromType:@"CB"];
     }
     if ([[NSString stringWithFormat:@"%@", request.characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_DATA_RECV]) {
         [self processFrames:request.value fromType:@"core bluetooth"];
