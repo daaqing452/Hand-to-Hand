@@ -24,32 +24,25 @@ using namespace cv::ml;
 
 @implementation Classifier
 
+const int FEATURES_LENGTH = 48;
+
 Ptr<SVM> svm;
 
 - (id)initWithSVM:(NSString *)filePath {
     self = [super init];
     svm = SVM::load([filePath UTF8String]);
-    
-    /*float trainDataC[][2] = {{0,0},{0,1},{1,0},{1,1}};
-    Mat trainData(9, 2, CV_32F, trainDataC);
-    for (int i = 0; i < 9; i++) {
-        Mat nowData = trainData(Range(i,i+1), Range().all());
-        float result = svm->predict(nowData);
-        NSLog(@"%d: %f", i, result);
-    }*/
-    
-    /*Ptr<SVM> svm = SVM::create();
-    svm->setKernel(SVM::RBF);
-    svm->setType(SVM::NU_SVC);*/
-    
     return self;
 }
 
 - (int)classify:(NSArray *)features {
     int length = (int)features.count;
-    float *dataArray = new float[length];
-    for (int i = 0; i < length; i++) dataArray[i] = [features[i] floatValue];
-    Mat dataMat = Mat(1, length, CV_32F, dataArray);
+    if (length != FEATURES_LENGTH) {
+        NSLog(@"feature length error");
+        return 0;
+    }
+    float *dataArray = new float[FEATURES_LENGTH];
+    for (int i = 0; i < FEATURES_LENGTH; i++) dataArray[i] = [features[i] floatValue];
+    Mat dataMat = Mat(1, FEATURES_LENGTH, CV_32F, dataArray);
     float result = svm->predict(dataMat);
     delete[] dataArray;
     return result;

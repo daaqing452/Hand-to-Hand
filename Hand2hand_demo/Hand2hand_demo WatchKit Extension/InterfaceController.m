@@ -345,6 +345,9 @@ double afterPeakEnergy;
 // recognition
 const int MOTION_ARRAY_CAPACITY = 50;
 const int MOTION_ARRAY_CUT_OFF = 25;
+const int ENERGY_BIN_NUM = 5;
+const int ENERGY_BIN_CAPACITY = MOTION_ARRAY_CAPACITY / ENERGY_BIN_NUM;
+const double ENERGY_THRESHOLD = 10.0;
 bool recognizing = false;
 NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attzArray;
 
@@ -400,9 +403,25 @@ NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attz
     [features addObjectsFromArray:[self getFeature:attxArray]];
     [features addObjectsFromArray:[self getFeature:attyArray]];
     [features addObjectsFromArray:[self getFeature:attzArray]];
+    
+    // check energy
+    double energys[ENERGY_BIN_NUM];
+    for (int i = 0; i < ENERGY_BIN_NUM; i += ENERGY_BIN_CAPACITY) {
+        double energy = 0;
+        for (int j = i; j < i + ENERGY_BIN_CAPACITY; j++) {
+            energy += pow([accxArray[j] doubleValue], 2) + pow([accyArray[j] doubleValue], 2) + pow([acczArray[j] doubleValue], 2);
+        }
+        energys[i / ENERGY_BIN_CAPACITY] = energy;
+    }
+    // half signal at front
+    if (energys[0] >= ENERGY_THRESHOLD && energys[1] < ENERGY_THRESHOLD && energys[2] < ENERGY_THRESHOLD && energys[3] < ENERGY_THRESHOLD && energys[4] < ENERGY_THRESHOLD) return;
+    // half signal at back
+    if (energys[0] < ENERGY_THRESHOLD && energys[1] < ENERGY_THRESHOLD && energys[2] < ENERGY_THRESHOLD && energys[3] < ENERGY_THRESHOLD && energys[4] >= ENERGY_THRESHOLD) return;
+    
     int length = features.count * 2 + 1;
     Byte bytes[length];
     bytes[0] = [device.name isEqualToString:@"Watch L"] ? 0 : ([device.name isEqualToString:@"Watch R"] ? 1 : 2);
+    
     for (int i = 0; i < features.count; i++) {
         double value = [features[i] doubleValue];
         int intValue = round(value * 1000);
@@ -411,6 +430,7 @@ NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attz
         bytes[i * 2 + 1] = (intValue & 0xff00) >> 8;
         bytes[i * 2 + 2] = intValue & 0x00ff;
     }
+    
     NSData *data = [[NSData alloc] initWithBytes:bytes length:length];
     [self sendData:data];
 }

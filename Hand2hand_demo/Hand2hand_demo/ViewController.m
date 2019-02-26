@@ -31,13 +31,17 @@
 WCSession *wcsession;
 NSBundle *bundle;
 Classifier *classifier;
-NSMutableArray *featuresLeft = nil, *featuresRight = nil;
 
-// detect & recognition
+// detect
 const double DELIMITER_MAX_BETWEEN_TIME = 0.3;
+double delimiterTimeWC = -1, delimiterTimeCB = -1;
+
+// recognition
 const double RECOGNITION_EXPIRE_TIME = 3.0;
-double delimiterDateWC = -1, delimiterDateCB = -1;
-double recognitionStartDate = -1;
+const double FEATURES_MAX_BETWEEN_TIME = 0.25;
+NSMutableArray *featuresLeft = nil, *featuresRight = nil;
+double featuresLeftArriveTime, featuresRightArriveTime;
+double recognitionStartTime = -1;
 double recognizing = false;
 
 - (void)viewDidLoad {
@@ -69,17 +73,17 @@ double recognizing = false;
         UILog(@"watch connectivity connected");
     } else if ([command isEqualToString:@"detect delimiter"]) {
         UILog(@"delimiter %@", fromType);
-        double dateNow = [[NSDate date] timeIntervalSince1970];
+        double timeNow = [[NSDate date] timeIntervalSince1970];
         if ([fromType isEqualToString:@"WC"]) {
-            delimiterDateWC = dateNow;
+            delimiterTimeWC = timeNow;
         } else if ([fromType isEqualToString:@"CB"]) {
-            delimiterDateCB = dateNow;
+            delimiterTimeCB = timeNow;
         } else {
             UILog(@"detect delimiter error");
         }
-        if (fabs(delimiterDateWC - delimiterDateCB) < DELIMITER_MAX_BETWEEN_TIME) {
+        if (fabs(delimiterTimeWC - delimiterTimeCB) < DELIMITER_MAX_BETWEEN_TIME) {
             UILog(@"recognition start");
-            recognitionStartDate = dateNow;
+            recognitionStartTime = timeNow;
             [self doClickButtonRecognitionOn:nil];
         }
     } else {
@@ -88,24 +92,28 @@ double recognizing = false;
 }
 
 - (void)processFrames:(NSData *)data fromType:(NSString *)fromType {
-    NSMutableArray *features = [[NSMutableArray alloc] init];
     Byte *bytes = (Byte *)data.bytes;
-    unsigned long length = data.length;
-    for (int i = 1; i < length; i += 2) {
+    NSMutableArray *features = [[NSMutableArray alloc] init];
+    for (int i = 1; i < data.length; i += 2) {
         short b0 = bytes[i + 0];
         short b1 = bytes[i + 1];
         short shortValue = (b0 << 8) | b1;
         float value = shortValue / 1000.0;
         [features addObject:[NSNumber numberWithFloat:value]];
     }
+    
+    double timeNow = [[NSDate date] timeIntervalSince1970];
     if (bytes[0] == 0) {
         featuresLeft = features;
+        featuresLeftArriveTime = timeNow;
     } else if (bytes[0] == 1) {
         featuresRight = features;
+        featuresRightArriveTime = timeNow;
     } else {
         UILog(@"recv data from unknown watch");
     }
-    if (featuresLeft != nil && featuresRight != nil) {
+    
+    if (featuresLeft != nil && featuresRight != nil && fabs(featuresLeftArriveTime - featuresRightArriveTime) < FEATURES_MAX_BETWEEN_TIME) {
         [featuresLeft addObjectsFromArray:featuresRight];
         int result = [classifier classify:featuresLeft];
         //UILog(@"ans: %d", result);
@@ -115,11 +123,11 @@ double recognizing = false;
     }
     
     // expire
-    double dateNow = [[NSDate date] timeIntervalSince1970];
-    if (recognizing && dateNow - recognitionStartDate > RECOGNITION_EXPIRE_TIME) {
+    /*double dateNow = [[NSDate date] timeIntervalSince1970];
+    if (recognizing && dateNow - recognitionStartTime > RECOGNITION_EXPIRE_TIME) {
         UILog(@"recognition expire");
         [self doClickButtonRecognitionOff:nil];
-    }
+    }*/
 }
 
 
