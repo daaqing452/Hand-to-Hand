@@ -37,6 +37,7 @@
 @implementation InterfaceController
 
 //  general
+const NSString *iPhoneName = @"iPhone PCG6";
 WKInterfaceDevice *device;
 NSFileManager *fileManager;
 NSString *documentPath;
@@ -417,7 +418,7 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
-    if ([peripheral.name isEqualToString:@"iPhone LU"]) {
+    if ([peripheral.name isEqualToString:iPhoneName]) {
         NSLog(@"find device: %@", peripheral.name);
         [peripheralDevices addObject:peripheral];
         [centralManager connectPeripheral:peripheral options:nil];
