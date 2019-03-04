@@ -7,7 +7,6 @@
 //
 
 #import "InterfaceController.h"
-#import <AVFoundation/AVFoundation.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreMotion/CoreMotion.h>
 #import <Foundation/Foundation.h>
@@ -38,7 +37,7 @@
 @implementation InterfaceController
 
 //  general
-const NSString *iPhoneName = @"iPhone PCG6";
+NSString * const iPhoneName = @"iPhone PCG6";
 WKInterfaceDevice *device;
 NSFileManager *fileManager;
 NSString *documentPath;
@@ -56,7 +55,7 @@ bool watchConnectivityTestFlag;
 
 //  log
 int const LOG_BUFFER_MAX_SIZE = 16384;
-bool const LOG_SHOW_FILE_SIZE = true;
+bool const LOG_SHOW_FILE_SIZE = false;
 bool logging = false;
 NSString *buffer = @"";
 NSString *logFileName;
@@ -79,28 +78,6 @@ CBCharacteristic *subscribedCharacteristic;
 
 - (void)willActivate {
     [super willActivate];
-    
-    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    AVAudioSessionRecordPermission audioSessionRecordPermission = [audioSession recordPermission];
-    switch (audioSessionRecordPermission) {
-        case AVAudioSessionRecordPermissionUndetermined:
-            NSLog(@"Undetermined");
-            [audioSession requestRecordPermission:^(BOOL granted) {
-                NSLog(@"%@ -- %@", @(granted), @([NSThread isMainThread]));
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    
-                });
-            }];
-            break;
-        case AVAudioSessionRecordPermissionDenied:
-            NSLog(@"Denied");
-            break;
-        case AVAudioSessionRecordPermissionGranted:
-            NSLog(@"Granted");
-            break;
-        default:
-            break;
-    }
     
     self.workoutConfiguration = [[HKWorkoutConfiguration alloc] init];
     self.workoutConfiguration.activityType = HKWorkoutActivityTypeRunning;
@@ -134,8 +111,13 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)parseCommand:(NSString *)command {
     if ([command isEqualToString:@"log on"]) {
         [self changeLogStatus:true];
+        NSURL *fileURL = [NSURL fileURLWithPath:[documentPath stringByAppendingPathComponent:@"a.wav"]];
+        [self presentAudioRecorderControllerWithOutputURL:fileURL preset:WKAudioRecorderPresetHighQualityAudio options:nil completion:^(BOOL didSave, NSError * __nullable error) {
+            NSLog(@"didSave: %d, error: %@", didSave, error);
+        }];
     } else if ([command isEqualToString:@"log off"]) {
         [self changeLogStatus:false];
+        [self dismissAudioRecorderController];
     } else if ([command isEqualToString:@"test watch connectivity success"]) {
         watchConnectivityTestFlag = true;
     } else {
@@ -254,9 +236,6 @@ CBCharacteristic *subscribedCharacteristic;
         }
         if (logging) {
             buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\natt %f %f %f\nrot %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, attitude.pitch, attitude.roll, attitude.yaw, rotationRate.x, rotationRate.y, rotationRate.z]];
-            if (arc4random() % 100 == 0) {
-                NSLog(@"buffer: %d", buffer.length);
-            }
             if (buffer.length > LOG_BUFFER_MAX_SIZE) {
                 [self writeFile:logFileName content:buffer];
                 buffer = @"";
@@ -328,6 +307,7 @@ CBCharacteristic *subscribedCharacteristic;
         [fileHandle closeFile];
         if (LOG_SHOW_FILE_SIZE) {
             long long size = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
+            NSLog(@"do write %lld", size);
             [self sendMessage:[NSString stringWithFormat:@"do write %lld", size]];
         }
     }
@@ -342,6 +322,8 @@ CBCharacteristic *subscribedCharacteristic;
         if ([[file pathExtension] isEqualToString:@"txt"]) {
             NSLog(@"file %@", file);
             fileCount += 1;
+        } else {
+            NSLog(@"file %@", file);
         }
     }
     [self.buttonShowFiles setTitle:[NSString stringWithFormat:@"Show Files: %d", fileCount]];

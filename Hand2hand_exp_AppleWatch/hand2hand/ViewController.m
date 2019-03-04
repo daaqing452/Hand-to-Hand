@@ -167,7 +167,8 @@ NSString *sharedPath;
     NSString *filePath = [[file fileURL] path];
     NSString *fileName = [filePath lastPathComponent];
     bool ifSuccess = [fileManager copyItemAtPath:filePath toPath:[documentPath stringByAppendingPathComponent:fileName] error:&error];
-    UILog(@"recv file %@: %@", ifSuccess ? @"Y" : @"N", fileName);
+    long long fileSize = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
+    UILog(@"recv file %@ (%.1fM): %@", ifSuccess ? @"Y" : @"N", fileSize / 1048576.0, fileName);
     if (!ifSuccess) {
         UILog(@"error %@", error);
     }
