@@ -7,6 +7,7 @@
 //
 
 #import "InterfaceController.h"
+#import <AVFoundation/AVFoundation.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreMotion/CoreMotion.h>
 #import <Foundation/Foundation.h>
@@ -79,6 +80,28 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)willActivate {
     [super willActivate];
     
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    AVAudioSessionRecordPermission audioSessionRecordPermission = [audioSession recordPermission];
+    switch (audioSessionRecordPermission) {
+        case AVAudioSessionRecordPermissionUndetermined:
+            NSLog(@"Undetermined");
+            [audioSession requestRecordPermission:^(BOOL granted) {
+                NSLog(@"%@ -- %@", @(granted), @([NSThread isMainThread]));
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    
+                });
+            }];
+            break;
+        case AVAudioSessionRecordPermissionDenied:
+            NSLog(@"Denied");
+            break;
+        case AVAudioSessionRecordPermissionGranted:
+            NSLog(@"Granted");
+            break;
+        default:
+            break;
+    }
+    
     self.workoutConfiguration = [[HKWorkoutConfiguration alloc] init];
     self.workoutConfiguration.activityType = HKWorkoutActivityTypeRunning;
     self.workoutConfiguration.locationType = HKWorkoutSessionLocationTypeOutdoor;
@@ -90,8 +113,6 @@ CBCharacteristic *subscribedCharacteristic;
     fileManager = [NSFileManager defaultManager];
     documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     sharedPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.pcg.hand2hand"] path];
-    
-    //[self startCommunication];
     
     self.motionManager = [[CMMotionManager alloc] init];
     if ([SENSOR_DATA_RETRIVAL isEqualToString:@"push"]) {

@@ -38,5 +38,7 @@
 	</array>
 	<key>WKExtensionDelegateClassName</key>
 	<string>ExtensionDelegate</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone Permission Request</string>
 </dict>
 </plist>
