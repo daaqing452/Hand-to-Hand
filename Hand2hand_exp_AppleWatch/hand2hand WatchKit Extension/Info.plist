@@ -40,5 +40,9 @@
 	<string>ExtensionDelegate</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Microphone Permission Request</string>
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>Permission update health data</string>
+    <key>NSHealthShareUsageDescription</key>
+    <string>Permission share health data</string>
 </dict>
 </plist>

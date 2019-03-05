@@ -28,7 +28,7 @@
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) HKWorkoutConfiguration *workoutConfiguration;
-@property (strong, nonatomic) HKHealthStore *healthScore;
+@property (strong, nonatomic) HKHealthStore *healthStore;
 @property (strong, nonatomic) HKWorkoutSession *workoutSession;
 
 @end
@@ -60,6 +60,12 @@ bool logging = false;
 NSString *buffer = @"";
 NSString *logFileName;
 
+// healthkit
+bool const HEALTH_MONITORING = false;
+
+// audio
+NSString *audioFileName;
+
 //  core bluetooth
 CBCentralManager *centralManager;
 NSMutableArray<CBPeripheral*> *peripheralDevices;
@@ -82,8 +88,8 @@ CBCharacteristic *subscribedCharacteristic;
     self.workoutConfiguration = [[HKWorkoutConfiguration alloc] init];
     self.workoutConfiguration.activityType = HKWorkoutActivityTypeRunning;
     self.workoutConfiguration.locationType = HKWorkoutSessionLocationTypeOutdoor;
-    self.healthScore = [[HKHealthStore alloc] init];
-    self.workoutSession = [[HKWorkoutSession alloc] initWithHealthStore:self.healthScore configuration:self.workoutConfiguration error:nil];
+    self.healthStore = [[HKHealthStore alloc] init];
+    self.workoutSession = [[HKWorkoutSession alloc] initWithHealthStore:self.healthStore configuration:self.workoutConfiguration error:nil];
     [self.workoutSession startActivityWithDate:[NSDate date]];
     
     device = [WKInterfaceDevice currentDevice];
@@ -96,6 +102,10 @@ CBCharacteristic *subscribedCharacteristic;
         [self setSensorDataGetPush];
     } else if ([SENSOR_DATA_RETRIVAL isEqualToString:@"pull"]) {
         [self setSensorDataGetPull];
+    }
+    
+    if (HEALTH_MONITORING) {
+        [self authorizeHealthSensor];
     }
     
     LBLog(@"%@", device.name);
@@ -111,13 +121,10 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)parseCommand:(NSString *)command {
     if ([command isEqualToString:@"log on"]) {
         [self changeLogStatus:true];
-        NSURL *fileURL = [NSURL fileURLWithPath:[documentPath stringByAppendingPathComponent:@"a.wav"]];
-        [self presentAudioRecorderControllerWithOutputURL:fileURL preset:WKAudioRecorderPresetHighQualityAudio options:nil completion:^(BOOL didSave, NSError * __nullable error) {
-            NSLog(@"didSave: %d, error: %@", didSave, error);
-        }];
+        [self startAudioRecording];
     } else if ([command isEqualToString:@"log off"]) {
         [self changeLogStatus:false];
-        [self dismissAudioRecorderController];
+        [self stopAudioRecording];
     } else if ([command isEqualToString:@"test watch connectivity success"]) {
         watchConnectivityTestFlag = true;
     } else {
@@ -182,7 +189,6 @@ CBCharacteristic *subscribedCharacteristic;
 //  UI
 //
 - (IBAction)doClickButtonTest:(id)sender {
-    LBLog(@"test");
     [self sendMessage:@"test"];
 }
 
@@ -223,13 +229,13 @@ CBCharacteristic *subscribedCharacteristic;
     NSDate *startTime = [NSDate date];
     [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
         if (error) return;
+        freqCnt++;
         CMAcceleration acceleration = motion.userAcceleration;
         CMAttitude *attitude = motion.attitude;
         CMRotationRate rotationRate = motion.rotationRate;
         //CMAcceleration gravity = motion.gravity;
         //CMCalibratedMagneticField magneticField = motion.magneticField;
         if (SENSOR_SHOW_DETAIL) {
-            freqCnt ++;
             float freq = freqCnt / (-[startTime timeIntervalSinceNow]);
             NSLog(@"acc %f %f %f", acceleration.x, acceleration.y, acceleration.z);
             NSLog(@"freqAcc: %f", freq);
@@ -240,6 +246,9 @@ CBCharacteristic *subscribedCharacteristic;
                 [self writeFile:logFileName content:buffer];
                 buffer = @"";
             }
+        }
+        if (HEALTH_MONITORING) {
+            if (freqCnt % 20 == 0) [self queryHealthData];
         }
     }];
     NSLog(@"push motion ready");
@@ -274,7 +283,9 @@ CBCharacteristic *subscribedCharacteristic;
         logging = false;
     } else {
         [self.buttonLog setTitle:@"Log: On"];
-        logFileName = [NSString stringWithFormat:@"log-%@-%@.txt", [self getTimeString:@"YYYYMMdd-HHmmss"], [device.name stringByReplacingOccurrencesOfString:@" " withString:@""]];
+        NSString *fileName = [NSString stringWithFormat:@"%@-%@", [self getTimeString:@"YYYYMMdd-HHmmss"], [device.name stringByReplacingOccurrencesOfString:@" " withString:@""]];
+        logFileName = [NSString stringWithFormat:@"log-%@.txt", fileName];
+        audioFileName = [NSString stringWithFormat:@"log-%@.wav", fileName];
         logging = true;
     }
 }
@@ -300,7 +311,7 @@ CBCharacteristic *subscribedCharacteristic;
     NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
     if (fileHandle == nil) {
         bool ifSuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-        NSLog(@"write file %@: %@", ifSuccess ? @"Y" : @"N", fileName);
+        NSLog(@"write file %@: %@", ifSuccess ? @"Yes" : @"No", fileName);
     } else {
         [fileHandle truncateFileAtOffset:[fileHandle seekToEndOfFile]];
         [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
@@ -335,8 +346,51 @@ CBCharacteristic *subscribedCharacteristic;
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSString *filePath = [documentPath stringByAppendingPathComponent:file];
         bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
-        NSLog(@"delete file %@: %@", ifSuccess ? @"Y" : @"N", file);
+        NSLog(@"delete file %@: %@", ifSuccess ? @"Yes" : @"No", file);
     }
+}
+
+
+
+// audio
+- (void)startAudioRecording {
+    NSURL *fileURL = [NSURL fileURLWithPath:[documentPath stringByAppendingPathComponent:audioFileName]];
+    [self presentAudioRecorderControllerWithOutputURL:fileURL preset:WKAudioRecorderPresetHighQualityAudio options:nil completion:^(BOOL didSave, NSError * __nullable error) {
+        NSLog(@"save: %d, error: %@", didSave, error);
+    }];
+}
+
+- (void)stopAudioRecording {
+    [self dismissAudioRecorderController];
+}
+
+
+
+// healthkit
+NSSet *writePermossionSet = nil;
+NSSet *readPermissionSet = nil;
+
+- (void)authorizeHealthSensor {
+    HKQuantityType *q0 = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate];
+    readPermissionSet = [NSSet setWithObjects:q0, nil];
+    [self.healthStore requestAuthorizationToShareTypes:writePermossionSet readTypes:readPermissionSet completion:^(BOOL success, NSError *error) {
+        NSLog(@"auth health kit %d: %@", success, error);
+    }];
+}
+
+- (void)queryHealthData {
+    HKQuantityType *q0 = [readPermissionSet anyObject];
+    
+    NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:[NSDate dateWithTimeIntervalSinceNow:-10] endDate:[NSDate dateWithTimeIntervalSinceNow:0] options:HKQueryOptionNone];
+    
+    HKStatisticsQuery *statisticsQuery = [[HKStatisticsQuery alloc] initWithQuantityType:q0 quantitySamplePredicate:predicate options:HKStatisticsOptionDiscreteAverage completionHandler:^(HKStatisticsQuery *query, HKStatistics *result, NSError *error) {
+        HKQuantity *ave = [result averageQuantity];
+        HKUnit *unit = [[HKUnit countUnit] unitDividedByUnit:[HKUnit secondUnit]];
+        double value = [ave doubleValueForUnit:unit] * 60;
+        NSLog(@"health = %f %@", value, error);
+    }];
+    
+    [self.healthStore executeQuery:statisticsQuery];
 }
 
 

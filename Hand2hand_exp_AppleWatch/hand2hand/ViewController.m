@@ -108,7 +108,7 @@ NSString *sharedPath;
 - (void)writeFile:(NSString *)fileName content:(NSString *)content {
     NSString *filePath = [documentPath stringByAppendingPathComponent:fileName];
     bool ifsuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    UILog(@"write file %@: %@", ifsuccess ? @"Y" : @"N", fileName);
+    UILog(@"write file %@: %@", ifsuccess ? @"Yes" : @"No", fileName);
 }
 
 - (void)showFiles:(NSString *)path {
@@ -116,8 +116,12 @@ NSString *sharedPath;
     NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:path];
     NSString *file;
     while ((file = [myDirectoryEnumerator nextObject])) {
+        NSString *filePath = [path stringByAppendingPathComponent:file];
+        long long fileSize = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
         if ([[file pathExtension] isEqualToString:@"txt"]) {
-            UILog(@"file %@", file);
+            UILog(@"file (%.2fM): %@", fileSize / 1048576.0, file);
+        } else if ([[file pathExtension] isEqualToString:@"wav"]) {
+            UILog(@"file (%.2fM): %@", fileSize / 1048576.0, file);
         }
     }
 }
@@ -128,7 +132,7 @@ NSString *sharedPath;
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSString *filePath = [documentPath stringByAppendingPathComponent:file];
         bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
-        UILog(@"delete file %@: %@", ifSuccess ? @"Y" : @"N", file);
+        UILog(@"delete file %@: %@", ifSuccess ? @"Yes" : @"No", file);
     }
 }
 
@@ -168,7 +172,7 @@ NSString *sharedPath;
     NSString *fileName = [filePath lastPathComponent];
     bool ifSuccess = [fileManager copyItemAtPath:filePath toPath:[documentPath stringByAppendingPathComponent:fileName] error:&error];
     long long fileSize = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
-    UILog(@"recv file %@ (%.1fM): %@", ifSuccess ? @"Y" : @"N", fileSize / 1048576.0, fileName);
+    UILog(@"recv file %@ (%.2fM): %@", ifSuccess ? @"Yes" : @"No", fileSize / 1048576.0, fileName);
     if (!ifSuccess) {
         UILog(@"error %@", error);
     }
