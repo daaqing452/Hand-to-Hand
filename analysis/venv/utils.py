@@ -34,6 +34,7 @@ def read_file2(filename):
 	acc = []
 	att = []
 	rot = []
+	qua = []
 	f = open(filename, 'r')
 	line = -1
 	while True:
@@ -49,8 +50,9 @@ def read_file2(filename):
 		if op == 'acc': acc.append([t, float(arr[1]), float(arr[2]), float(arr[3])])
 		if op == 'att': att.append([t, float(arr[1]), float(arr[2]), float(arr[3])])
 		if op == 'rot': rot.append([t, float(arr[1]), float(arr[2]), float(arr[3])])
+		if op == 'qua': qua.append([t, float(arr[1]), float(arr[2]), float(arr[3]), float(arr[4])])
 	f.close()
-	return np.array(acc), np.array(att), np.array(rot)
+	return np.array(acc), np.array(att), np.array(rot), np.array(qua)
 
 def resample(a, t1=None, stride=20):
 	shape = a.shape
@@ -74,6 +76,9 @@ def bias(a0, a1, bias0 = 0, bias1 = 0):
 	a0[:,0] -= a0[0,0]
 	a1 = a1[bias1:,]
 	a1[:,0] -= a1[0,0]
+	n = min(a0.shape[0], a1.shape[0])
+	a0 = a0[:n]
+	a1 = a1[:n]
 	return a0, a1
 
 def conv(a0, a1, window=5, std_threshold=5, amplitude_threshold=9.8):
@@ -128,3 +133,11 @@ def kalman_filter(obs, q=0.01):
         x[i] = obs[i] * h + x[i-1] * (1 - h)
         p = math.sqrt((1 - h) * k * k)
     return x
+
+def print_timestamp_quality(t0, t1):
+	t0 = np.diff(t0) * 1000
+	t1 = np.diff(t1) * 1000
+	t0.sort()
+	t1.sort()
+	print('T0:', t0.mean(), t0.std(), t0[-5:])
+	print('T1:', t1.mean(), t1.std(), t1[-5:])

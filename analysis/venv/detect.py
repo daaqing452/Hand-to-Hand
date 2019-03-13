@@ -4,8 +4,8 @@ from utils import *
 
 filename_l = "../data/log-w16-WatchL.txt"
 filename_r = "../data/log-w16-WatchR.txt"
-acc0r, att0r, rot0r = read_file2(filename_l)
-acc1r, att1r, rot1r = read_file2(filename_r)
+acc0r, att0r, rot0r, qua0r = read_file2(filename_l)
+acc1r, att1r, rot1r, qua1r = read_file2(filename_r)
 
 acc0r = rot0r
 acc1r = rot1r

@@ -44,5 +44,10 @@
     <string>Permission update health data</string>
     <key>NSHealthShareUsageDescription</key>
     <string>Permission share health data</string>
+    
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+    </array>
 </dict>
 </plist>

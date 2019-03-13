@@ -3,18 +3,13 @@ import numpy as np
 import sys
 from utils import *
 
-filename_l = "../log-20190305-091935-WatchL.txt"
-filename_r = "../log-test_delimiter-WatchR.txt"
-acc0r, att0r, rot0r = read_file2(filename_l)
-acc1r, att1r, rot1r = read_file2(filename_r)
+filename0 = "../data/log-3-WatchL.txt"
+filename1 = "../data/log-3-WatchR.txt"
+acc0r, att0r, rot0r, qua0r = read_file2(filename0)
+acc1r, att1r, rot1r, qua1r = read_file2(filename1)
 print(acc0r.shape, acc1r.shape)
 
-t0 = np.diff(acc0r[:, 0]) * 1000
-t1 = np.diff(acc1r[:, 0]) * 1000
-t0.sort()
-t1.sort()
-print(t0.mean(), t0.std(), t0[-5:])
-print(t1.mean(), t1.std(), t1[-5:])
+print_timestamp_quality(acc0r[:,0], acc1r[:,0])
 
 acc0r, acc1r = bias(acc0r, acc1r, 0, 0)
 
