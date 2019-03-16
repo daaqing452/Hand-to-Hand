@@ -24,6 +24,7 @@
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonDeleteFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonSendFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonCommunication;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonMicrophone;
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
@@ -64,7 +65,7 @@ NSString *logFileName;
 bool const HEALTH_MONITORING = false;
 
 // audio
-bool const AUDIO_MONITORING = false;
+bool audioMinitoring = true;
 NSString *audioFileName;
 
 //  core bluetooth
@@ -122,12 +123,12 @@ CBCharacteristic *subscribedCharacteristic;
 - (void)parseCommand:(NSString *)command {
     if ([command isEqualToString:@"log on"]) {
         [self changeLogStatus:true];
-        if (AUDIO_MONITORING) {
+        if (audioMinitoring) {
             [self startAudioRecording];
         }
     } else if ([command isEqualToString:@"log off"]) {
         [self changeLogStatus:false];
-        if (AUDIO_MONITORING) {
+        if (audioMinitoring) {
             [self stopAudioRecording];
         }
     } else if ([command isEqualToString:@"test watch connectivity success"]) {
@@ -220,6 +221,15 @@ CBCharacteristic *subscribedCharacteristic;
 - (IBAction)doClickButtonCommunication:(id)sender {
     [self changeCommunication:@"null"];
     [self startCommunication];
+}
+
+- (IBAction)doClickButtonMicrophone:(id)sender {
+    audioMinitoring = !audioMinitoring;
+    if (audioMinitoring) {
+        [self.buttonMicrophone setTitle:@"Microphone: On"];
+    } else {
+        [self.buttonMicrophone setTitle:@"Microphone: Off"];
+    }
 }
 
 

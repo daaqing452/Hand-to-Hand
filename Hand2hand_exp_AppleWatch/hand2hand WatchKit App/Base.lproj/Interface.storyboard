@@ -25,6 +25,11 @@
                                 <action selector="doClickButtonCommunication:" destination="AgC-eL-Hgc" id="adc-sX-tVZ"/>
                             </connections>
                         </button>
+                        <button width="1" alignment="left" title="Microphone: On" id="7pC-Sc-1Md" userLabel="Button Microphone">
+                            <connections>
+                                <action selector="doClickButtonMicrophone:" destination="AgC-eL-Hgc" id="sCB-oE-3CK"/>
+                            </connections>
+                        </button>
                         <button width="1" alignment="left" title="Show Files" id="14h-lw-cMk" userLabel="Button Show Files">
                             <connections>
                                 <action selector="doClickButtonShowFiles:" destination="AgC-eL-Hgc" id="Grf-cX-z4d"/>
@@ -51,6 +56,7 @@
                         <outlet property="buttonCommunication" destination="1pY-Aj-sIw" id="3pC-us-plV"/>
                         <outlet property="buttonDeleteFiles" destination="goU-qR-KaR" id="brb-be-OCN"/>
                         <outlet property="buttonLog" destination="Ekh-rI-yBQ" id="fhv-te-T70"/>
+                        <outlet property="buttonMicrophone" destination="7pC-Sc-1Md" id="3JN-3x-hAP"/>
                         <outlet property="buttonSendFiles" destination="yLo-gh-7ep" id="iys-TD-VYh"/>
                         <outlet property="buttonShowFiles" destination="14h-lw-cMk" id="ONl-hC-p9o"/>
                         <outlet property="buttonTest" destination="UKS-eV-HmI" id="T2E-1H-PcX"/>
