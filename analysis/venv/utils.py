@@ -54,21 +54,39 @@ def read_file2(filename):
 	f.close()
 	return np.array(acc), np.array(att), np.array(rot), np.array(qua)
 
-def resample(a, t1=None, stride=20):
+def resample(a, t1=None, stride=20, norm='linear'):
 	shape = a.shape
 	t = a[0,0]
 	if t1 is None:
 		t1 = a[shape[0]-1,0]
 	b = []
 	i = 0
+	j = 0
 	while t < t1:
-		while i < shape[0] and a[i,0] < t: i += 1
-		sl = (t - a[i-1,0]) / (a[i,0] - a[i-1,0])
-		sr = (a[i,0] - t) / (a[i,0] - a[i-1,0])
-		b.append([a[i-1,j] * sr + a[i,j] * sl for j in range(1, shape[1])])
+		while i+1 < shape[0] and a[i+1,0] <= t: i += 1
+		while j < shape[0] and a[j,0] < t: j += 1
+		if i == j:
+			b.append(a[i,1:])
+			t += stride
+			continue
+		sl = (t - a[i,0]) / (a[j,0] - a[i,0])
+		sr = (a[j,0] - t) / (a[j,0] - a[i,0])
+		if norm == 'linear':
+			bb = [sr * a[i,k] + sl * a[j,k] for k in range(1, shape[1])]
+		elif norm == 'sphere':
+			costh = a[i,1]*a[j,1] + a[i,2]*a[j,2] + a[i,3]*a[j,3] + a[i,4]*a[j,4]
+			if costh < 0:
+				a[j,1:] = -a[j,1:]
+				costh = a[i,1]*a[j,1] + a[i,2]*a[j,2] + a[i,3]*a[j,3] + a[i,4]*a[j,4]
+			costh = min(costh, 1)
+			th = math.acos(costh)
+			if th < 1e-3:
+				bb = a[i,1:]
+			else:
+				bb = [(math.sin(sr*th) * a[i,k] + math.sin(sl*th) * a[j,k]) / math.sin(th) for k in range(1, shape[1])]
+		b.append(bb)
 		t += stride
 	b = np.array(b)
-	print(b.shape)
 	return b
 
 def bias(a0, a1, bias0 = 0, bias1 = 0):
@@ -141,3 +159,13 @@ def print_timestamp_quality(t0, t1):
 	t1.sort()
 	print('T0:', t0.mean(), t0.std(), t0[-5:])
 	print('T1:', t1.mean(), t1.std(), t1[-5:])
+
+def qua_mean_filter(qua, w=2):
+	n = qua.shape[0]
+	quaq = []
+	for i in range(n):
+		a = qua[max(0,i-w//2):min(n-1,i+w//2)]
+		M = np.dot(a.T, a) / a.shape[0]
+		eigvalue, eigvector = np.linalg.eig(M)
+		quaq.append(eigvector[0])
+	return np.array(quaq)

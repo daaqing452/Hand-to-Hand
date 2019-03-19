@@ -7,16 +7,20 @@ from utils import *
 COMBINE_LR = True
 SUB_SIGNAL = False
 
-filename0 = "../log-001-WatchL.txt"
-filename1 = "../log-001-WatchR.txt"
+filename0 = "../log-004-WatchL.txt"
+filename1 = "../log-004-WatchR.txt"
 acc0r, att0r, rot0r, qua0r = read_file2(filename0)
 acc1r, att1r, rot1r, qua1r = read_file2(filename1)
-print(acc0r.shape, qua0r.shape)
+print('acc raw shape:', acc0r.shape, qua0r.shape)
+
+# orientation -> rotation
+qua0r[:,2:] *= -1
+qua1r[:,2:] *= -1
 
 print_timestamp_quality(acc0r[:,0], acc1r[:,0])
 
-acc0, acc1 = bias(acc0r, acc1r, 3, 0)
-qua0, qua1 = bias(qua0r, qua1r, 3, 0)
+acc0, acc1 = bias(acc0r, acc1r, 0, 15)
+qua0, qua1 = bias(qua0r, qua1r, 0, 15)
 if SUB_SIGNAL:
 	zl = 250
 	zr = 350
@@ -26,7 +30,7 @@ if SUB_SIGNAL:
 	qua1 = qua1[zl:zr]
 t1 = min(acc0[-1,0], acc1[-1,0])
 acc0 = resample(acc0, t1, 0.01)
-qua0 = resample(qua0, t1, 0.01)
+qua0 = resample(qua0, t1, 0.01, norm='sphere')
 acc1 = resample(acc1, t1, 0.01)
 qua1 = resample(qua1, t1, 0.01)
 
@@ -41,11 +45,13 @@ def quamul(a, b):
 
 def quainv(a):
 	w, x, y, z = a[0], a[1], a[2], a[3]
-	return np.array([w, -x, -y, -z]) / np.linalg.norm(a, ord=2)
+	return np.array([w, -x, -y, -z])
 
 def work(acc, qua):
 	# filter qua
-	quaq = signal.medfilt(qua, (21, 1))
+	quaq = signal.medfilt(qua, (151, 1))
+	quaq = (quaq.T / np.linalg.norm(quaq.T, axis=0)).T
+	# quaq = qua_mean_filter(qua)
 
 	# rotate
 	n = acc.shape[0]
@@ -53,14 +59,49 @@ def work(acc, qua):
 	accq = []
 	for i in range(n):
 		ai = quamul(quamul(quainv(quaq[i]), acc[i]), quaq[i])
+		# ai = quamul(quamul(quaq[i], acc[i]), quainv(quaq[i]))
 		accq.append(ai[1:])
 	accq = np.array(accq)
 	return accq, quaq
 
+def work2(acc, qua0, qua1):
+	qua0q = signal.medfilt(qua0, (151, 1))
+	qua0q = (qua0q.T / np.linalg.norm(qua0q.T, axis=0)).T
+	qua1q = signal.medfilt(qua1, (151, 1))
+	qua1q = (qua1q.T / np.linalg.norm(qua1q.T, axis=0)).T
+	n = acc.shape[0]
+	acc = np.insert(acc, 0, values=np.zeros(n), axis=1)
+	accq = []
+	for i in range(n):
+		qcom = quamul(qua1[i], quainv(qua0[i]))
+		# qcom = quamul(quainv(qua1[i]), qua0[i])
+		ai = quamul(quamul(qcom, acc[i]), quainv(qcom))
+		accq.append(ai[1:])
+	accq = np.array(accq)
+	return accq
+
 acc0q, qua0q = work(acc0, qua0)
 acc1q, qua1q = work(acc1, qua1)
+print('acc rotated shape:', acc0q.shape)
 
-print(acc0q.shape)
+acc0z = work2(acc0, qua0, qua1)
+
+def correlation_axis(acc0q, acc1q, w=100):
+	n = acc0q.shape[0]
+	i = 0
+	cors = []
+	for i in range(n-w):
+		a0 = acc0q[i:i+w]
+		a1 = -acc1q[i:i+w]
+		a0 = (a0 - a0.mean(axis=0)) / a0.std(axis=0)
+		a1 = (a1 - a1.mean(axis=0)) / a0.std(axis=0)
+		cor = (a0 * a1).sum(axis=0)
+		# cors.append(cor)
+		cors.append(acc0q[i:i+w].std(axis=0))
+	cors = np.array(cors)
+	return cors
+
+cors = correlation_axis(acc0q, acc1q)
 
 if True:
 	if COMBINE_LR:
@@ -68,7 +109,7 @@ if True:
 	else:
 		row = 6
 	# raw
-	plt.figure()
+	plt.figure('acc raw')
 	for i in range(3):
 	    sub = plt.subplot(row, 1, i+1)
 	    sub.set_ylim(-10, 10)
@@ -80,7 +121,7 @@ if True:
 		    sub.set_ylim(-10, 10)
 		    plt.plot(acc1[:, i])
 	# rotated
-	plt.figure()
+	plt.figure('acc rotated')
 	for i in range(3):
 	    sub = plt.subplot(row, 1, i+1)
 	    sub.set_ylim(-10, 10)
@@ -92,7 +133,7 @@ if True:
 		    sub.set_ylim(-10, 10)
 		    plt.plot(acc1q[:, i])
 	# qua
-	plt.figure()
+	plt.figure('qua')
 	for i in range(4):
 		sub = plt.subplot(8, 1, i+1)
 		sub.set_ylim(-1.1, 1.1)
@@ -102,51 +143,42 @@ if True:
 		sub.set_ylim(-1.1, 1.1)
 		plt.plot(qua0q[:, i])
 		plt.plot(qua1q[:, i])
-	# sync
-	energy = acc0q * -acc1q
-	plt.figure()
+
+	# rotate one
+	plt.figure('rotate one')
+	for i in range(3):
+	    sub = plt.subplot(row, 1, i+1)
+	    sub.set_ylim(-10, 10)
+	    plt.plot(acc0z[:, i])
+	    if COMBINE_LR:
+	    	plt.plot(acc1[:, i])
+	    else:
+		    sub = plt.subplot(row, 1, i+4)
+		    sub.set_ylim(-10, 10)
+		    plt.plot(acc1[:, i])
+
+	# correlation
+	'''plt.figure('correlation')
 	for i in range(3):
 		sub = plt.subplot(4, 1, i+1)
-		plt.plot(energy[:, i])
-	sub = plt.subplot(4, 1, 4)
-	plt.plot(np.linalg.norm(energy, ord=2, axis=1))
+		plt.plot(cors[:,i])'''
 
-'''if False:
-	plt.figure()
-	for i in range(3):
-	    sub = plt.subplot(7, 1, i+1)
-	    sub.set_ylim(-10, 10)
-	    plt.plot(acc0r[:, i+1])
-	    plt.plot(acc0q[:, i+1])
+	# deltaqua
+	dqua = []
+	costh = []
+	for i in range(qua0q.shape[0]):
+		dqua.append(quamul(qua1q[i], quainv(qua0q[i])))
+		# dqua.append(quamul(quainv(qua0q[i]), qua1q[i]))
+		costh.append(np.sum(qua0q[i] * qua1q[i]))
+	plt.figure('delta qua')
+	dqua = np.array(dqua)
+	costh = np.array(costh)
 	for i in range(4):
-	    sub = plt.subplot(7, 1, i+4)
-	    sub.set_ylim(-1.1, 1.1)
-	    plt.plot(qua0r[:, i+1])
-	    plt.plot(qua0[:, i])
-
-if False:
-	plt.figure()
-	for i in range(3):
-	    sub = plt.subplot(7, 1, i+1)
-	    sub.set_ylim(-10, 10)
-	    plt.plot(acc0r[:, i+1])
-	for i in range(4):
-	    sub = plt.subplot(7, 1, i+4)
-	    sub.set_ylim(-1.1, 1.1)
-	    plt.plot(qua0r[:, i+1])
-	plt.figure()
-	for i in range(3):
-	    sub = plt.subplot(7, 1, i+1)
-	    sub.set_ylim(-10, 10)
-	    plt.plot(acc0q[:, i+1])
-	for i in range(4):
-	    sub = plt.subplot(7, 1, i+4)
-	    sub.set_ylim(-1.1, 1.1)
-	    plt.plot(qua0[:, i])'''
+		sub = plt.subplot(5, 1, i+1)
+		sub.set_ylim(-1.1, 1.1)
+		plt.plot(dqua[:, i])
+	sub = plt.subplot(5, 1, 5)
+	sub.set_ylim(-1.1, 1.1)
+	plt.plot(costh)
 
 plt.show()
-
-'''q0 = np.array([0.9812798, -0.07862352, 0.157247, -0.07862352])
-v = np.array([0, 1, 2, 3])
-vv = quamul(quamul(q0, v), quainv(q0))
-print(vv)'''
