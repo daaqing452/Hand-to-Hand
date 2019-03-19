@@ -7,8 +7,16 @@ from utils import *
 COMBINE_LR = True
 SUB_SIGNAL = False
 
-filename0 = "../log-004-WatchL.txt"
-filename1 = "../log-004-WatchR.txt"
+PLOT_ACC_RAW 		= True
+PLOT_ACC_ROTATED 	= False
+PLOT_ACC_ROTATE_ONE = True
+PLOT_QUA 			= False
+PLOT_DELTA_QUA		= True
+PLOT_CORRELATION 	= True
+PLOT_HIGHPASS 		= False
+
+filename0 = "../log-005noise-WatchL.txt"
+filename1 = "../log-005noise-WatchR.txt"
 acc0r, att0r, rot0r, qua0r = read_file2(filename0)
 acc1r, att1r, rot1r, qua1r = read_file2(filename1)
 print('acc raw shape:', acc0r.shape, qua0r.shape)
@@ -19,8 +27,8 @@ qua1r[:,2:] *= -1
 
 print_timestamp_quality(acc0r[:,0], acc1r[:,0])
 
-acc0, acc1 = bias(acc0r, acc1r, 0, 15)
-qua0, qua1 = bias(qua0r, qua1r, 0, 15)
+acc0, acc1 = bias(acc0r, acc1r, 0, 0)
+qua0, qua1 = bias(qua0r, qua1r, 0, 0)
 if SUB_SIGNAL:
 	zl = 250
 	zr = 350
@@ -101,14 +109,14 @@ def correlation_axis(acc0q, acc1q, w=100):
 	cors = np.array(cors)
 	return cors
 
-cors = correlation_axis(acc0q, acc1q)
 
-if True:
-	if COMBINE_LR:
-		row = 3
-	else:
-		row = 6
-	# raw
+if COMBINE_LR:
+	row = 3
+else:
+	row = 6
+
+# raw
+if PLOT_ACC_RAW:
 	plt.figure('acc raw')
 	for i in range(3):
 	    sub = plt.subplot(row, 1, i+1)
@@ -120,7 +128,9 @@ if True:
 		    sub = plt.subplot(row, 1, i+4)
 		    sub.set_ylim(-10, 10)
 		    plt.plot(acc1[:, i])
-	# rotated
+
+# rotated
+if PLOT_ACC_ROTATED:
 	plt.figure('acc rotated')
 	for i in range(3):
 	    sub = plt.subplot(row, 1, i+1)
@@ -132,19 +142,9 @@ if True:
 		    sub = plt.subplot(row, 1, i+4)
 		    sub.set_ylim(-10, 10)
 		    plt.plot(acc1q[:, i])
-	# qua
-	plt.figure('qua')
-	for i in range(4):
-		sub = plt.subplot(8, 1, i+1)
-		sub.set_ylim(-1.1, 1.1)
-		plt.plot(qua0[:, i])
-		plt.plot(qua1[:, i])
-		sub = plt.subplot(8, 1, i+5)
-		sub.set_ylim(-1.1, 1.1)
-		plt.plot(qua0q[:, i])
-		plt.plot(qua1q[:, i])
 
-	# rotate one
+# rotate one
+if PLOT_ACC_ROTATE_ONE:
 	plt.figure('rotate one')
 	for i in range(3):
 	    sub = plt.subplot(row, 1, i+1)
@@ -157,13 +157,21 @@ if True:
 		    sub.set_ylim(-10, 10)
 		    plt.plot(acc1[:, i])
 
-	# correlation
-	'''plt.figure('correlation')
-	for i in range(3):
-		sub = plt.subplot(4, 1, i+1)
-		plt.plot(cors[:,i])'''
+# qua
+if PLOT_QUA:
+	plt.figure('qua')
+	for i in range(4):
+		sub = plt.subplot(8, 1, i+1)
+		sub.set_ylim(-1.1, 1.1)
+		plt.plot(qua0[:, i])
+		plt.plot(qua1[:, i])
+		sub = plt.subplot(8, 1, i+5)
+		sub.set_ylim(-1.1, 1.1)
+		plt.plot(qua0q[:, i])
+		plt.plot(qua1q[:, i])
 
-	# deltaqua
+# deltaqua
+if PLOT_DELTA_QUA:
 	dqua = []
 	costh = []
 	for i in range(qua0q.shape[0]):
@@ -180,5 +188,29 @@ if True:
 	sub = plt.subplot(5, 1, 5)
 	sub.set_ylim(-1.1, 1.1)
 	plt.plot(costh)
+
+# correlation
+if PLOT_CORRELATION:
+	cors = correlation_axis(acc0z, acc1)
+	plt.figure('correlation')
+	for i in range(3):
+		sub = plt.subplot(4, 1, i+1)
+		# plt.plot(cors[:,i])
+		plt.plot(acc0z[:, i] * -acc1[:, i])
+
+# highpass
+if PLOT_HIGHPASS:
+	coeff_b, coeff_a = signal.butter(3, 0.2, 'highpass')
+	for i in range(3):
+		sub = plt.subplot(6, 1, i+1)
+		sub.set_ylim(-10, 10)
+		plt.plot(acc0[:, i])
+		plt.plot(acc1[:, i])
+		acc0h = signal.filtfilt(coeff_b, coeff_a, acc0[:,i])
+		acc1h = signal.filtfilt(coeff_b, coeff_a, acc1[:,i])
+		sub = plt.subplot(6, 1, i+4)
+		sub.set_ylim(-10, 10)
+		plt.plot(acc0h)
+		plt.plot(acc1h)
 
 plt.show()
