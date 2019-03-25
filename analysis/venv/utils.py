@@ -157,8 +157,8 @@ def print_timestamp_quality(t0, t1):
 	t1 = np.diff(t1) * 1000
 	t0.sort()
 	t1.sort()
-	print('T0:', t0.mean(), t0.std(), t0[-5:])
-	print('T1:', t1.mean(), t1.std(), t1[-5:])
+	print('T0:', t0.mean(), t0.std(), t0[:5], t0[-5:])
+	print('T1:', t1.mean(), t1.std(), t1[:5], t1[-5:])
 
 def qua_mean_filter(qua, w=2):
 	n = qua.shape[0]
@@ -169,3 +169,17 @@ def qua_mean_filter(qua, w=2):
 		eigvalue, eigvector = np.linalg.eig(M)
 		quaq.append(eigvector[0])
 	return np.array(quaq)
+
+def quamul(a, b):
+    w0, x0, y0, z0 = a[0], a[1], a[2], a[3]
+    w1, x1, y1, z1 = b[0], b[1], b[2], b[3]
+    w = w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1
+    x = w0 * x1 + x0 * w1 + y0 * z1 - z0 * y1
+    y = w0 * y1 - x0 * z1 + y0 * w1 + z0 * x1
+    z = w0 * z1 + x0 * y1 - y0 * x1 + z0 * w1
+    return np.array([w, x, y, z])
+
+def quainv(a):
+    w, x, y, z = a[0], a[1], a[2], a[3]
+    return np.array([w, -x, -y, -z])
+
