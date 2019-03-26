@@ -4,7 +4,7 @@ import sys
 from utils import *
 
 SUB         = True
-COMBINE_LR  = False
+COMBINE_LR  = True
 
 PLOT_ACC_RAW            = False
 PLOT_ACC_RAW_TIME       = False
@@ -12,9 +12,10 @@ PLOT_ACC_RAW_RESAMPLE   = True
 PLOT_ACC_ROTATED        = True
 PLOT_QUA                = True
 PLOT_ROT                = True
+PLOT_CORRELATION        = True
 
-filename0 = "../log-010-WatchL.txt"
-filename1 = "../log-010-WatchR.txt"
+filename0 = "../log-010IyPb-WatchL.txt"
+filename1 = "../log-010IyPb-WatchR.txt"
 acc0r, att0r, rot0r, qua0r = read_file2(filename0)
 acc1r, att1r, rot1r, qua1r = read_file2(filename1)
 print('acc raw shape:', acc0r.shape, qua0r.shape)
@@ -40,7 +41,7 @@ rot1 = resample(rot1, t1, 0.01)
 
 if SUB:
     ZL = 324
-    ZR = 6300
+    ZR = -500
     acc0 = acc0[ZL:ZR]
     qua0 = qua0[ZL:ZR]
     rot0 = rot0[ZL:ZR]
@@ -65,7 +66,7 @@ def rotate2(acc, qua0, qua1):
     return accq
 
 acc0z = rotate2(acc0, qua0, qua1)
-
+cors = acc0z * -acc1
 
 if COMBINE_LR:
     row = 3
@@ -123,5 +124,13 @@ if PLOT_ROT:
         plt.plot(rot0[:, i])
         plt.subplot(row, 1, row//6*3+i+1)
         plt.plot(rot1[:, i])
+
+if PLOT_CORRELATION:
+    plt.figure('correlation')
+    for i in range(3):
+        sub = plt.subplot(4, 1, i+1)
+        plt.plot(cors[:,i])
+    sub = plt.subplot(4, 1, 4)
+    plt.plot(cors.sum(axis=1))
 
 plt.show()

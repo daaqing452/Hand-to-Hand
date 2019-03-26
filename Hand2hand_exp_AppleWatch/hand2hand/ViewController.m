@@ -115,15 +115,19 @@ NSString *sharedPath;
     UILog(@"show files: %@", path);
     NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:path];
     NSString *file;
+    int fileNum = 0;
     while ((file = [myDirectoryEnumerator nextObject])) {
         NSString *filePath = [path stringByAppendingPathComponent:file];
         long long fileSize = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
         if ([[file pathExtension] isEqualToString:@"txt"]) {
             UILog(@"file (%.2fM): %@", fileSize / 1048576.0, file);
+            fileNum++;
         } else if ([[file pathExtension] isEqualToString:@"wav"]) {
             UILog(@"file (%.2fM): %@", fileSize / 1048576.0, file);
+            fileNum++;
         }
     }
+    UILog(@"number of files: %d", fileNum);
 }
 
 - (void)deleteFiles:(NSString *)path {
