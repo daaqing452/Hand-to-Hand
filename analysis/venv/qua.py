@@ -18,8 +18,8 @@ PLOT_HIGHPASS 		= False
 DRAW_SMOOTH			= False
 DRAW_CORRELATION	= True
 
-filename0 = "../log-006noise-WatchL.txt"
-filename1 = "../log-006noise-WatchR.txt"
+filename0 = "../log-006correlation-WatchL.txt"
+filename1 = "../log-006correlation-WatchR.txt"
 acc0r, att0r, rot0r, qua0r = read_file2(filename0)
 acc1r, att1r, rot1r, qua1r = read_file2(filename1)
 print('acc raw shape:', acc0r.shape, qua0r.shape)
@@ -214,24 +214,26 @@ if DRAW_SMOOTH:
 	for i in range(4):
 		sub = plt.subplot(4, 2, i*2+1)
 		sub.set_ylim(-1.1, 1.1)
+		plt.ylabel(ylabel[i], rotation='horizontal', horizontalalignment='right', fontsize=15, fontname='arial')
 		plt.xticks([])
 		plt.yticks(size=8, fontname='arial')
-		plt.plot(qua0[:rr, i])
-		plt.plot(qua1[:rr, i], 'coral')
-		if i == 3:
-			plt.xlabel('(a) Before smoothing', fontsize=12, fontname='arial')
+		plt.plot(qua0[:rr, i], linewidth=1)
+		plt.plot(qua1[:rr, i], 'coral', linewidth=1)
+		#if i == 3:
+		#	plt.xlabel('(a) Before smoothing', fontsize=12, fontname='arial')
 
 		sub = plt.subplot(4, 2, i*2+2)
-		sub.yaxis.set_ticks_position('right')
+		# sub.yaxis.set_ticks_position('right')
 		sub.set_ylim(-1.1, 1.1)
 		plt.ylabel(ylabel[i], rotation='horizontal', horizontalalignment='right', fontsize=15, fontname='arial')
 		plt.xticks([])
 		plt.yticks(size=8, fontname='arial')
-		p0, = plt.plot(qua0q[:rr, i])
-		p1, = plt.plot(qua1q[:rr, i], 'coral')
-		if i == 3:
-			plt.xlabel('(b) After smoothing', fontsize=12, fontname='arial')
-			sub.legend([p0, p1], ['Left', 'Right'], loc=(1.06, 0.5), edgecolor='white', prop={'family': 'arial'})
+		p0, = plt.plot(qua0q[:rr, i], linewidth=1)
+		p1, = plt.plot(qua1q[:rr, i], 'coral', linewidth=1)
+		#if i == 3:
+		#	plt.xlabel('(b) After smoothing', fontsize=12, fontname='arial')
+		if i == 0:	
+			sub.legend([p0, p1], ['Left', 'Right'], loc=(0.2, 1.03), edgecolor='white', ncol=2, prop={'family': 'arial', 'size': 14})
 
 # draw correlation
 if DRAW_CORRELATION:
@@ -242,31 +244,31 @@ if DRAW_CORRELATION:
 		sub.yaxis.set_ticks_position('right')
 		plt.yticks(size=8, fontname='arial')
 		plt.xticks([])
-		p1, = plt.plot(acc1[:, i], 'coral')
-		p0, = plt.plot(acc0[:, i])
+		p1, = plt.plot(acc1[:, i], 'coral', linewidth=1)
+		p0, = plt.plot(acc0[:, i], linewidth=1)
 		if i == 1:
 			plt.ylabel('Raw Motion', fontsize=12, fontname='arial')
 		if i == 0:
-			sub.legend([p0, p1], ['Left', 'Right'], loc=(0.9, 1.1), edgecolor='white', prop={'family': 'arial'})
+			sub.legend([p0, p1], ['Left', 'Right'], loc=(0.5, 1.1), ncol=2, edgecolor='white', prop={'family': 'arial', 'size': 10})
 	for i in range(3):
 		sub = plt.subplot(7, 1, i+4)
 		sub.set_ylim(-9.5, 9.5)
 		sub.yaxis.set_ticks_position('right')
 		plt.yticks(size=8, fontname='arial')
 		plt.xticks([])
-		p1, = plt.plot(acc1[:, i], 'coral')
-		p0, = plt.plot(acc0z[:, i], 'seagreen')
+		p1, = plt.plot(acc1[:, i], 'coral', linewidth=1)
+		p0, = plt.plot(acc0z[:, i], 'seagreen', linewidth=1)
 		if i == 1:
 			plt.ylabel('Rotated Motion', fontsize=12, fontname='arial')
 		if i == 2:
-			sub.legend([p0, p1], ['Rotated Left', 'Right'], loc=(0.9, -2.3), edgecolor='white', prop={'family': 'arial'})
+			sub.legend([p0, p1], ['Rotated Left', 'Right'], loc=(0.5, -2.3), ncol=2, edgecolor='white', prop={'family': 'arial', 'size': 10})
 	sub = plt.subplot(7, 1, 7)
 	sub.yaxis.set_ticks_position('right')
 	plt.yticks(size=8, fontname='arial')
 	plt.xticks([])
-	p2, = plt.plot(cors.sum(axis=1), 'darkviolet')
+	p2, = plt.plot(cors.sum(axis=1), 'darkviolet', linewidth=1)
 	plt.ylabel('Correlation', fontsize=12, fontname='arial')
-	plt.xlabel('Body Still Walking Running Jumping Free Hand Moving', fontsize=12, fontname='arial')
-	sub.legend([p2], ['X Y Z'], loc=(0.7, 8.4), edgecolor='white', prop={'family': 'arial'})
+	plt.xlabel('Stationary Walking Running Jumping Hand Moving', fontsize=12, fontname='arial')
+	sub.legend([p2], ['X Y Z'], loc=(0.2, 8.4), edgecolor='white', ncol=2, prop={'family': 'arial', 'size': 10})
 
 plt.show()

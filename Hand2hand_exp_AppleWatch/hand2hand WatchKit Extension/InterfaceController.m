@@ -22,6 +22,7 @@
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonLog;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonShowFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonDeleteFiles;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonDeleteRecent;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonSendFiles;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonCommunication;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonMicrophone;
@@ -207,7 +208,11 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (IBAction)doClickButtonDeleteFiles:(id)sender {
-    [self deleteFiles:documentPath];
+    [self deleteFiles:documentPath deleteRecent:false];
+}
+
+- (IBAction)doClickButtonDeleteRecent:(id)sender {
+    [self deleteFiles:documentPath deleteRecent:true];
 }
 
 - (IBAction)doClickButtonSendFiles:(id)sender {
@@ -258,7 +263,8 @@ CBCharacteristic *subscribedCharacteristic;
         }
         if (logging) {
             // buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\natt %f %f %f\nrot %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, attitude.pitch, attitude.roll, attitude.yaw, rotationRate.x, rotationRate.y, rotationRate.z]];
-            buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\nrot %f %f %f\nqua %f %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, rotationRate.x, rotationRate.y, rotationRate.z, quaternion.w, quaternion.x, quaternion.y, quaternion.z]];
+            //buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\nrot %f %f %f\nqua %f %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, rotationRate.x, rotationRate.y, rotationRate.z, quaternion.w, quaternion.x, quaternion.y, quaternion.z]];
+            buffer = [buffer stringByAppendingString:[NSString stringWithFormat:@"time %f\nacc %f %f %f\nrot %f %f %f\nqua %f %f %f %f\natt %f %f %f\n", motion.timestamp, acceleration.x, acceleration.y, acceleration.z, rotationRate.x, rotationRate.y, rotationRate.z, quaternion.w, quaternion.x, quaternion.y, quaternion.z, attitude.roll, attitude.pitch, attitude.yaw]];
             if (buffer.length > LOG_BUFFER_MAX_SIZE) {
                 [self writeFile:logFileName content:buffer];
                 buffer = @"";
@@ -357,14 +363,37 @@ CBCharacteristic *subscribedCharacteristic;
     [self.buttonShowFiles setTitle:[NSString stringWithFormat:@"Show Files: %d", fileCount]];
 }
 
-- (void)deleteFiles:(NSString *)path {
-    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:path];
-    NSString *file;
-    while ((file = [myDirectoryEnumerator nextObject])) {
-        NSString *filePath = [documentPath stringByAppendingPathComponent:file];
-        bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
-        NSLog(@"delete file %@: %@", ifSuccess ? @"Yes" : @"No", file);
-    }
+- (void)deleteFiles:(NSString *)path deleteRecent:(bool)deleteRecent {
+    WKAlertAction *actionCancel = [WKAlertAction actionWithTitle:@"取消" style:WKAlertActionStyleDefault handler:^{
+    }];
+    static NSString *message = @"null";
+    WKAlertAction *actionDelete = [WKAlertAction actionWithTitle:@"确认删除" style:WKAlertActionStyleDestructive handler:^{
+        NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:path];
+        NSString *file;
+        NSString *mostRecentFileName = @"1";
+        while ((file = [myDirectoryEnumerator nextObject])) {
+            if (deleteRecent == true) {
+                if ([mostRecentFileName compare:file] == NSOrderedAscending) {
+                    mostRecentFileName = file;
+                }
+                continue;
+            }
+            NSString *filePath = [documentPath stringByAppendingPathComponent:file];
+            bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
+            NSLog(@"delete file %@: %@", ifSuccess ? @"Yes" : @"No", file);
+        }
+        if (deleteRecent) {
+            mostRecentFileName = [mostRecentFileName stringByDeletingPathExtension];
+            myDirectoryEnumerator = [fileManager enumeratorAtPath:path];
+            while ((file = [myDirectoryEnumerator nextObject])) {
+                if (![[file stringByDeletingPathExtension] isEqualToString:mostRecentFileName]) continue;
+                NSString *filePath = [documentPath stringByAppendingPathComponent:file];
+                bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
+                NSLog(@"delete file %@: %@", ifSuccess ? @"Yes" : @"No", file);
+            }
+        }
+    }];
+    [self presentAlertControllerWithTitle:@"确认删除？" message:message preferredStyle:WKAlertControllerStyleActionSheet actions:@[actionCancel, actionDelete]];
 }
 
 
@@ -452,14 +481,6 @@ NSSet *readPermissionSet = nil;
 - (void)session:(WCSession *)session didReceiveApplicationContext:(NSDictionary<NSString *,id> *)applicationContext {
     LBLog(@"did %@", applicationContext[@"message"]);
 }
-
-/*- (void)alert:(NSString *)message {
-    WKAlertAction *actionDone = [WKAlertAction actionWithTitle:@"完成" style:WKAlertActionStyleDefault handler:^{
-    }];
-    WKAlertAction *actionDestruction = [WKAlertAction actionWithTitle:@"毁灭" style:WKAlertActionStyleDestructive handler:^{
-    }];
-    [self presentAlertControllerWithTitle:@"消息" message:message preferredStyle:WKAlertControllerStyleActionSheet actions:@[actionDone, actionDestruction]];
-}*/
 
 
 
