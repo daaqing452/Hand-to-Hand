@@ -43,7 +43,28 @@ t1 = min(acc0[-1,0], acc1[-1,0])
 acc0 = resample(acc0, t1, 0.01)
 qua0 = resample(qua0, t1, 0.01, norm='sphere')
 acc1 = resample(acc1, t1, 0.01)
-qua1 = resample(qua1, t1, 0.01)
+qua1 = resample(qua1, t1, 0.01, norm='sphere')
+
+l = 500
+r = 5800
+acc0 = acc0[l:r]
+qua0 = qua0[l:r]
+acc1 = acc1[l:r]
+qua1 = qua1[l:r]
+
+acc2r, att2r, rot2r, qua2r = read_file2('../log-014sin-WatchL.txt')
+acc3r, att3r, rot3r, qua3r = read_file2('../log-014sin-WatchR.txt')
+acc2, acc3 = bias(acc2r, acc3r, 0, 0)
+qua2, qua3 = bias(qua2r, qua3r, 0, 0)
+t1 = min(acc2[-1,0], acc3[-1,0])
+acc2 = resample(acc2, t1, 0.01)
+qua2 = resample(qua2, t1, 0.01, norm='sphere')
+acc3 = resample(acc3, t1, 0.01)
+qua3 = resample(qua3, t1, 0.01, norm='sphere')
+acc0 = np.concatenate([acc0, acc2], axis=0)[:-150]
+acc1 = np.concatenate([acc1, acc3], axis=0)[:-150]
+qua0 = np.concatenate([qua0, qua2], axis=0)[:-150]
+qua1 = np.concatenate([qua1, qua3], axis=0)[:-150]
 
 def rotate(acc, qua):
 	# filter qua
@@ -268,7 +289,7 @@ if DRAW_CORRELATION:
 	plt.xticks([])
 	p2, = plt.plot(cors.sum(axis=1), 'darkviolet', linewidth=1)
 	plt.ylabel('Correlation', fontsize=12, fontname='arial')
-	plt.xlabel('Stationary Walking Running Jumping Hand Moving', fontsize=12, fontname='arial')
+	plt.xlabel('Stationary Walking Running Jumping Hand Moving Unimanual Touch', fontsize=12, fontname='arial')
 	sub.legend([p2], ['X Y Z'], loc=(0.2, 8.4), edgecolor='white', ncol=2, prop={'family': 'arial', 'size': 10})
 
 plt.show()

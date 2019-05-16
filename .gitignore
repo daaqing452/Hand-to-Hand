@@ -6,9 +6,16 @@
 /analysis/venv/__pycache__/*.pyc
 /analysis/venv/.DS_Store
 /analysis/venv/*.pyc
-
 /analysis/data/
 /analysis/log*
 /analysis/.DS_Store
+
+/user_study/running/
+/user_study/stationary/
+/user_study/swipe/
+/user_study/walking/
+/user_study/.DS_Store
+
+/user_study_random/.DS_Store
 
 .DS_Store

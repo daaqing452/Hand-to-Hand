@@ -3,7 +3,7 @@ import numpy as np
 import sys
 from utils import *
 
-SUB         = True
+SUB         = False
 COMBINE_LR  = True
 
 PLOT_ACC_RAW            = False
@@ -14,8 +14,8 @@ PLOT_QUA                = True
 PLOT_ROT                = True
 PLOT_CORRELATION        = True
 
-filename0 = "../log-010IyPb-WatchL.txt"
-filename1 = "../log-010IyPb-WatchR.txt"
+filename0 = "../log-014sin-WatchL.txt"
+filename1 = "../log-014sin-WatchR.txt"
 acc0r, att0r, rot0r, qua0r = read_file2(filename0)
 acc1r, att1r, rot1r, qua1r = read_file2(filename1)
 print('acc raw shape:', acc0r.shape, qua0r.shape)
@@ -25,6 +25,8 @@ qua0r[:,2:] *= -1
 qua1r[:,2:] *= -1
 
 print_timestamp_quality(acc0r[:,0], acc1r[:,0])
+# walking 224 0
+# running 15 0
 BIAS_L = 0
 BIAS_R = 0
 acc0, acc1 = bias(acc0r, acc1r, BIAS_L, BIAS_R)

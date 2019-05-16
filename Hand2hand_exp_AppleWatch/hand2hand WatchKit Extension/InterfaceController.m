@@ -126,12 +126,15 @@ CBCharacteristic *subscribedCharacteristic;
         [self changeLogStatus:true];
         if (audioMinitoring) {
             [self startAudioRecording];
+        } else {
+            [device playHaptic:WKHapticTypeNotification];
         }
     } else if ([command isEqualToString:@"log off"]) {
         [self changeLogStatus:false];
         if (audioMinitoring) {
             [self stopAudioRecording];
         }
+        [device playHaptic:WKHapticTypeNotification];
     } else if ([command isEqualToString:@"test watch connectivity success"]) {
         watchConnectivityTestFlag = true;
     } else {
@@ -388,6 +391,8 @@ CBCharacteristic *subscribedCharacteristic;
             while ((file = [myDirectoryEnumerator nextObject])) {
                 if (![[file stringByDeletingPathExtension] isEqualToString:mostRecentFileName]) continue;
                 NSString *filePath = [documentPath stringByAppendingPathComponent:file];
+                //NSDictionary *attribute = [fileManager attributesOfItemAtPath:filePath error:nil];
+                //id createDate = [attribute objectForKey:NSFileCreationDate];
                 bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
                 NSLog(@"delete file %@: %@", ifSuccess ? @"Yes" : @"No", file);
             }
