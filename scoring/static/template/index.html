@@ -1,0 +1,274 @@
+<head>
+	<script src='static/js/jquery-3.3.1.min.js'> </script>
+	<style>
+	.bbs {
+		border-bottom: dashed 1px;
+	}
+	.bbm {
+		border-bottom: solid 1px;
+	}
+	.bbb {
+		border-bottom: solid 3px;
+	}
+	.brs {
+		border-right: dashed 1px;
+	}
+	.brm {
+		border-right: solid 1px;
+	}
+	.brb {
+		border-right: solid 3px;
+	}
+	</style>
+</head>
+
+<body>
+	<h1>Hand-to-hand Scoring</h1>
+	<hr/>
+	<div id="all">
+		<h3>基本信息</h3>
+		<div style="padding:2">姓名：<input id="name" type="text"></input></div>
+		<div style="padding:2">性别：<select id="gender"><option>男</option><option>女</option></select></div>
+		<div style="padding:2">年龄：<input id="age" type="text"></input></div>
+		<div style="padding:2">利手：<select id="handness"><option>右</option><option>左</option><option>无偏好</option></select></div>
+		<div style="padding:2">学号：<input id="student_id" type="text"></input></div>
+		<div style="padding:2">对手势交互的熟悉程度：<select id="expertise"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>（例如VR、AR、Leap Motion等，1-完全不熟悉，5-专家）</div>
+		<hr/>
+		<h3>手势打分</h3>
+		<ul>
+			<li><b>提交前请勿刷新！刷新后数据丢失！</b></li>
+			<li>本次问卷的目的是设计一些双手接触式的手势，为日常生活中无视觉注意力下的交互提供更多可能性。问卷时长40分钟左右，报酬60元。</li>
+			<li>本次问卷需要被试者给若干手势打分；<b>在对每一个手势打分之前，请阅读文字描述、观看示范视频，并自行尝试。</b></li>
+			<li>请直接点击分数给每个手势的四个维度打分，分数范围1-7；1表示最差；7表示最好。</li>
+			<ul>
+				<li><b>容易完成</b>：<u>好不好做</u>，费不费力，考虑不同场景如静止/跑步等；分数越高表示越容易完成</li>
+				<li><b>容易记忆</b>：<u>好不好记</u>，容不容易从一些功能上联想；分数越高表示越容易完成</li>
+				<li><b>接受度</b>：在公共场合做的过程中<u>是否会尴尬</u>，是否会<u>影响到他人</u>；分数越高表示接受度越高</li>
+				<li><b>不易混淆度</b>：在日常生活中是否会<u>误触发</u>，是否会和日常动作或其他手势混淆；分数越高表示越不容易混淆</li>
+			</ul>
+			<li>欢迎在每个手势的备注栏写下你的意见</li>
+		</ul>
+		<br/>
+		<table id="main" style="border:solid 1px; text-align:center"></table>
+		<br/>
+		<button style="width:80;height:45;font-size:20" onclick="submit()">提交</button>
+		请完成所有打分后点击提交，并等待提交成功提示
+	</div>
+	
+<script>
+	var colors = ["#ff3333", "#ff8800", "#ffff00", "#00ff00", "#00ffff", "#3366ff", "#ff00ff"];
+	
+	var g = [
+		[],
+		["PxP", "bbs", "手掌碰手掌"],
+		["PxB", "bbs", "手掌碰手背"],
+		["BxP", "bbs", "手背碰手掌"],
+		["BxB", "bbb", "手背碰手背"],
+		["PxU", "bbs", "手掌碰手上侧"],
+		["PxFU", "bbs", "手掌碰拳上侧"],
+		["BxU", "bbs", "手背碰手上侧"],
+		["BxFU", "bbs", "手背碰拳上侧"],
+		["DxP", "bbs", "手下侧碰手掌"],
+		["FDxP", "bbs", "拳下侧碰手掌"],
+		["DxB", "bbb", "手下侧碰手背"],
+		["FDxB", "bbb", "拳下侧碰手背"],
+		["UxU", "bbs", "手上侧相碰"],
+		["UxFU", "bbs", "手上侧拳上侧相碰"],
+		["FUxFU", "bbb", "拳上侧相碰"],
+		["DxD", "bbs", "手下侧相碰"],
+		["DxFD", "bbs", "手下侧拳下侧相碰"],
+		["FDxFD", "bbs", "拳下侧相碰"],
+		["DxU", "bbs", "手下侧碰手上侧"],
+		["DxFU", "bbs", "手下侧碰拳上侧"],
+		["FDxU", "bbb", "拳下侧碰手上侧"],
+		["FDxFU", "bbb", "拳下侧碰拳上侧"],
+		["FFxU", "bbs", "拳前侧手上侧相碰"],
+		["FFxFU", "bbs", "拳前侧拳上侧相碰"],
+		["FFxD", "bbs", "拳前侧手下侧相碰"],
+		["FFxFD", "bbs", "拳前侧拳下侧相碰"],
+		["FFxP", "bbs", "拳前侧手掌相碰"],
+		["FFxB", "bbs", "拳前侧手背相碰"],
+		["FFxFF", "bbb", "拳前侧相碰"],
+		["IxU", "bbs", "手指点手上侧"],
+		["IxFU", "bbs", "手指点拳上侧"],
+		["IxD", "bbs", "手指点手下侧"],
+		["IxFD", "bbs", "手指点拳下侧"],
+		["IxP", "bbs", "手指点手掌"],
+		["IxB", "bbs", "手指点手背"],
+		["IxI", "bbs", "手指碰手指"],
+		["IxFF", "bbs", "手指点拳前侧"],
+		["IxJ", "bbb", "手指点关节"],
+		["DxG", "bbs", "手下侧碰虎口"],
+		["IxG", "bbs", "手指点虎口"],
+		["GxG", "bbs", "五指交叉相碰"],
+		["PyP", "bbs", "手掌划手掌(上下左右)"],
+		["ByP", "bbs", "手背划手掌(上下左右)"],
+		["PyB", "bbs", "手掌划手背(上下左右)"],
+		["ByB", "bbs", "手背划手背(上下左右)"],
+		["PyU", "bbs", "手掌划手上侧(左右)"],
+		["ByU", "bbs", "手背划手上侧(左右)"],
+		["PyD", "bbb", "手掌划手下侧(左右)"],
+		["ByD", "bbb", "手背划手下侧(左右)"],
+		["DyP", "bbs", "手下侧划手掌(上下左右)"],
+		["DyB", "bbs", "手下侧划手背(上下左右)"],
+		["DyU", "bbb", "手下侧划手上侧(左右)"],
+		["IyP", "bbs", "手指划手掌(上下左右)"],
+		["IyB", "bbs", "手指划手背(上下左右)"],
+		["IyU", "bbs", "手指划手上侧(左右)"],
+		["IyD", "bbb", "手指划手下侧(左右)"],
+	];
+	
+	var tlist = [
+		["newline"],[1],[2],[3],[4],
+		["newline", ""],[5,6],[7,8],[9,10],[11,12],
+		["newline"],[13],[14],[15],
+		["newline"],[16],[17],[18],
+		["newline", ""],[19,20],[21,22],
+		["newline", ""],[23,24],[25,26],[27],[28],[29],
+		["newline", ""],[30,31],[32,33],[34],[35],[36],[37],[38],
+		["newline"],[39],[40],[41],
+		["newline", ""],[42,43],[44,45],[46,47],[48,49],
+		["newline"],[50],[51],[52],
+		["newline"],[53],[54],[55],[56]
+	];
+	
+	var selected = [
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+		[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],
+	];
+
+	function click_it(ges, pro, val) {
+		val = val % 8;
+		selected[ges][pro] = val;
+		for (var i = 1; i <= 7; i++) {
+			var color = (selected[ges][pro] == i) ? colors[i-1] : "#ffffff";
+			$("div#" + ges + "-" + pro + "-" + i).css('background-color', color);
+		}
+	}
+	
+	function add_radio(ges, pro) {
+		var s = "";
+		for (var i = 1; i <= 8; i++) {
+			var floa = (i % 2 == 1) ? "left" : "right";
+			var color = (selected[ges][pro] == i) ? colors[i-1] : "#ffffff";
+			var label = (i == 8) ? "清空" : i;
+			s += '<div id=' + ges + '-' + pro + '-' + i + ' style="width:48%; height:25%; margin:1%; float:' + floa + '; background-color:' + color + '" onclick="click_it(' + ges + ', ' + pro + ', ' + i + ')">' + label + '</div>';
+		}
+		return s;
+	}
+	
+	function submit() {
+		var check = true;
+		var score = [];
+		for (var i = 1; i < g.length; i++) {
+			score.push({"ges": g[i][0], "score": selected[i]});
+			if (check) {
+				for (var j = 0; j < 4; j++) {
+					if (selected[i][j] == 0) {
+						alert('第' + i + '个手势有维度未打分！');
+						return;
+					}
+				}
+			}
+		}
+		var info = {"name": $("input#name").val(), "gender": $("select#gender").val(), "age": $("input#age").val(), "handness": $("select#handness").val(), "student_id": $("input#student_id").val(), "expertise": $("select#expertise").val()};
+		
+		var comments = {};
+		$("textarea#comment").each(function(){
+			var textarea = $(this);
+			if (textarea.val() != "") {
+				var x = textarea.attr("ges");
+				comments[g[x][0]] = textarea.val();
+			}
+		});
+		if (confirm("确认提交？")) {
+			$.ajax({
+				url: window.location.href,
+				type: "POST",
+				data: {"op": "submit", "info": JSON.stringify(info), "score": JSON.stringify(score), "comments": JSON.stringify(comments)},
+				success: function(data) {
+					var data = JSON.parse(data);
+					if (data["result"] == "yes") {
+						alert("提交成功！");
+						$("div#all").empty();
+						$("div#all").append("<h3>谢谢参与！</h3>");
+					} else {
+						alert(data["result"]);
+					}
+				}
+			});
+		}
+	}
+	
+	var s = "";
+	for (var i in tlist) {
+		var t = tlist[i];
+		var s = '';
+		if (t[0] == "newline") {
+			if (i > 0) {
+				s += '<tr><td colspan="15" style="border-bottom: solid 1px">&nbsp;</td></tr>';
+			}
+			s += '\
+				<tr>\
+					<td class="bbm brs" width="5%">手势</td>\
+					<td class="bbm brs"></td>\
+					<td class="bbm brs" width="8%">容易完成</td>\
+					<td class="bbm brs" width="8%">容易记忆</td>\
+					<td class="bbm brs" width="8%">接受度</td>\
+					<td class="bbm brs" width="8%">不易混淆度</td>\
+					<td class="bbm brs" width="5%">备注</td>';
+			if (t.length >= 2) {
+				s += '\
+					<td class="brm" width="1%"></td>\
+					<td class="bbm brs" width="5%">手势</td>\
+					<td class="bbm brs"></td>\
+					<td class="bbm brs" width="8%">容易完成</td>\
+					<td class="bbm brs" width="8%">容易记忆</td>\
+					<td class="bbm brs" width="8%">接受度</td>\
+					<td class="bbm brs" width="8%">不易混淆度</td>\
+					<td class="bbm    " width="5%">备注</td>\
+				</tr>';
+			} else {
+				s += '<td colspan="8">&nbsp;</td>';
+			}
+		} else {
+			var x = t[0];
+			s += '\
+				<tr>\
+					<td class="' + g[x][1] + ' brs">' + x + '<br/>' + g[x][2] + '</td>\
+					<td class="' + g[x][1] + ' brs"><video width="100%" src="static/videos/' + g[x][0] + '.mp4" controls="controls" loop="loop"></video></td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 0) + '</td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 1) + '</td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 2) + '</td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 3) + '</td>\
+					<td class="' + g[x][1] + ' brm"><textarea id="comment" ges=' + x + ' rows="5" style="width:100%"/></td>';
+			if (t.length >= 2) {
+				var x = t[1];
+				s += '\
+					<td class="brm"></td>\
+					<td class="' + g[x][1] + ' brs">' + x + '<br/>' + g[x][2] + '</td>\
+					<td class="' + g[x][1] + ' brs"><video width="100%" src="static/videos/' + g[x][0] + '.mp4" controls="controls" loop="loop"></video></td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 0) + '</td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 1) + '</td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 2) + '</td>\
+					<td class="' + g[x][1] + ' brs">' + add_radio(x, 3) + '</td>\
+					<td class="' + g[x][1] + '    "><textarea id="comment" ges=' + x + ' rows="5" style="width:100%"/></td>\
+				</tr>';
+			} else {
+				s += '<td colspan="8">&nbsp;</td>';
+			}
+		}
+		$('table#main').append(s);
+	}
+</script>
+</body>
