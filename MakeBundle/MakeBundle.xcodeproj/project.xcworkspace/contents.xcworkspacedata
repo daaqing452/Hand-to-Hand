@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:MakeBuddle.xcodeproj">
+      location = "self:/Users/luyiqin/Project/Hand-to-Hand/MakeBundle/MakeBundle.xcodeproj">
    </FileRef>
 </Workspace>

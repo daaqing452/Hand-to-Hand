@@ -8,14 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		BF45A1CA221E350300720FA1 /* opencv.model in Resources */ = {isa = PBXBuildFile; fileRef = BF45A1C9221E350300720FA1 /* opencv.model */; };
-		BF98F8D821F98C7A0025DA79 /* log-3-WatchL.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF98F8D721F98C7A0025DA79 /* log-3-WatchL.txt */; };
+		BF98F8D821F98C7A0025DA79 /* log-WatchL.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */; };
+		BFC7ABD822E6ACC100E7BE34 /* plain.txt in Resources */ = {isa = PBXBuildFile; fileRef = BFC7ABD722E6ACC100E7BE34 /* plain.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		BF45A1C9221E350300720FA1 /* opencv.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = opencv.model; sourceTree = "<group>"; };
-		BF98F8CE21F98BAA0025DA79 /* MakeBuddle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MakeBuddle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF98F8CE21F98BAA0025DA79 /* makeBundle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = makeBundle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF98F8D121F98BAA0025DA79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BF98F8D721F98C7A0025DA79 /* log-3-WatchL.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "log-3-WatchL.txt"; sourceTree = "<group>"; };
+		BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "log-WatchL.txt"; sourceTree = "<group>"; };
+		BFC7ABD722E6ACC100E7BE34 /* plain.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plain.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,7 +34,7 @@
 		BF98F8C521F98BAA0025DA79 = {
 			isa = PBXGroup;
 			children = (
-				BF98F8D021F98BAA0025DA79 /* MakeBuddle */,
+				BF98F8D021F98BAA0025DA79 /* MakeBundle */,
 				BF98F8CF21F98BAA0025DA79 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,27 +42,28 @@
 		BF98F8CF21F98BAA0025DA79 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BF98F8CE21F98BAA0025DA79 /* MakeBuddle.bundle */,
+				BF98F8CE21F98BAA0025DA79 /* makeBundle.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		BF98F8D021F98BAA0025DA79 /* MakeBuddle */ = {
+		BF98F8D021F98BAA0025DA79 /* MakeBundle */ = {
 			isa = PBXGroup;
 			children = (
-				BF98F8D721F98C7A0025DA79 /* log-3-WatchL.txt */,
+				BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */,
 				BF45A1C9221E350300720FA1 /* opencv.model */,
 				BF98F8D121F98BAA0025DA79 /* Info.plist */,
+				BFC7ABD722E6ACC100E7BE34 /* plain.txt */,
 			);
-			path = MakeBuddle;
+			path = MakeBundle;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BF98F8CD21F98BAA0025DA79 /* MakeBuddle */ = {
+		BF98F8CD21F98BAA0025DA79 /* makeBundle */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BF98F8D421F98BAA0025DA79 /* Build configuration list for PBXNativeTarget "MakeBuddle" */;
+			buildConfigurationList = BF98F8D421F98BAA0025DA79 /* Build configuration list for PBXNativeTarget "makeBundle" */;
 			buildPhases = (
 				BF98F8CA21F98BAA0025DA79 /* Sources */,
 				BF98F8CB21F98BAA0025DA79 /* Frameworks */,
@@ -70,9 +73,9 @@
 			);
 			dependencies = (
 			);
-			name = MakeBuddle;
-			productName = MakeBuddle;
-			productReference = BF98F8CE21F98BAA0025DA79 /* MakeBuddle.bundle */;
+			name = makeBundle;
+			productName = makeBundle;
+			productReference = BF98F8CE21F98BAA0025DA79 /* makeBundle.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -89,7 +92,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BF98F8C921F98BAA0025DA79 /* Build configuration list for PBXProject "MakeBuddle" */;
+			buildConfigurationList = BF98F8C921F98BAA0025DA79 /* Build configuration list for PBXProject "MakeBundle" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -101,7 +104,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BF98F8CD21F98BAA0025DA79 /* MakeBuddle */,
+				BF98F8CD21F98BAA0025DA79 /* makeBundle */,
 			);
 		};
 /* End PBXProject section */
@@ -112,7 +115,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF45A1CA221E350300720FA1 /* opencv.model in Resources */,
-				BF98F8D821F98C7A0025DA79 /* log-3-WatchL.txt in Resources */,
+				BF98F8D821F98C7A0025DA79 /* log-WatchL.txt in Resources */,
+				BFC7ABD822E6ACC100E7BE34 /* plain.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,9 +250,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 2V33378F7P;
-				INFOPLIST_FILE = MakeBuddle/Info.plist;
+				INFOPLIST_FILE = makeBundle/Info.plist;
 				INSTALL_PATH = "";
-				PRODUCT_BUNDLE_IDENTIFIER = pcg.MakeBuddle;
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.MakeBundle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = NO;
@@ -262,9 +266,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 2V33378F7P;
-				INFOPLIST_FILE = MakeBuddle/Info.plist;
+				INFOPLIST_FILE = makeBundle/Info.plist;
 				INSTALL_PATH = "";
-				PRODUCT_BUNDLE_IDENTIFIER = pcg.MakeBuddle;
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.MakeBundle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = NO;
@@ -275,7 +279,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BF98F8C921F98BAA0025DA79 /* Build configuration list for PBXProject "MakeBuddle" */ = {
+		BF98F8C921F98BAA0025DA79 /* Build configuration list for PBXProject "MakeBundle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF98F8D221F98BAA0025DA79 /* Debug */,
@@ -284,7 +288,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BF98F8D421F98BAA0025DA79 /* Build configuration list for PBXNativeTarget "MakeBuddle" */ = {
+		BF98F8D421F98BAA0025DA79 /* Build configuration list for PBXNativeTarget "makeBundle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF98F8D521F98BAA0025DA79 /* Debug */,
