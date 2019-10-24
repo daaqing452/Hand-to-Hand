@@ -66,7 +66,7 @@ NSString *logFileName;
 bool const HEALTH_MONITORING = false;
 
 // audio
-bool audioMinitoring = true;
+bool audioMinitoring = false;
 NSString *audioFileName;
 
 //  core bluetooth
@@ -181,16 +181,16 @@ CBCharacteristic *subscribedCharacteristic;
 }
 
 - (void)startCommunication {
-    if ([communication isEqualToString:@"core bluetooth"]) {
-        [self connectByCoreBluetooth];
-    } else {
+//    if ([communication isEqualToString:@"core bluetooth"]) {
+//        [self connectByCoreBluetooth];
+//    } else {
         wcsession = [WCSession defaultSession];
         wcsession.delegate = self;
         [wcsession activateSession];
         watchConnectivityTestFlag = false;
         [self sendMessageByWatchConnectivity:@"test watch connectivity"];
         [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timeredWatchConnectivity:) userInfo:nil repeats:NO];
-    }
+//    }
 }
 
 

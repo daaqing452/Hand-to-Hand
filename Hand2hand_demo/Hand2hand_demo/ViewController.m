@@ -32,18 +32,6 @@ WCSession *wcsession;
 NSBundle *bundle;
 Classifier *classifier;
 
-// detect
-const double DELIMITER_MAX_BETWEEN_TIME = 0.3;
-double delimiterTimeWC = -1, delimiterTimeCB = -1;
-
-// recognition
-const double RECOGNITION_EXPIRE_TIME = 3.0;
-const double FEATURES_MAX_BETWEEN_TIME = 0.25;
-NSMutableArray *featuresLeft = nil, *featuresRight = nil;
-double featuresLeftArriveTime, featuresRightArriveTime;
-double recognitionStartTime = -1;
-double recognizing = false;
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -71,63 +59,61 @@ double recognizing = false;
     } else if ([command isEqualToString:@"test watch connectivity"]) {
         [self sendMessageByWatchConnectivity:@"test watch connectivity success"];
         UILog(@"watch connectivity connected");
-    } else if ([command isEqualToString:@"detect delimiter"]) {
-        UILog(@"delimiter %@", fromType);
-        double timeNow = [[NSDate date] timeIntervalSince1970];
-        if ([fromType isEqualToString:@"WC"]) {
-            delimiterTimeWC = timeNow;
-        } else if ([fromType isEqualToString:@"CB"]) {
-            delimiterTimeCB = timeNow;
-        } else {
-            UILog(@"detect delimiter error");
-        }
-        if (fabs(delimiterTimeWC - delimiterTimeCB) < DELIMITER_MAX_BETWEEN_TIME) {
-            UILog(@"recognition start");
-            recognitionStartTime = timeNow;
-            [self doClickButtonRecognitionOn:nil];
-        }
     } else {
         UILog(@"recv %@: %@", fromType, command);
     }
 }
 
+- (float)bytesToFloat:(Byte *)b {
+    unsigned int c = ((unsigned int)b[0] << 24) + ((unsigned int)b[1] << 16) + ((unsigned int)b[2] << 8) + (b[3]);
+    float *p = (float *)(&c);
+    return *p;
+}
+
+- (double)fmod: (double)x mod:(double)y {
+    return x - (int)(x / y + 1e-7) * y;
+}
+
+// recognition
+// buffer 8 feature frame (2s)
+const int FEATURE_BUFFER = 8;
+const double EPS = 1e-7;
+const double MAX_ARRIVE_TIME_DIFF = 0.1;
+NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
+double recognizing = false;
+
 - (void)processFrames:(NSData *)data fromType:(NSString *)fromType {
     Byte *bytes = (Byte *)data.bytes;
+    Byte ctrl = bytes[0];
     NSMutableArray *features = [[NSMutableArray alloc] init];
-    for (int i = 1; i < data.length; i += 2) {
-        short b0 = bytes[i + 0];
-        short b1 = bytes[i + 1];
-        short shortValue = (b0 << 8) | b1;
-        float value = shortValue / 1000.0;
+    for (int i = 1; i < data.length; i += 4) {
+        float value = [self bytesToFloat:bytes + 5];
         [features addObject:[NSNumber numberWithFloat:value]];
     }
-    
-    double timeNow = [[NSDate date] timeIntervalSince1970];
-    if (bytes[0] == 0) {
-        featuresLeft = features;
-        featuresLeftArriveTime = timeNow;
-    } else if (bytes[0] == 1) {
-        featuresRight = features;
-        featuresRightArriveTime = timeNow;
+    float timeArrive = [features[0] floatValue];
+    int tidx = (int)([self fmod:timeArrive mod:2.0] * 100 + EPS) / 25;
+    NSMutableArray *other;
+    if (ctrl == 0) {
+        featuresLeft[tidx] = features;
+        other = featuresRight[tidx];
+    } else if (ctrl == 1) {
+        featuresRight[tidx] = features;
+        other = featuresLeft[tidx];
     } else {
         UILog(@"recv data from unknown watch");
     }
-    
-    if (featuresLeft != nil && featuresRight != nil && fabs(featuresLeftArriveTime - featuresRightArriveTime) < FEATURES_MAX_BETWEEN_TIME) {
-        [featuresLeft addObjectsFromArray:featuresRight];
-        int result = [classifier classify:featuresLeft];
-        //UILog(@"ans: %d", result);
-        NSLog(@"ans: %d", result);
-        featuresLeft = nil;
-        featuresRight = nil;
+    if (other != nil) {
+        if (fabs(timeArrive - [other[0] floatValue]) < MAX_ARRIVE_TIME_DIFF) {
+            [featuresLeft[tidx] addObjectsFromArray:featuresRight[tidx]];
+            UILog(@"recognition");
+            //int result = [classifier classify:featuresLeft[tidx]];
+            //UILog(@"ans: %d", result);
+            featuresLeft[tidx] = nil;
+            featuresRight[tidx] = nil;
+        } else {
+            UILog(@"lr diff: %d %f %f", ctrl, timeArrive, [other[0] floatValue]);
+        }
     }
-    
-    // expire
-    /*double dateNow = [[NSDate date] timeIntervalSince1970];
-    if (recognizing && dateNow - recognitionStartTime > RECOGNITION_EXPIRE_TIME) {
-        UILog(@"recognition expire");
-        [self doClickButtonRecognitionOff:nil];
-    }*/
 }
 
 
@@ -213,8 +199,8 @@ double recognizing = false;
 - (void)session:(nonnull WCSession *)session didReceiveMessage:(nonnull NSDictionary<NSString *,id> *)dict replyHandler:(nonnull void (^)(NSDictionary<NSString *,id> * __nonnull))replyHandler {
     //replyHandler(@{@"message": @"yes"});
     NSString *message = dict[@"message"];
-    if ([message isEqualToString:@"features"]) {
-        [self processFrames:dict[@"data"] fromType:@"watch connectivity"];
+    if ([message isEqualToString:@"data"]) {
+        [self processFrames:dict[@"data"] fromType:@"WC"];
     } else {
         [self parseCommand:message fromType:@"WC"];
     }
@@ -295,7 +281,7 @@ CBMutableCharacteristic *characteristicMessageSend = nil;
         [self parseCommand:command fromType:@"CB"];
     }
     if ([[NSString stringWithFormat:@"%@", request.characteristic.UUID] isEqualToString:CHARACTERISTIC_UUID_DATA_RECV]) {
-        [self processFrames:request.value fromType:@"core bluetooth"];
+        [self processFrames:request.value fromType:@"CB"];
     }
 }
 
@@ -305,3 +291,28 @@ CBMutableCharacteristic *characteristicMessageSend = nil;
 }
 
 @end
+
+
+/*
+// detect
+const double DELIMITER_MAX_BETWEEN_TIME = 0.3;
+double delimiterTimeWC = -1, delimiterTimeCB = -1;
+
+// parse command
+ else if ([command isEqualToString:@"detect delimiter"]) {
+     UILog(@"delimiter %@", fromType);
+     double timeNow = [[NSDate date] timeIntervalSince1970];
+     if ([fromType isEqualToString:@"WC"]) {
+         delimiterTimeWC = timeNow;
+     } else if ([fromType isEqualToString:@"CB"]) {
+         delimiterTimeCB = timeNow;
+     } else {
+         UILog(@"detect delimiter error");
+     }
+     if (fabs(delimiterTimeWC - delimiterTimeCB) < DELIMITER_MAX_BETWEEN_TIME) {
+         UILog(@"recognition start");
+         recognitionStartTime = timeNow;
+         [self doClickButtonRecognitionOn:nil];
+     }
+ }
+ */

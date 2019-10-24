@@ -40,7 +40,6 @@ WCSession *wcsession;
 NSString *communication = @"null";
 bool watchConnectivityTestFlag;
 
-
 - (void)awakeWithContext:(id)context {
     [super awakeWithContext:context];
     if ([WCSession isSupported]) {
@@ -103,7 +102,7 @@ bool watchConnectivityTestFlag;
     if ([communication isEqualToString:@"core bluetooth"]) {
         [self sendDataByCoreBluetooth:data];
     } else {
-        [self sendDataByWatchConnectivity:@{@"message": @"features", @"data": data}];
+        [self sendDataByWatchConnectivity:@{@"message": @"data", @"data": data}];
     }
 }
 
@@ -161,48 +160,17 @@ bool watchConnectivityTestFlag;
 }
 
 - (IBAction)doClickButtonTest:(id)sender {
-    [self sendMessageByCoreBluetooth:@"test"];
+    //[self sendMessageByCoreBluetooth:@"test"];
+    [self changeCommunication:@"null"];
+    [self connectByCoreBluetooth];
 }
 
-- (void)okok {
-    NSString *sa = @"";
-    for (int i = 0; i < 96; i++) {
-        sa = [sa stringByAppendingString:@"a"];
-    }
-    [self sendDataByCoreBluetooth:[sa dataUsingEncoding:NSUTF8StringEncoding]];
-}
 
 
 //
 //  --- sensor ---
 //
 const double REPORT_ACC_THREHOLD = 100;
-
-const double CALIBRATION_ACC_Z_THRESHOLD = -5.0;
-const double CALIBRATION_AFTER_PEAK_TIME = 0.1;
-enum CalibrationStates { C_Idle, C_Listening, C_PeakOccur } calibrationState = C_Idle;
-double minValue0;
-double calibratedTimestamp = 0;
-double prevCalibratedTimestamp = 0;
-
-//#define DETECTION_DEBUG
-const double DETECTION_ZERO_THRESHOLD = 3.5;
-const double DETECTION_ZERO1ST_TIME = 0.2;
-const double DETECTION_ZERO2ND_TIME = 0.1;
-const double DETECTION_ROT_X_THRESHOLD_MIN = -10.0;
-const double DETECTION_ROT_X_THRESHOLD_MAX = 10.0;
-const double DETECTION_MAX_BETWEEN_PEAK_TIME = 0.35;
-const double DETECTION_ENERGY_THRESHOLD = 300;
-enum DetectionStates { D_Idle, D_Zero1st, D_MinPeak, D_MaxPeak } detectionState = D_Idle, prevDetectionState;
-bool zeroing = false;
-double zeroStartTimestamp = -1;
-int zeroId = 0;
-int goodZeroId;
-double minValue1;
-double maxValue1;
-double minPeakTimestamp;
-double maxPeakTimestamp;
-double afterPeakEnergy;
 
 - (void)setSensorDataGetPush {
     if (!self.motionManager.deviceMotionAvailable) return;
@@ -214,10 +182,7 @@ double afterPeakEnergy;
         if (error) return;
         
         // get motion
-        double nowTimestamp = motion.timestamp - calibratedTimestamp;
         CMAcceleration acceleration = motion.userAcceleration;
-        //CMAttitude *attitude = motion.attitude;
-        CMRotationRate rotationRate = motion.rotationRate;
         if (fabs(acceleration.x) > REPORT_ACC_THREHOLD || fabs(acceleration.y) > REPORT_ACC_THREHOLD || fabs(acceleration.z) > REPORT_ACC_THREHOLD) {
             NSLog(@"%f %f %f %f", motion.timestamp, acceleration.x, acceleration.y, acceleration.z);
         }
@@ -225,156 +190,75 @@ double afterPeakEnergy;
         if (recognizing) {
             [self addFrame:motion];
         }
-        
-        // calibration
-        if (calibrationState == C_Listening || calibrationState == C_PeakOccur) {
-            double value = acceleration.z;
-            if (value < CALIBRATION_ACC_Z_THRESHOLD) {
-                calibrationState = C_PeakOccur;
-                if (value < minValue0) {
-                    minValue0 = value;
-                    calibratedTimestamp = motion.timestamp;
-                }
-            } else {
-                if (calibrationState == C_PeakOccur && motion.timestamp - calibratedTimestamp > CALIBRATION_AFTER_PEAK_TIME) {
-                    [self sendMessage:[NSString stringWithFormat:@"calibration time %@: %f", device.name, calibratedTimestamp - prevCalibratedTimestamp]];
-                    prevCalibratedTimestamp = calibratedTimestamp;
-                    calibrationState = C_Idle;
-                }
-            }
-        }
-        
-        // detection
-        if (fabs(rotationRate.x) < DETECTION_ZERO_THRESHOLD) {
-            if (!zeroing) {
-                zeroStartTimestamp = nowTimestamp;
-                zeroId++;
-            }
-            zeroing = true;
-        } else {
-            zeroing = false;
-        }
-        switch (detectionState) {
-            case D_Idle:
-                // long zero then listen peak
-                if (zeroing && nowTimestamp - zeroStartTimestamp > DETECTION_ZERO1ST_TIME) {
-                    detectionState = D_Zero1st;
-                    minValue1 = 1;
-                    goodZeroId = zeroId;
-                }
-                break;
-            case D_Zero1st:
-                // find min peak
-                if (rotationRate.x < minValue1) {
-                    minValue1 = rotationRate.x;
-                    minPeakTimestamp = nowTimestamp;
-                }
-#ifdef DETECTION_DEBUG
-                if (zeroing && goodZeroId != zeroId) {
-                    NSLog(@"minv %f", minValue1);
-                }
-#endif
-                // zero after min peak
-                if (zeroing && minValue1 < DETECTION_ROT_X_THRESHOLD_MIN) {
-                    detectionState = D_MinPeak;
-                    goodZeroId = zeroId;
-                    maxValue1 = -1;
-                    break;
-                }
-                // zero -> non-zero & no peak -> zero ==> failed
-                if (goodZeroId != zeroId) {
-                    detectionState = D_Idle;
-                    break;
-                }
-                break;
-            case D_MinPeak:
-                // find max peak
-                if (rotationRate.x > maxValue1) {
-                    maxValue1 = rotationRate.x;
-                }
-#ifdef DETECTION_DEBUG
-                if (zeroing && goodZeroId != zeroId) {
-                    NSLog(@"maxv %f", maxValue1);
-                }
-#endif
-                // zero after max peak
-                if (zeroing && maxValue1 > DETECTION_ROT_X_THRESHOLD_MAX) {
-                    detectionState = D_MaxPeak;
-                    maxPeakTimestamp = nowTimestamp;
-                    afterPeakEnergy = 0;
-                    break;
-                }
-                // zero -> non-zero & no peak -> zero ==> failed
-                if (goodZeroId != zeroId) {
-                    detectionState = D_Idle;
-                    break;
-                }
-                // too long between two peaks
-                if (nowTimestamp - minPeakTimestamp > DETECTION_MAX_BETWEEN_PEAK_TIME) {
-                    detectionState = D_Idle;
-                    break;
-                }
-                break;
-            case D_MaxPeak:
-                // detect after max peak energy
-                afterPeakEnergy += pow(rotationRate.x, 2);
-                if (nowTimestamp - maxPeakTimestamp > DETECTION_ZERO2ND_TIME) {
-#ifdef DETECTION_DEBUG
-                    NSLog(@"energy: %f", afterPeakEnergy);
-#endif
-                    if (afterPeakEnergy < DETECTION_ENERGY_THRESHOLD) {
-                        [self sendMessage:@"detect delimiter"];
-                    }
-                    detectionState = D_Idle;
-                }
-                break;
-        }
-        
-#ifdef DETECTION_DEBUG
-        if (detectionState != prevDetectionState) {
-            NSLog(@"s%d", detectionState);
-        }
-        prevDetectionState = detectionState;
-#endif
+        [self calibration:motion];
+        //[self detection:motion];
     }];
     //NSLog(@"push motion ready");
+}
+
+const double CALIBRATION_ACC_Z_THRESHOLD = -5.0;
+const double CALIBRATION_AFTER_PEAK_TIME = 0.1;
+enum CalibrationStates { C_Idle, C_Listening, C_PeakOccur } calibrationState = C_Idle;
+double minValue0;
+double calibratedTimestamp = 0;
+double prevCalibratedTimestamp = 0;
+
+- (void)calibration:(CMDeviceMotion *)motion {
+    CMAcceleration acceleration = motion.userAcceleration;
+    if (calibrationState == C_Listening || calibrationState == C_PeakOccur) {
+        double value = acceleration.z;
+        if (value < CALIBRATION_ACC_Z_THRESHOLD) {
+            calibrationState = C_PeakOccur;
+            if (value < minValue0) {
+                minValue0 = value;
+                calibratedTimestamp = motion.timestamp;
+            }
+        } else {
+            if (calibrationState == C_PeakOccur && motion.timestamp - calibratedTimestamp > CALIBRATION_AFTER_PEAK_TIME) {
+                [self sendMessage:[NSString stringWithFormat:@"calibration time %@: %f", device.name, calibratedTimestamp - prevCalibratedTimestamp]];
+                prevCalibratedTimestamp = calibratedTimestamp;
+                calibrationState = C_Idle;
+            }
+        }
+    }
 }
 
 
 
 // recognition
+const double EPS = 1e-7;
+const int AXES = 8;
 const int MOTION_ARRAY_CAPACITY = 50;
 const int MOTION_ARRAY_CUT_OFF = 25;
 const int ENERGY_BIN_NUM = 5;
 const int ENERGY_BIN_CAPACITY = MOTION_ARRAY_CAPACITY / ENERGY_BIN_NUM;
 const double ENERGY_THRESHOLD = 10.0;
 bool recognizing = false;
-NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attzArray;
+double timeNow;
+NSMutableArray *arrays[AXES];
 
 - (void)initArrays {
-    accxArray = [[NSMutableArray alloc] init];
-    accyArray = [[NSMutableArray alloc] init];
-    acczArray = [[NSMutableArray alloc] init];
-    attxArray = [[NSMutableArray alloc] init];
-    attyArray = [[NSMutableArray alloc] init];
-    attzArray = [[NSMutableArray alloc] init];
+    for (int i = 0; i < AXES; i++) {
+        arrays[i] = [[NSMutableArray alloc] init];
+    }
+}
+
+- (double)fmod: (double)x mod:(double)y {
+    return x - (int)(x / y + EPS) * y;
 }
 
 - (void)addFrame:(CMDeviceMotion *)motion {
-    [accxArray addObject:[NSNumber numberWithDouble:motion.userAcceleration.x]];
-    [accyArray addObject:[NSNumber numberWithDouble:motion.userAcceleration.y]];
-    [acczArray addObject:[NSNumber numberWithDouble:motion.userAcceleration.z]];
-    [attxArray addObject:[NSNumber numberWithDouble:motion.attitude.pitch]];
-    [attyArray addObject:[NSNumber numberWithDouble:motion.attitude.roll]];
-    [attzArray addObject:[NSNumber numberWithDouble:motion.attitude.yaw]];
-    if (accxArray.count >= MOTION_ARRAY_CAPACITY) {
+    double motionData[9] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.pitch, motion.attitude.roll};
+    for (int i = 0; i < AXES; i++) {
+        [arrays[i] addObject:[NSNumber numberWithDouble:motionData[i]]];
+    }
+    timeNow = motion.timestamp - calibratedTimestamp;
+    // window 0.5s, send per 0.25s, sample interval 0.1s
+    if ([self fmod:timeNow mod:0.25] < 0.1 && arrays[0].count >= MOTION_ARRAY_CAPACITY) {
         [self processFrames];
-        [accxArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
-        [accyArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
-        [acczArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
-        [attxArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
-        [attyArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
-        [attzArray removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+        for (int i = 0; i < AXES; i++) {
+            [arrays[i] removeObjectsInRange:NSMakeRange(0, MOTION_ARRAY_CUT_OFF)];
+        }
     }
 }
 
@@ -395,21 +279,27 @@ NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attz
     return [NSArray arrayWithObjects:[NSNumber numberWithDouble:qmin], [NSNumber numberWithDouble:qmax], [NSNumber numberWithDouble:qmean], [NSNumber numberWithDouble:qstd], nil];
 }
 
+- (void)doubleToBytes:(double)v b:(Byte*)b {
+    float vf = (float)v;
+    unsigned int *p = (unsigned int *)(&vf);
+    b[0] = (*p & 0xff000000) >> 24;
+    b[1] = (*p & 0x00ff0000) >> 16;
+    b[2] = (*p & 0x0000ff00) >>  8;
+    b[3] = (*p & 0x000000ff) >>  0;
+}
+
 - (void)processFrames {
     NSMutableArray *features = [[NSMutableArray alloc] init];
-    [features addObjectsFromArray:[self getFeature:accxArray]];
-    [features addObjectsFromArray:[self getFeature:accyArray]];
-    [features addObjectsFromArray:[self getFeature:acczArray]];
-    [features addObjectsFromArray:[self getFeature:attxArray]];
-    [features addObjectsFromArray:[self getFeature:attyArray]];
-    [features addObjectsFromArray:[self getFeature:attzArray]];
+    for (int i = 0; i < AXES; i++) {
+        [features addObjectsFromArray:[self getFeature:arrays[i]]];
+    }
     
     // check energy
     double energys[ENERGY_BIN_NUM];
     for (int i = 0; i < ENERGY_BIN_NUM; i += ENERGY_BIN_CAPACITY) {
         double energy = 0;
         for (int j = i; j < i + ENERGY_BIN_CAPACITY; j++) {
-            energy += pow([accxArray[j] doubleValue], 2) + pow([accyArray[j] doubleValue], 2) + pow([acczArray[j] doubleValue], 2);
+            energy += pow([arrays[0][j] doubleValue], 2) + pow([arrays[1][j] doubleValue], 2) + pow([arrays[2][j] doubleValue], 2);
         }
         energys[i / ENERGY_BIN_CAPACITY] = energy;
     }
@@ -418,17 +308,14 @@ NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attz
     // half signal at back
     if (energys[0] < ENERGY_THRESHOLD && energys[1] < ENERGY_THRESHOLD && energys[2] < ENERGY_THRESHOLD && energys[3] < ENERGY_THRESHOLD && energys[4] >= ENERGY_THRESHOLD) return;
     
-    int length = features.count * 2 + 1;
+    int length = features.count * 4 + 5;
     Byte bytes[length];
     bytes[0] = [device.name isEqualToString:@"Watch L"] ? 0 : ([device.name isEqualToString:@"Watch R"] ? 1 : 2);
+    [self doubleToBytes:timeNow b:bytes+1];
     
     for (int i = 0; i < features.count; i++) {
         double value = [features[i] doubleValue];
-        int intValue = round(value * 1000);
-        intValue = intValue >  32767 ?  32767 : intValue;
-        intValue = intValue < -32768 ? -32768 : intValue;
-        bytes[i * 2 + 1] = (intValue & 0xff00) >> 8;
-        bytes[i * 2 + 2] = intValue & 0x00ff;
+        [self doubleToBytes:value b:bytes+5];
     }
     
     NSData *data = [[NSData alloc] initWithBytes:bytes length:length];
@@ -464,7 +351,6 @@ NSMutableArray *accxArray, *accyArray, *acczArray, *attxArray, *attyArray, *attz
 //
 //  core bluetooth
 //
-
 NSString *const CHARACTERISTIC_UUID_MESSAGE_RECV = @"FEF2";
 NSString *const CHARACTERISTIC_UUID_DATA_RECV = @"FEF3";
 CBCentralManager *centralManager;
@@ -498,7 +384,7 @@ CBCharacteristic *characteristicMessageRecv = nil, *characteristicDataRecv = nil
 }
 
 - (void)centralManager:(CBCentralManager *)centralManager didDiscoverPeripheral:(nonnull CBPeripheral *)peripheral advertisementData:(nonnull NSDictionary<NSString *,id> *)advertisementData RSSI:(nonnull NSNumber *)RSSI {
-    if ([peripheral.name isEqualToString:@"iPhone LU"]) {
+    if ([peripheral.name isEqualToString:@"iPhone PCG6"]) {
         NSLog(@"find device: %@", peripheral.name);
         [peripheralDevices addObject:peripheral];
         [centralManager connectPeripheral:peripheral options:nil];
@@ -587,3 +473,119 @@ CBCharacteristic *characteristicMessageRecv = nil, *characteristicDataRecv = nil
 
 
 
+/*
+//#define DETECTION_DEBUG
+const double DETECTION_ZERO_THRESHOLD = 3.5;
+const double DETECTION_ZERO1ST_TIME = 0.2;
+const double DETECTION_ZERO2ND_TIME = 0.1;
+const double DETECTION_ROT_X_THRESHOLD_MIN = -10.0;
+const double DETECTION_ROT_X_THRESHOLD_MAX = 10.0;
+const double DETECTION_MAX_BETWEEN_PEAK_TIME = 0.35;
+const double DETECTION_ENERGY_THRESHOLD = 300;
+enum DetectionStates { D_Idle, D_Zero1st, D_MinPeak, D_MaxPeak } detectionState = D_Idle, prevDetectionState;
+bool zeroing = false;
+double zeroStartTimestamp = -1;
+int zeroId = 0;
+int goodZeroId;
+double minValue1;
+double maxValue1;
+double minPeakTimestamp;
+double maxPeakTimestamp;
+double afterPeakEnergy;
+ 
+- (void)detection:(CMDeviceMotion *)motion {
+    double nowTimestamp = motion.timestamp - calibratedTimestamp;
+    CMRotationRate rotationRate = motion.rotationRate;
+    if (fabs(rotationRate.x) < DETECTION_ZERO_THRESHOLD) {
+        if (!zeroing) {
+            zeroStartTimestamp = nowTimestamp;
+            zeroId++;
+        }
+        zeroing = true;
+    } else {
+        zeroing = false;
+    }
+    switch (detectionState) {
+        case D_Idle:
+            // long zero then listen peak
+            if (zeroing && nowTimestamp - zeroStartTimestamp > DETECTION_ZERO1ST_TIME) {
+                detectionState = D_Zero1st;
+                minValue1 = 1;
+                goodZeroId = zeroId;
+            }
+            break;
+        case D_Zero1st:
+            // find min peak
+            if (rotationRate.x < minValue1) {
+                minValue1 = rotationRate.x;
+                minPeakTimestamp = nowTimestamp;
+            }
+#ifdef DETECTION_DEBUG
+            if (zeroing && goodZeroId != zeroId) {
+                NSLog(@"minv %f", minValue1);
+            }
+#endif
+            // zero after min peak
+            if (zeroing && minValue1 < DETECTION_ROT_X_THRESHOLD_MIN) {
+                detectionState = D_MinPeak;
+                goodZeroId = zeroId;
+                maxValue1 = -1;
+                break;
+            }
+            // zero -> non-zero & no peak -> zero ==> failed
+            if (goodZeroId != zeroId) {
+                detectionState = D_Idle;
+                break;
+            }
+            break;
+        case D_MinPeak:
+            // find max peak
+            if (rotationRate.x > maxValue1) {
+                maxValue1 = rotationRate.x;
+            }
+#ifdef DETECTION_DEBUG
+            if (zeroing && goodZeroId != zeroId) {
+                NSLog(@"maxv %f", maxValue1);
+            }
+#endif
+            // zero after max peak
+            if (zeroing && maxValue1 > DETECTION_ROT_X_THRESHOLD_MAX) {
+                detectionState = D_MaxPeak;
+                maxPeakTimestamp = nowTimestamp;
+                afterPeakEnergy = 0;
+                break;
+            }
+            // zero -> non-zero & no peak -> zero ==> failed
+            if (goodZeroId != zeroId) {
+                detectionState = D_Idle;
+                break;
+            }
+            // too long between two peaks
+            if (nowTimestamp - minPeakTimestamp > DETECTION_MAX_BETWEEN_PEAK_TIME) {
+                detectionState = D_Idle;
+                break;
+            }
+            break;
+        case D_MaxPeak:
+            // detect after max peak energy
+            afterPeakEnergy += pow(rotationRate.x, 2);
+            if (nowTimestamp - maxPeakTimestamp > DETECTION_ZERO2ND_TIME) {
+#ifdef DETECTION_DEBUG
+                NSLog(@"energy: %f", afterPeakEnergy);
+#endif
+                if (afterPeakEnergy < DETECTION_ENERGY_THRESHOLD) {
+                    [self sendMessage:@"detect delimiter"];
+                }
+                detectionState = D_Idle;
+            }
+            break;
+    }
+    
+#ifdef DETECTION_DEBUG
+    if (detectionState != prevDetectionState) {
+        NSLog(@"s%d", detectionState);
+    }
+    prevDetectionState = detectionState;
+#endif
+}
+*/

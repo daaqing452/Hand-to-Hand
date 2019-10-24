@@ -20,7 +20,7 @@
 ### CoreBluetooth
 * 使用CoreBluetooth接口，Apple Watch只能当center不能当peripheral，只能iPhone当peripheral
 * 在使用CoreBluetooth接口的地方，不能每次唤醒都使用WCSession那几句话，不然后台不跑了
-* CoreBluetooth的传输能力及其有限（一次512B左右？）
+* CoreBluetooth的传输能力极其有限（一次512B左右？）
 
 ### Apple Watch的自动息屏
 * Apple Watch做一些手势/过一段时间就会息屏，息屏以后整个程序就不工作了；这时必须用HealthKit + workout让它后台运行
