@@ -248,7 +248,7 @@ NSMutableArray *arrays[AXES];
 }
 
 - (void)addFrame:(CMDeviceMotion *)motion {
-    double motionData[9] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.pitch, motion.attitude.roll};
+    double motionData[AXES] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.pitch, motion.attitude.roll};
     for (int i = 0; i < AXES; i++) {
         [arrays[i] addObject:[NSNumber numberWithDouble:motionData[i]]];
     }
@@ -276,7 +276,7 @@ NSMutableArray *arrays[AXES];
         qstd += pow(value - qmean, 2);
     }
     qstd = sqrt(qstd / array.count);
-    return [NSArray arrayWithObjects:[NSNumber numberWithDouble:qmin], [NSNumber numberWithDouble:qmax], [NSNumber numberWithDouble:qmean], [NSNumber numberWithDouble:qstd], nil];
+    return [NSArray arrayWithObjects:[NSNumber numberWithDouble:qmax], [NSNumber numberWithDouble:qmin], [NSNumber numberWithDouble:qmean], [NSNumber numberWithDouble:qstd], nil];
 }
 
 - (void)doubleToBytes:(double)v b:(Byte*)b {
@@ -311,11 +311,11 @@ NSMutableArray *arrays[AXES];
     int length = features.count * 4 + 5;
     Byte bytes[length];
     bytes[0] = [device.name isEqualToString:@"Watch L"] ? 0 : ([device.name isEqualToString:@"Watch R"] ? 1 : 2);
-    [self doubleToBytes:timeNow b:bytes+1];
+    [self doubleToBytes:timeNow b:bytes + 1];
     
     for (int i = 0; i < features.count; i++) {
         double value = [features[i] doubleValue];
-        [self doubleToBytes:value b:bytes+5];
+        [self doubleToBytes:value b:bytes + 5 + i * 4];
     }
     
     NSData *data = [[NSData alloc] initWithBytes:bytes length:length];

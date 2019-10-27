@@ -49,5 +49,7 @@
     <string>Permission update health data</string>
     <key>NSHealthShareUsageDescription</key>
     <string>Permission share health data</string>-->
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Always Use Bluetooth</string>
 </dict>
 </plist>

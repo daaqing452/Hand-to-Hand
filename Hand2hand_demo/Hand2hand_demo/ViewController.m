@@ -43,12 +43,12 @@ Classifier *classifier;
     
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     
-    bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"MakeBuddle" ofType:@"bundle"]];
+    bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
     
-    NSString *fileName = [bundle pathForResource:@"opencv" ofType:@"model"];
-    classifier = [[Classifier alloc] initWithSVM:fileName];
+    NSString *fileNameDetectWalking = [bundle pathForResource:@"detect_walking" ofType:@"model"];
+    classifier = [[Classifier alloc] initWithSVM:fileNameDetectWalking];
     
-    [self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
+    //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
     
     UILog(@"init finished");
 }
@@ -87,7 +87,7 @@ double recognizing = false;
     Byte ctrl = bytes[0];
     NSMutableArray *features = [[NSMutableArray alloc] init];
     for (int i = 1; i < data.length; i += 4) {
-        float value = [self bytesToFloat:bytes + 5];
+        float value = [self bytesToFloat:bytes + i];
         [features addObject:[NSNumber numberWithFloat:value]];
     }
     float timeArrive = [features[0] floatValue];
@@ -96,18 +96,21 @@ double recognizing = false;
     if (ctrl == 0) {
         featuresLeft[tidx] = features;
         other = featuresRight[tidx];
+        //UILog(@"recv L %f %d", timeArrive, tidx);
     } else if (ctrl == 1) {
         featuresRight[tidx] = features;
         other = featuresLeft[tidx];
+        //UILog(@"recv R %f %d", timeArrive, tidx);
     } else {
         UILog(@"recv data from unknown watch");
     }
     if (other != nil) {
         if (fabs(timeArrive - [other[0] floatValue]) < MAX_ARRIVE_TIME_DIFF) {
+            [featuresLeft[tidx] removeObjectAtIndex:0];
+            [featuresRight[tidx] removeObjectAtIndex:0];
             [featuresLeft[tidx] addObjectsFromArray:featuresRight[tidx]];
-            UILog(@"recognition");
-            //int result = [classifier classify:featuresLeft[tidx]];
-            //UILog(@"ans: %d", result);
+            int result = [classifier classify:featuresLeft[tidx]];
+            if (result == 1) UILog(@"ans: %d", result);
             featuresLeft[tidx] = nil;
             featuresRight[tidx] = nil;
         } else {

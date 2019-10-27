@@ -24,7 +24,7 @@ using namespace cv::ml;
 
 @implementation Classifier
 
-const int FEATURES_LENGTH = 48;
+const int FEATURES_LENGTH = 64;
 
 Ptr<SVM> svm;
 
@@ -38,7 +38,7 @@ Ptr<SVM> svm;
     int length = (int)features.count;
     if (length != FEATURES_LENGTH) {
         NSLog(@"feature length error");
-        return 0;
+        return -1;
     }
     float *dataArray = new float[FEATURES_LENGTH];
     for (int i = 0; i < FEATURES_LENGTH; i++) dataArray[i] = [features[i] floatValue];

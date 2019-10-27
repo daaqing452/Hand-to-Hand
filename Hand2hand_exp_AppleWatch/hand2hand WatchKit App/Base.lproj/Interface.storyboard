@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
-    <device id="watch38" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="15400" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
+    <device id="watch38"/>
     <dependencies>
-        <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14460.16"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="15400"/>
     </dependencies>
     <scenes>
         <!--Interface Controller-->
@@ -52,7 +49,7 @@
                                 <action selector="doClickButtonDeleteRecent:" destination="AgC-eL-Hgc" id="zAh-i6-zEJ"/>
                             </connections>
                         </button>
-                        <button width="1" alignment="left" title="Microphone: On" id="7pC-Sc-1Md" userLabel="Button Microphone">
+                        <button width="1" alignment="left" title="Microphone: Off" id="7pC-Sc-1Md" userLabel="Button Microphone">
                             <connections>
                                 <action selector="doClickButtonMicrophone:" destination="AgC-eL-Hgc" id="sCB-oE-3CK"/>
                             </connections>

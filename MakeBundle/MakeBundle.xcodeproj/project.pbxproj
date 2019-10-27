@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		BF45A1CA221E350300720FA1 /* opencv.model in Resources */ = {isa = PBXBuildFile; fileRef = BF45A1C9221E350300720FA1 /* opencv.model */; };
+		BF62C4512362ED2A00A93A0C /* detect_walking.model in Resources */ = {isa = PBXBuildFile; fileRef = BF62C4502362ED2A00A93A0C /* detect_walking.model */; };
 		BF98F8D821F98C7A0025DA79 /* log-WatchL.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */; };
 		BFC7ABD822E6ACC100E7BE34 /* plain.txt in Resources */ = {isa = PBXBuildFile; fileRef = BFC7ABD722E6ACC100E7BE34 /* plain.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		BF45A1C9221E350300720FA1 /* opencv.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = opencv.model; sourceTree = "<group>"; };
+		BF62C4502362ED2A00A93A0C /* detect_walking.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = detect_walking.model; path = ../../user_study/detect_walking.model; sourceTree = "<group>"; };
 		BF98F8CE21F98BAA0025DA79 /* makeBundle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = makeBundle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF98F8D121F98BAA0025DA79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "log-WatchL.txt"; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 				BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */,
 				BF45A1C9221E350300720FA1 /* opencv.model */,
 				BF98F8D121F98BAA0025DA79 /* Info.plist */,
+				BF62C4502362ED2A00A93A0C /* detect_walking.model */,
 				BFC7ABD722E6ACC100E7BE34 /* plain.txt */,
 			);
 			path = MakeBundle;
@@ -114,6 +117,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF62C4512362ED2A00A93A0C /* detect_walking.model in Resources */,
 				BF45A1CA221E350300720FA1 /* opencv.model in Resources */,
 				BF98F8D821F98C7A0025DA79 /* log-WatchL.txt in Resources */,
 				BFC7ABD822E6ACC100E7BE34 /* plain.txt in Resources */,

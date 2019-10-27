@@ -3,7 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 from utils import *
 
-samp_n = 500
+samp_n = 1000
 
 BIAS_L = 0
 BIAS_R = 0

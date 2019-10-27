@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF45A1CC221E352A00720FA1 /* MakeBuddle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BF45A1CB221E352A00720FA1 /* MakeBuddle.bundle */; };
+		BF62C4532362ED5200A93A0C /* makeBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BF62C4522362ED5200A93A0C /* makeBundle.bundle */; };
 		BF9B8FCD2202A61B00CFD2E8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BF9B8FCC2202A61B00CFD2E8 /* AppDelegate.m */; };
 		BF9B8FD02202A61B00CFD2E8 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BF9B8FCF2202A61B00CFD2E8 /* ViewController.m */; };
 		BF9B8FD32202A61B00CFD2E8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BF9B8FD12202A61B00CFD2E8 /* Main.storyboard */; };
@@ -69,7 +69,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		BF45A1CB221E352A00720FA1 /* MakeBuddle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = MakeBuddle.bundle; sourceTree = "<group>"; };
+		BF62C4522362ED5200A93A0C /* makeBundle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = makeBundle.bundle; path = "../../../../Library/Developer/Xcode/DerivedData/MakeBundle-dsixpeqyllxiuwbdtfqunlewxndq/Build/Products/Debug-iphonesimulator/makeBundle.bundle"; sourceTree = "<group>"; };
 		BF9B8FC82202A61B00CFD2E8 /* Hand2hand_demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hand2hand_demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF9B8FCB2202A61B00CFD2E8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BF9B8FCC2202A61B00CFD2E8 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -144,7 +144,7 @@
 			isa = PBXGroup;
 			children = (
 				BFC12A042215195A003ACE2D /* Hand2hand_demo.entitlements */,
-				BF45A1CB221E352A00720FA1 /* MakeBuddle.bundle */,
+				BF62C4522362ED5200A93A0C /* makeBundle.bundle */,
 				BF9B900B2202A72F00CFD2E8 /* opencv2.framework */,
 				BF9B8FCB2202A61B00CFD2E8 /* AppDelegate.h */,
 				BF9B8FCC2202A61B00CFD2E8 /* AppDelegate.m */,
@@ -305,9 +305,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF9B8FD82202A61C00CFD2E8 /* LaunchScreen.storyboard in Resources */,
+				BF62C4532362ED5200A93A0C /* makeBundle.bundle in Resources */,
 				BF9B8FD52202A61C00CFD2E8 /* Assets.xcassets in Resources */,
 				BF9B8FD32202A61B00CFD2E8 /* Main.storyboard in Resources */,
-				BF45A1CC221E352A00720FA1 /* MakeBuddle.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
