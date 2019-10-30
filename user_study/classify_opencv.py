@@ -7,7 +7,7 @@ from sklearn.metrics import confusion_matrix
 
 
 condition = sys.argv[1]
-ctype = sys.argv[2]
+# ctype = sys.argv[2]
 users = ['hbs', 'wxy', 'zmy', 'xcn', 'gyz', 'xsc', 'lzp', 'wjy', 'wzh', 'cs']
 if len(sys.argv) > 3 and ctype == 'within':
 	users = [sys.argv[3]]
@@ -52,40 +52,32 @@ def feature(a):
 	return f
 
 cms = np.zeros((len(gess), len(gess)))
-acc_all = 0
-for u in range(len(users)):
-	print('\n' + users[u])
-	data = []
-	label = []
-	data2 = []
-	label2 = []
+data = []
+label = []
+data2 = []
+label2 = []
 
-	for v in range(len(users)):
-		for g in range(len(gess)):
-			n = raw[v][g].shape[0]
-			if v != u:
-				data  .append( feature(raw[v][g]) )
-				label .append( [g] * n            )
-			else:
-				data2 .append( feature(raw[v][g]) )
-				label2.append( [g] * n            )
+for v in range(len(users)):
+	for g in range(len(gess)):
+		n = raw[v][g].shape[0]
+		data  .append( feature(raw[v][g]) )
+		label .append( [g] * n            )
 
-	data   = np.concatenate(data,   axis=0)
-	label  = np.concatenate(label,  axis=0)
-	data2  = np.concatenate(data2,  axis=0)
-	label2 = np.concatenate(label2, axis=0)
+data   = np.concatenate(data,   axis=0).astype(np.float32)
+label  = np.concatenate(label,  axis=0)
 
-	clf = svm.SVC()
-	clf.fit(data, label)
-	res = clf.predict(data2)
-	acc = 1 - len(np.nonzero(res != label2)[0]) / label2.shape[0]
-	print('acc:', acc)
-	acc_all += acc
-	cm = confusion_matrix(label2, res)
-	cms += cm
+svm = cv2.ml.SVM_create()
+svm.setType(cv2.ml.SVM_C_SVC)
+svm.setKernel(cv2.ml.SVM_RBF)
+print('start training...')
+svm.trainAuto(data, cv2.ml.ROW_SAMPLE, label)
+svm.save('recognition_' + condition + '.model')
 
-print('mean acc = ', acc_all / len(users))
-
+res = np.array(svm.predict(data)[1]).reshape(label.shape[0])
+acc = 1 - len(np.nonzero(np.abs(res - label) > 0.1)[0]) / label.shape[0]
+print('acc:', acc)
+cm = confusion_matrix(label, res)
+cms += cm
 
 def plot_confusion_matrix(cm, classes, normalize=False, title=None, cmap=plt.cm.Blues):
     """

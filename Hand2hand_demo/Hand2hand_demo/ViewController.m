@@ -10,6 +10,7 @@
 #import "Classifier.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <WatchConnectivity/WatchConnectivity.h>
+#import <AVFoundation/AVFoundation.h>
 
 #define UILog(format, ...) [self showInfoInUI:[NSString stringWithFormat:(format), ##__VA_ARGS__]]
 
@@ -18,19 +19,23 @@
 
 @property (weak, nonatomic) IBOutlet UITextView *textInfo;
 @property (weak, nonatomic) IBOutlet UIButton *buttonCalibration;
-@property (weak, nonatomic) IBOutlet UIButton *buttonTest;
+@property (weak, nonatomic) IBOutlet UIButton *buttonRecognition;
 @property (weak, nonatomic) IBOutlet UIButton *buttonClear;
-@property (weak, nonatomic) IBOutlet UIButton *buttonRecognitionOn;
-@property (weak, nonatomic) IBOutlet UIButton *buttonRecognitionOff;
+@property (weak, nonatomic) IBOutlet UIButton *buttonMode;
+@property (weak, nonatomic) IBOutlet UIButton *buttonExperiment;
+@property (weak, nonatomic) IBOutlet UIButton *buttonExperimentCommand;
+@property (weak, nonatomic) IBOutlet UIButton *buttonFalsePositive;
+@property (weak, nonatomic) IBOutlet UIButton *buttonFalseNegative;
 
 @end
 
+// ['IxP', 'IxB', 'IxI', 'IxFU', 'FUxFU', 'FDxFU', 'PxFU', 'FDxP']
 
 @implementation ViewController
 
 WCSession *wcsession;
 NSBundle *bundle;
-Classifier *classifier;
+Classifier *detector, *recognizerStationay;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -45,8 +50,11 @@ Classifier *classifier;
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
     
-    NSString *fileNameDetectWalking = [bundle pathForResource:@"detect_walking" ofType:@"model"];
-    classifier = [[Classifier alloc] initWithSVM:fileNameDetectWalking];
+    NSString *fileNameDetect = [bundle pathForResource:@"detect_walking_sta" ofType:@"model"];
+    detector = [[Classifier alloc] initWithSVM:fileNameDetect];
+    
+    NSString *fileNameRecognizerStationary = [bundle pathForResource:@"recognition_walking" ofType:@"model"];
+    recognizerStationay = [[Classifier alloc] initWithSVM:fileNameRecognizerStationary];
     
     //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
     
@@ -64,6 +72,16 @@ Classifier *classifier;
     }
 }
 
+
+
+// recognition
+// buffer 20 feature frame (5s)
+const int FEATURE_BUFFER = 20;
+const double EPS = 1e-7;
+const double MAX_ARRIVE_TIME_DIFF = 0.1;
+NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
+double recognizing = false;
+
 - (float)bytesToFloat:(Byte *)b {
     unsigned int c = ((unsigned int)b[0] << 24) + ((unsigned int)b[1] << 16) + ((unsigned int)b[2] << 8) + (b[3]);
     float *p = (float *)(&c);
@@ -74,14 +92,6 @@ Classifier *classifier;
     return x - (int)(x / y + 1e-7) * y;
 }
 
-// recognition
-// buffer 8 feature frame (2s)
-const int FEATURE_BUFFER = 8;
-const double EPS = 1e-7;
-const double MAX_ARRIVE_TIME_DIFF = 0.1;
-NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
-double recognizing = false;
-
 - (void)processFrames:(NSData *)data fromType:(NSString *)fromType {
     Byte *bytes = (Byte *)data.bytes;
     Byte ctrl = bytes[0];
@@ -91,7 +101,7 @@ double recognizing = false;
         [features addObject:[NSNumber numberWithFloat:value]];
     }
     float timeArrive = [features[0] floatValue];
-    int tidx = (int)([self fmod:timeArrive mod:2.0] * 100 + EPS) / 25;
+    int tidx = (int)([self fmod:timeArrive mod:FEATURE_BUFFER / 4] * 100 + EPS) / 25;
     NSMutableArray *other;
     if (ctrl == 0) {
         featuresLeft[tidx] = features;
@@ -109,15 +119,27 @@ double recognizing = false;
             [featuresLeft[tidx] removeObjectAtIndex:0];
             [featuresRight[tidx] removeObjectAtIndex:0];
             [featuresLeft[tidx] addObjectsFromArray:featuresRight[tidx]];
-            int result = [classifier classify:featuresLeft[tidx]];
-            if (result == 1) UILog(@"ans: %d", result);
+            int resD = [detector classify:featuresLeft[tidx]];
+            //UILog(@"res %d", resD);
+            if (resD != 0) {
+                int resR = [recognizerStationay classify:featuresLeft[tidx]];
+                UILog(@"ans: %d", resR);
+                [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
+            }
             featuresLeft[tidx] = nil;
             featuresRight[tidx] = nil;
         } else {
-            UILog(@"lr diff: %d %f %f", ctrl, timeArrive, [other[0] floatValue]);
+            NSLog(@"lr diff: %d %f %f", ctrl, timeArrive, [other[0] floatValue]);
         }
     }
 }
+
+
+
+//  experiment
+enum ModeStates { M_Stationary, M_Walking, M_Running } mode = M_Stationary;
+bool expertimentStart = false;
+
 
 
 //
@@ -129,24 +151,57 @@ double recognizing = false;
     UILog(@"start calibration");
 }
 
-- (IBAction)doClickButtonTest:(id)sender {
-    [self sendMessageByCoreBluetooth:[NSString stringWithFormat:@"hello %ld", random() % 100]];
+- (IBAction)doClickButtonRecognition:(id)sender {
+    if (recognizing) {
+        [self sendMessageByWatchConnectivity:@"recognition off"];
+        [self sendMessageByCoreBluetooth:@"recognition off"];
+        [self.buttonRecognition setTitle:@"Rec. Off" forState:UIControlStateNormal];
+        recognizing = false;
+    } else {
+        [self sendMessageByWatchConnectivity:@"recognition on"];
+        [self sendMessageByCoreBluetooth:@"recognition on"];
+        [self.buttonRecognition setTitle:@"Rec. On" forState:UIControlStateNormal];
+        recognizing = true;
+    }
 }
 
 - (IBAction)doClickButtonClear:(id)sender {
     [self.textInfo setText:@""];
 }
 
-- (IBAction)doClickButtonRecognitionOn:(id)sender {
-    recognizing = true;
-    [self sendMessageByWatchConnectivity:@"recognition on"];
-    [self sendMessageByCoreBluetooth:@"recognition on"];
+- (IBAction)doClickButtonMode:(id)sender {
+    if (mode == M_Stationary) {
+        mode = M_Walking;
+        [self.buttonMode setTitle:@"Walking" forState:UIControlStateNormal];
+    } else if (mode == M_Walking) {
+        mode = M_Running;
+        [self.buttonMode setTitle:@"Running" forState:UIControlStateNormal];
+    } else if (mode == M_Running) {
+        mode = M_Stationary;
+        [self.buttonMode setTitle:@"Stationary" forState:UIControlStateNormal];
+    }
 }
 
-- (IBAction)doClickButtonRecognitionOff:(id)sender {
-    recognizing = false;
-    [self sendMessageByWatchConnectivity:@"recognition off"];
-    [self sendMessageByCoreBluetooth:@"recognition off"];
+- (IBAction)doClickButtonExperiment:(id)sender {
+    if (expertimentStart) {
+        [self.buttonExperiment setTitle:@"Exp. End" forState:UIControlStateNormal];
+        expertimentStart = false;
+    } else {
+        [self.buttonExperiment setTitle:@"Exp. Start" forState:UIControlStateNormal];
+        expertimentStart = true;
+    }
+}
+
+- (IBAction)doClickButtonExperimentCommand:(id)sender {
+    [self speakText:@"0" language:@"Chinese"];
+}
+
+- (IBAction)doClickButtonFalsePositive:(id)sender {
+    
+}
+
+- (IBAction)doClickButtonFalseNegative:(id)sender {
+    
 }
 
 - (void)showInfoInUI:(NSString *)newInfo {
@@ -180,6 +235,22 @@ double recognizing = false;
     
     NSLog(@"%@", [s substringToIndex:(random() % 10 + 1)]);
     return s;
+}
+
+
+
+//
+//  voice
+//
+- (void)speakText:(NSString *)text language:(NSString *)language {
+    AVSpeechUtterance *utterance = [AVSpeechUtterance speechUtteranceWithString:text];
+    utterance.pitchMultiplier = 0.8;
+    if ([language isEqualToString:@"Chinese"]) {
+        AVSpeechSynthesisVoice *voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"zh-CN"];
+        utterance.voice = voice;
+    }
+    AVSpeechSynthesizer *synthesizer = [[AVSpeechSynthesizer alloc] init];
+    [synthesizer speakUtterance:utterance];
 }
 
 

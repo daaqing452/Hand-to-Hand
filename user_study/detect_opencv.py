@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import time
+import math
 from sklearn.metrics import confusion_matrix
 
 condition = sys.argv[1]
@@ -22,6 +23,33 @@ for user in users:
 			a = a[:10]
 		rawu.append(a.swapaxes(1, 2))
 	raw.append(rawu)
+
+def euler_from_quaternion(qua):
+    sinr_cosp = 2.0*(qua[0]*qua[1]+qua[2]*qua[3])
+    cosr_cosp = 1 - 2.0*(qua[1]*qua[1]+qua[2]*qua[2])
+    roll = math.atan2(sinr_cosp, cosr_cosp)
+    sinp = 2.0 * (qua[0]*qua[2]-qua[1]*qua[3])
+    pitch = 0
+    if math.fabs(sinp) >= 1:
+        if sinp > 0:
+            pitch = math.pi / 2
+        else:
+            pitch = math.pi / -2
+    else:
+        pitch = math.asin(sinp)
+    siny_cosp = 2.0*(qua[0]*qua[3]+qua[1]*qua[2])
+    cosy_cosp = 1 - 2.0*(qua[2]*qua[2]+qua[3]*qua[3])
+    yaw = math.atan2(siny_cosp, cosy_cosp)
+    return [roll, pitch, yaw]
+
+def e2q(q):
+	m = q.shape[0]
+	n = q.shape[2]
+	e = np.zeros((m, 3, n))
+	for i in range(m):
+		for j in range(n):
+			e[i,:,j] = euler_from_quaternion(q[i,:,j])
+	return e
 
 def feature_axis(a):
 	n = a.shape[0]
@@ -67,7 +95,7 @@ if ctype == 'between':
 					data2 .append( feature(raw[v][g]) )
 					label2.append( [lb] * n           )
 
-		noise_wristrot = np.load('walking/NNNOISE/noise_wristrot_1000.npy')
+		noise_wristrot = np.load('noise/noise_wristrot_1000.npy')
 		nnwr = noise_wristrot.shape[0]
 		nnwrt = int(nnwr * 0.8)
 		data.append(feature(noise_wristrot[:nnwrt]))
@@ -117,15 +145,45 @@ elif ctype == 'all':
 			data  .append( feature(raw[u][g]) )
 			label .append( [lb] * n           )
 
-	noise_wristrot = np.load('walking/NNNOISE/noise_wristrot_1000.npy')
+	noise_wristrot = np.load('noise/noise_wristrot_1000.npy')
 	data.append(feature(noise_wristrot))
 	label.append([0] * noise_wristrot.shape[0])
+
+	# noise_what = np.load('noise/what.npy')
+	# data.append(noise_what)
+	# label.append([0] * noise_what.shape[0])
+
+	for i in range(9):
+		noise_station = np.load('noise/noise_np' + str(i) + '.npy')[:, :1000]
+		noise_station = noise_station.reshape(noise_station.shape[0], 50, 20).swapaxes(1, 2)
+		ar0 = noise_station[:, 0:6, :]
+		att0 = e2q(noise_station[:, 6:10, :])
+		ar1 = noise_station[:, 10:16, :]
+		att1 = e2q(noise_station[:, 16:20, :])
+		# for k in range(8):
+		# 	plt.subplot(4, 2, k+1)
+		# 	print(ar0[k,0:3,:].shape)
+		# 	plt.plot(ar0[k, 0:3, :].T)
+		# plt.show()
+		f = []
+		f.extend( [feature_axis(ar0[:,i]) for i in range(6)] )
+		f.extend( [feature_axis(att0[:,i]) for i in range(2)] )
+		f.extend( [feature_axis(ar1[:,i]) for i in range(6)] )
+		f.extend( [feature_axis(att1[:,i]) for i in range(2)] )
+		f = np.concatenate(f, axis=1)
+		print('noise', i, f.shape)
+		data.append(f)
+		label.append([0] * f.shape[0])
 
 	data   = np.concatenate(data,   axis=0).astype(np.float32)
 	label  = np.concatenate(label,  axis=0)
 	svm = cv2.ml.SVM_create()
 	svm.setType(cv2.ml.SVM_C_SVC)
 	svm.setKernel(cv2.ml.SVM_RBF)
+	print('start training...')
 	svm.trainAuto(data, cv2.ml.ROW_SAMPLE, label)
-	svm.save('detect_' + condition + '.model')
+	svm.save('models/detect_' + condition + '_sta.model')
 
+	res = np.array(svm.predict(data)[1]).reshape(label.shape[0])
+	acc = 1 - len(np.nonzero(np.abs(res - label) > 0.1)[0]) / label.shape[0]
+	print('acc:', acc)

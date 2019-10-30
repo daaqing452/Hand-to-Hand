@@ -248,7 +248,7 @@ NSMutableArray *arrays[AXES];
 }
 
 - (void)addFrame:(CMDeviceMotion *)motion {
-    double motionData[AXES] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.pitch, motion.attitude.roll};
+    double motionData[AXES] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.roll, motion.attitude.pitch};
     for (int i = 0; i < AXES; i++) {
         [arrays[i] addObject:[NSNumber numberWithDouble:motionData[i]]];
     }
@@ -263,11 +263,11 @@ NSMutableArray *arrays[AXES];
 }
 
 - (NSArray *)getFeature:(NSArray *)array {
-    double qmin = 1e20, qmax = -1e20, qmean = 0, qstd = 0;
+    double qmax = -1e20, qmin = 1e20, qmean = 0, qstd = 0;
     for (int i = 0; i < array.count; i++) {
         double value = [array[i] doubleValue];
-        qmin = fmin(qmin, value);
         qmax = fmax(qmax, value);
+        qmin = fmin(qmin, value);
         qmean += value;
     }
     qmean /= array.count;

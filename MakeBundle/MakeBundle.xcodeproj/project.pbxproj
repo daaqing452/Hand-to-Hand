@@ -7,19 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF45A1CA221E350300720FA1 /* opencv.model in Resources */ = {isa = PBXBuildFile; fileRef = BF45A1C9221E350300720FA1 /* opencv.model */; };
-		BF62C4512362ED2A00A93A0C /* detect_walking.model in Resources */ = {isa = PBXBuildFile; fileRef = BF62C4502362ED2A00A93A0C /* detect_walking.model */; };
-		BF98F8D821F98C7A0025DA79 /* log-WatchL.txt in Resources */ = {isa = PBXBuildFile; fileRef = BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */; };
-		BFC7ABD822E6ACC100E7BE34 /* plain.txt in Resources */ = {isa = PBXBuildFile; fileRef = BFC7ABD722E6ACC100E7BE34 /* plain.txt */; };
+		BFE5BA1A2369323700080D56 /* detect_walking_sta.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE5BA182369323700080D56 /* detect_walking_sta.model */; };
+		BFE5BA1B2369323700080D56 /* recognition_walking.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE5BA192369323700080D56 /* recognition_walking.model */; };
+		BFE897472366B1E1000A3968 /* detect_walking_what.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE897462366B1E1000A3968 /* detect_walking_what.model */; };
+		BFE897492366B7B7000A3968 /* opencv_nonoise.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE897482366B7B7000A3968 /* opencv_nonoise.model */; };
+		BFE8974B2366C7A5000A3968 /* opencv_noise.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE8974A2366C7A5000A3968 /* opencv_noise.model */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BF45A1C9221E350300720FA1 /* opencv.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = opencv.model; sourceTree = "<group>"; };
-		BF62C4502362ED2A00A93A0C /* detect_walking.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = detect_walking.model; path = ../../user_study/detect_walking.model; sourceTree = "<group>"; };
 		BF98F8CE21F98BAA0025DA79 /* makeBundle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = makeBundle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF98F8D121F98BAA0025DA79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "log-WatchL.txt"; sourceTree = "<group>"; };
-		BFC7ABD722E6ACC100E7BE34 /* plain.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plain.txt; sourceTree = "<group>"; };
+		BFE5BA182369323700080D56 /* detect_walking_sta.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = detect_walking_sta.model; path = ../../user_study/models/detect_walking_sta.model; sourceTree = "<group>"; };
+		BFE5BA192369323700080D56 /* recognition_walking.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = recognition_walking.model; path = ../../user_study/models/recognition_walking.model; sourceTree = "<group>"; };
+		BFE897462366B1E1000A3968 /* detect_walking_what.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = detect_walking_what.model; path = ../../user_study/models/detect_walking_what.model; sourceTree = "<group>"; };
+		BFE897482366B7B7000A3968 /* opencv_nonoise.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opencv_nonoise.model; path = ../../user_study/models/opencv_nonoise.model; sourceTree = "<group>"; };
+		BFE8974A2366C7A5000A3968 /* opencv_noise.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opencv_noise.model; path = ../../user_study/models/opencv_noise.model; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,11 +54,12 @@
 		BF98F8D021F98BAA0025DA79 /* MakeBundle */ = {
 			isa = PBXGroup;
 			children = (
-				BF98F8D721F98C7A0025DA79 /* log-WatchL.txt */,
-				BF45A1C9221E350300720FA1 /* opencv.model */,
+				BFE897462366B1E1000A3968 /* detect_walking_what.model */,
 				BF98F8D121F98BAA0025DA79 /* Info.plist */,
-				BF62C4502362ED2A00A93A0C /* detect_walking.model */,
-				BFC7ABD722E6ACC100E7BE34 /* plain.txt */,
+				BFE5BA182369323700080D56 /* detect_walking_sta.model */,
+				BFE5BA192369323700080D56 /* recognition_walking.model */,
+				BFE8974A2366C7A5000A3968 /* opencv_noise.model */,
+				BFE897482366B7B7000A3968 /* opencv_nonoise.model */,
 			);
 			path = MakeBundle;
 			sourceTree = "<group>";
@@ -117,10 +120,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF62C4512362ED2A00A93A0C /* detect_walking.model in Resources */,
-				BF45A1CA221E350300720FA1 /* opencv.model in Resources */,
-				BF98F8D821F98C7A0025DA79 /* log-WatchL.txt in Resources */,
-				BFC7ABD822E6ACC100E7BE34 /* plain.txt in Resources */,
+				BFE897492366B7B7000A3968 /* opencv_nonoise.model in Resources */,
+				BFE5BA1B2369323700080D56 /* recognition_walking.model in Resources */,
+				BFE5BA1A2369323700080D56 /* detect_walking_sta.model in Resources */,
+				BFE8974B2366C7A5000A3968 /* opencv_noise.model in Resources */,
+				BFE897472366B1E1000A3968 /* detect_walking_what.model in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

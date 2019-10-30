@@ -17,14 +17,34 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="ITG-Cz-MzG" userLabel="Text Info">
-                                <rect key="frame" x="16" y="220" width="343" height="488"/>
+                                <rect key="frame" x="16" y="285" width="343" height="488"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="N4b-vw-Yg3">
+                                <rect key="frame" x="16" y="53" width="101" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="Calibration"/>
+                                <connections>
+                                    <action selector="doClickButtonCalibration:" destination="BYZ-38-t0r" eventType="touchUpInside" id="EFh-9s-11l"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lTC-Y4-eKL" userLabel="Button Recognition">
+                                <rect key="frame" x="136" y="53" width="101" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="Rec. Off"/>
+                                <connections>
+                                    <action selector="doClickButtonRecognition:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ZPe-2P-8Pu"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a81-bm-MXO" userLabel="Button Clear">
-                                <rect key="frame" x="136" y="135" width="101" height="68"/>
+                                <rect key="frame" x="258" y="53" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
@@ -33,44 +53,54 @@
                                     <action selector="doClickButtonClear:" destination="BYZ-38-t0r" eventType="touchUpInside" id="BiJ-Hv-DbB"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ejn-oQ-cWm" userLabel="Button Test">
-                                <rect key="frame" x="260" y="53" width="99" height="68"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5XX-I4-zpW" userLabel="Button Mode">
+                                <rect key="frame" x="16" y="131" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <state key="normal" title="Test"/>
+                                <state key="normal" title="Stationary"/>
                                 <connections>
-                                    <action selector="doClickButtonTest:" destination="BYZ-38-t0r" eventType="touchUpInside" id="lv6-1X-tb3"/>
+                                    <action selector="doClickButtonMode:" destination="BYZ-38-t0r" eventType="touchUpInside" id="19z-vs-GkW"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lTC-Y4-eKL" userLabel="Button Recognition On">
-                                <rect key="frame" x="16" y="53" width="99" height="68"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vG3-61-aqz" userLabel="Button Experiment">
+                                <rect key="frame" x="136" y="131" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <state key="normal" title="Recog. On"/>
+                                <state key="normal" title="Exp. End"/>
                                 <connections>
-                                    <action selector="doClickButtonRecognitionOn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="2ZN-AE-Qgh"/>
+                                    <action selector="doClickButtonExperiment:" destination="BYZ-38-t0r" eventType="touchUpInside" id="QwY-7a-fbP"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vG3-61-aqz" userLabel="Button Recognition Off">
-                                <rect key="frame" x="138" y="53" width="99" height="68"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ejn-oQ-cWm" userLabel="Button ExperimentCommand">
+                                <rect key="frame" x="258" y="131" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <state key="normal" title="Recog. Off"/>
+                                <state key="normal" title="Exp. Cmd."/>
                                 <connections>
-                                    <action selector="doClickButtonRecognitionOff:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Fzi-XV-E9K"/>
+                                    <action selector="doClickButtonExperimentCommand:" destination="BYZ-38-t0r" eventType="touchUpInside" id="aJB-Zj-h9n"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="N4b-vw-Yg3">
-                                <rect key="frame" x="16" y="135" width="99" height="68"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9mw-SC-9nE" userLabel="Button FalsePositive">
+                                <rect key="frame" x="136" y="208" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <state key="normal" title="Calibration"/>
+                                <state key="normal" title="FP"/>
                                 <connections>
-                                    <action selector="doClickButtonCalibration:" destination="BYZ-38-t0r" eventType="touchUpInside" id="EFh-9s-11l"/>
+                                    <action selector="doClickButtonFalsePositive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ec4-oa-7CQ"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vtu-qx-GRB" userLabel="Button FalseNegative">
+                                <rect key="frame" x="258" y="208" width="101" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="FN"/>
+                                <connections>
+                                    <action selector="doClickButtonFalseNegative:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Yz0-Uv-uZ6"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -80,9 +110,12 @@
                     <connections>
                         <outlet property="buttonCalibration" destination="N4b-vw-Yg3" id="MFA-Jq-y6m"/>
                         <outlet property="buttonClear" destination="a81-bm-MXO" id="2o4-AP-ImU"/>
-                        <outlet property="buttonRecognitionOff" destination="vG3-61-aqz" id="EfV-ka-Vxu"/>
-                        <outlet property="buttonRecognitionOn" destination="lTC-Y4-eKL" id="JLI-mr-IJv"/>
-                        <outlet property="buttonTest" destination="Ejn-oQ-cWm" id="njC-jI-sYX"/>
+                        <outlet property="buttonExperiment" destination="vG3-61-aqz" id="KH2-CE-sDD"/>
+                        <outlet property="buttonExperimentCommand" destination="Ejn-oQ-cWm" id="zGo-8j-JXU"/>
+                        <outlet property="buttonFalseNegative" destination="vtu-qx-GRB" id="asb-aR-ux1"/>
+                        <outlet property="buttonFalsePositive" destination="9mw-SC-9nE" id="fth-rj-Toj"/>
+                        <outlet property="buttonMode" destination="5XX-I4-zpW" id="tlH-Gh-gI2"/>
+                        <outlet property="buttonRecognition" destination="lTC-Y4-eKL" id="Fff-7a-90g"/>
                         <outlet property="textInfo" destination="ITG-Cz-MzG" id="a46-o6-eEV"/>
                     </connections>
                 </viewController>

@@ -18,6 +18,8 @@ using namespace cv::ml;
 
 @interface Classifier()
 
+@property Ptr<SVM> svm;
+
 @end
 
 
@@ -25,12 +27,11 @@ using namespace cv::ml;
 @implementation Classifier
 
 const int FEATURES_LENGTH = 64;
-
-Ptr<SVM> svm;
+const double EPS = 1e-7;
 
 - (id)initWithSVM:(NSString *)filePath {
     self = [super init];
-    svm = SVM::load([filePath UTF8String]);
+    self.svm = SVM::load([filePath UTF8String]);
     return self;
 }
 
@@ -43,9 +44,9 @@ Ptr<SVM> svm;
     float *dataArray = new float[FEATURES_LENGTH];
     for (int i = 0; i < FEATURES_LENGTH; i++) dataArray[i] = [features[i] floatValue];
     Mat dataMat = Mat(1, FEATURES_LENGTH, CV_32F, dataArray);
-    float result = svm->predict(dataMat);
+    float result = self.svm->predict(dataMat);
     delete[] dataArray;
-    return result;
+    return (int)(result + EPS);
 }
 
 @end
