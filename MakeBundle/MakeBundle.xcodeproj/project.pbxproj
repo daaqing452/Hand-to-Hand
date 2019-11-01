@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF2B0890236BEDDC00E18CA8 /* bensound in Resources */ = {isa = PBXBuildFile; fileRef = BF2B088F236BEDDB00E18CA8 /* bensound */; };
 		BFE5BA1A2369323700080D56 /* detect_walking_sta.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE5BA182369323700080D56 /* detect_walking_sta.model */; };
 		BFE5BA1B2369323700080D56 /* recognition_walking.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE5BA192369323700080D56 /* recognition_walking.model */; };
 		BFE897472366B1E1000A3968 /* detect_walking_what.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE897462366B1E1000A3968 /* detect_walking_what.model */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BF2B088F236BEDDB00E18CA8 /* bensound */ = {isa = PBXFileReference; lastKnownFileType = folder; path = bensound; sourceTree = "<group>"; };
 		BF98F8CE21F98BAA0025DA79 /* makeBundle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = makeBundle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF98F8D121F98BAA0025DA79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFE5BA182369323700080D56 /* detect_walking_sta.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = detect_walking_sta.model; path = ../../user_study/models/detect_walking_sta.model; sourceTree = "<group>"; };
@@ -54,6 +56,7 @@
 		BF98F8D021F98BAA0025DA79 /* MakeBundle */ = {
 			isa = PBXGroup;
 			children = (
+				BF2B088F236BEDDB00E18CA8 /* bensound */,
 				BFE897462366B1E1000A3968 /* detect_walking_what.model */,
 				BF98F8D121F98BAA0025DA79 /* Info.plist */,
 				BFE5BA182369323700080D56 /* detect_walking_sta.model */,
@@ -122,6 +125,7 @@
 			files = (
 				BFE897492366B7B7000A3968 /* opencv_nonoise.model in Resources */,
 				BFE5BA1B2369323700080D56 /* recognition_walking.model in Resources */,
+				BF2B0890236BEDDC00E18CA8 /* bensound in Resources */,
 				BFE5BA1A2369323700080D56 /* detect_walking_sta.model in Resources */,
 				BFE8974B2366C7A5000A3968 /* opencv_noise.model in Resources */,
 				BFE897472366B1E1000A3968 /* detect_walking_what.model in Resources */,

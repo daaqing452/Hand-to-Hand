@@ -29,7 +29,7 @@
 
 @end
 
-// ['IxP', 'IxB', 'IxI', 'IxFU', 'FUxFU', 'FDxFU', 'PxFU', 'FDxP']
+
 
 @implementation ViewController
 
@@ -49,14 +49,14 @@ Classifier *detector, *recognizerStationay;
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
-    
     NSString *fileNameDetect = [bundle pathForResource:@"detect_walking_sta" ofType:@"model"];
+    NSString *fileNameRecognizerStationary = [bundle pathForResource:@"opencv_nonoise" ofType:@"model"];
     detector = [[Classifier alloc] initWithSVM:fileNameDetect];
-    
-    NSString *fileNameRecognizerStationary = [bundle pathForResource:@"recognition_walking" ofType:@"model"];
     recognizerStationay = [[Classifier alloc] initWithSVM:fileNameRecognizerStationary];
     
     //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
+    
+    [self initExperiment];
     
     UILog(@"init finished");
 }
@@ -137,8 +137,64 @@ double recognizing = false;
 
 
 //  experiment
+// ['IxP', 'IxB', 'IxI', 'IxFU', 'FUxFU', 'FDxFU', 'PxFU', 'FDxP']
 enum ModeStates { M_Stationary, M_Walking, M_Running } mode = M_Stationary;
 bool expertimentStart = false;
+NSDictionary *numberToGestureStationary;
+NSDictionary *numberToGestureMoving;
+NSDictionary *gestureToCommand;
+
+- (void)initExperiment {
+    numberToGestureStationary = @{@0:@"IxP", @1:@"IxB", @2:@"IxI", @3:@"IxFU", @4:@"FUxFU", @5:@"FDxFU", @6:@"PxFU", @7:@"FDxP"};
+    numberToGestureMoving = @{@0:@"IxP", @1:@"IxB", @2:@"FDxP", @3:@"PxFU", @4:@"FDxFU"};
+    gestureToCommand = @{@"IxP":@"Answer Call", @"IxB":@"Reject Call", @"FDxP":@"Next Music", @"PxFU":@"Prev Music", @"FDxFU":@"Play/Pause", @"IxFU":@"Read Message", @"IxI":@"Delete Message", @"FUxFU": @"Reply Message"};
+    
+    NSString *musicDirPath = [bundle pathForResource:@"bensound" ofType:@""];
+    
+}
+
+- (void)issueStimuli:(NSString *)command {
+    NSArray *nameList = @[@"张子豪", @"郭英超", @"陈远杰", @"马玉涛", @"周翔", @"陈佳颖", @"王雨涵", @"吴哲宇", @"陶红杰", @"陈阳"];
+    if ([command isEqualToString:@"Answer Call"]) {
+        NSString *name = nameList[arc4random() % [nameList count]];
+        [self speakText:[NSString stringWithFormat:@"来电提示：%@", name] language:@"Chinese"];
+    } else if ([command isEqualToString:@"Reject Call"]) {
+        [self speakText:@"来电提示：未知号码" language:@"Chinese"];
+    } else if ([command isEqualToString:@"Next Music"]) {
+        [self speakText:@"下一首音乐" language:@"Chinese"];
+    } else if ([command isEqualToString:@"Prev Music"]) {
+        [self speakText:@"上一首音乐" language:@"Chinese"];
+    } else if ([command isEqualToString:@"Play/Pause"]) {
+        [self speakText:@"暂停音乐" language:@"Chinese"];
+    } else if ([command isEqualToString:@"Read Message"]) {
+        NSString *name = nameList[arc4random() % [nameList count]];
+        [self speakText:[NSString stringWithFormat:@"新消息提示：%@", name] language:@"Chinese"];
+    } else if ([command isEqualToString:@"Delete Message"]) {
+        [self speakText:@"新消息提示：未知l号码" language:@"Chinese"];
+    } else if ([command isEqualToString:@"Reply Message"]) {
+        // do nothing
+    }
+}
+
+- (void)issueFeedback:(NSString *)command {
+    if ([command isEqualToString:@"Answer Call"]) {
+        [self speakText:@"接听成功" language:@"Chinese"];
+    } else if ([command isEqualToString:@"Reject Call"]) {
+        [self speakText:@"已挂断" language:@"Chinese"];
+    } else if ([command isEqualToString:@"Next Music"]) {
+        
+    } else if ([command isEqualToString:@"Prev Music"]) {
+        
+    } else if ([command isEqualToString:@"Play/Pause"]) {
+        
+    } else if ([command isEqualToString:@"Read Message"]) {
+        
+    } else if ([command isEqualToString:@"Delete Message"]) {
+        
+    } else if ([command isEqualToString:@"Reply Message"]) {
+        
+    }
+}
 
 
 

@@ -19,6 +19,7 @@
 @interface InterfaceController () <WCSessionDelegate, CBCentralManagerDelegate, CBPeripheralDelegate, HKWorkoutSessionDelegate>
 
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
+@property (weak, nonatomic) IBOutlet WKInterfaceLabel *labelRecognition;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonCommunication;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
 
@@ -80,8 +81,10 @@ bool watchConnectivityTestFlag;
         calibrationState = C_Listening;
         minValue0 = 0;
     } else if ([command isEqualToString:@"recognition on"]) {
+        [self.labelRecognition setText:@"Rec. On"];
         recognizing = true;
     } else if ([command isEqualToString:@"recognition off"]) {
+        [self.labelRecognition setText:@"Rec. Off"];
         recognizing = false;
     } else if ([command isEqualToString:@"hello"]) {
         LBLog(@"hello");
@@ -187,6 +190,7 @@ const double REPORT_ACC_THREHOLD = 100;
             NSLog(@"%f %f %f %f", motion.timestamp, acceleration.x, acceleration.y, acceleration.z);
         }
         
+        calibratedTicker += 0.01;
         if (recognizing) {
             [self addFrame:motion];
         }
@@ -202,6 +206,7 @@ enum CalibrationStates { C_Idle, C_Listening, C_PeakOccur } calibrationState = C
 double minValue0;
 double calibratedTimestamp = 0;
 double prevCalibratedTimestamp = 0;
+double calibratedTicker = 0;
 
 - (void)calibration:(CMDeviceMotion *)motion {
     CMAcceleration acceleration = motion.userAcceleration;
@@ -212,6 +217,7 @@ double prevCalibratedTimestamp = 0;
             if (value < minValue0) {
                 minValue0 = value;
                 calibratedTimestamp = motion.timestamp;
+                calibratedTicker = 0;
             }
         } else {
             if (calibrationState == C_PeakOccur && motion.timestamp - calibratedTimestamp > CALIBRATION_AFTER_PEAK_TIME) {
@@ -248,11 +254,16 @@ NSMutableArray *arrays[AXES];
 }
 
 - (void)addFrame:(CMDeviceMotion *)motion {
+    timeNow = motion.timestamp - calibratedTimestamp;
+    if (calibratedTicker - timeNow > 0.01) {
+        NSLog(@"delay %lf %lf", calibratedTicker, timeNow);
+        calibratedTicker -= 0.01;
+        return;
+    }
     double motionData[AXES] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.roll, motion.attitude.pitch};
     for (int i = 0; i < AXES; i++) {
         [arrays[i] addObject:[NSNumber numberWithDouble:motionData[i]]];
     }
-    timeNow = motion.timestamp - calibratedTimestamp;
     // window 0.5s, send per 0.25s, sample interval 0.1s
     if ([self fmod:timeNow mod:0.25] < 0.1 && arrays[0].count >= MOTION_ARRAY_CAPACITY) {
         [self processFrames];
