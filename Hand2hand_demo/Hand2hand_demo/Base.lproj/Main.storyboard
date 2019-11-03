@@ -83,6 +83,16 @@
                                     <action selector="doClickButtonExperimentCommand:" destination="BYZ-38-t0r" eventType="touchUpInside" id="aJB-Zj-h9n"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zr4-Wc-rlz" userLabel="Button XXX">
+                                <rect key="frame" x="16" y="208" width="101" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="XXX"/>
+                                <connections>
+                                    <action selector="doClickButtonFalsePositive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fih-XY-Evs"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9mw-SC-9nE" userLabel="Button FalsePositive">
                                 <rect key="frame" x="136" y="208" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>

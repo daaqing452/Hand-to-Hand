@@ -36,6 +36,8 @@
 WCSession *wcsession;
 NSBundle *bundle;
 Classifier *detector, *recognizerStationay;
+NSFileManager *fileManager;
+NSString *documentPath;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -53,8 +55,10 @@ Classifier *detector, *recognizerStationay;
     NSString *fileNameRecognizerStationary = [bundle pathForResource:@"opencv_nonoise" ofType:@"model"];
     detector = [[Classifier alloc] initWithSVM:fileNameDetect];
     recognizerStationay = [[Classifier alloc] initWithSVM:fileNameRecognizerStationary];
-    
     //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
+    
+    fileManager = [NSFileManager defaultManager];
+    documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
     [self initExperiment];
     
@@ -138,41 +142,78 @@ double recognizing = false;
 
 //  experiment
 // ['IxP', 'IxB', 'IxI', 'IxFU', 'FUxFU', 'FDxFU', 'PxFU', 'FDxP']
-enum ModeStates { M_Stationary, M_Walking, M_Running } mode = M_Stationary;
+enum Mode { M_Stationary, M_Walking, M_Running } mode = M_Stationary;
+enum TaskState { TS_Normal, TS_PlayingMusic, TS_ReadingMessage } taskState;
+enum Command { C_AnswerCall, C_RejectCall, C_NextMusic, C_PrevMusic, C_PlayPause, C_ReadMessage, C_DeleteMessage, C_ReplyMessage } nowCommand;
 bool expertimentStart = false;
-NSDictionary *numberToGestureStationary;
-NSDictionary *numberToGestureMoving;
-NSDictionary *gestureToCommand;
+NSDictionary *predStationary;
+NSDictionary *predMoving;
+NSDictionary *mapping;
+
+NSMutableArray *musicPaths;
+int musicIndex;
+AVAudioPlayer *nowPlayer;
 
 - (void)initExperiment {
-    numberToGestureStationary = @{@0:@"IxP", @1:@"IxB", @2:@"IxI", @3:@"IxFU", @4:@"FUxFU", @5:@"FDxFU", @6:@"PxFU", @7:@"FDxP"};
-    numberToGestureMoving = @{@0:@"IxP", @1:@"IxB", @2:@"FDxP", @3:@"PxFU", @4:@"FDxFU"};
-    gestureToCommand = @{@"IxP":@"Answer Call", @"IxB":@"Reject Call", @"FDxP":@"Next Music", @"PxFU":@"Prev Music", @"FDxFU":@"Play/Pause", @"IxFU":@"Read Message", @"IxI":@"Delete Message", @"FUxFU": @"Reply Message"};
+    predStationary = @{@0:@"IxP", @1:@"IxB", @2:@"IxI", @3:@"IxFU", @4:@"FUxFU", @5:@"FDxFU", @6:@"PxFU", @7:@"FDxP"};
+    predMoving = @{@0:@"IxP", @1:@"IxB", @2:@"FDxP", @3:@"PxFU", @4:@"FDxFU"};
+    mapping = @{@"IxP":[NSNumber numberWithInt:C_AnswerCall], @"IxB":[NSNumber numberWithInt:C_RejectCall], @"FDxP":[NSNumber numberWithInt:C_NextMusic], @"PxFU":[NSNumber numberWithInt:C_PrevMusic], @"FDxFU":[NSNumber numberWithInt:C_PlayPause], @"IxFU":[NSNumber numberWithInt:C_ReadMessage], @"IxI":[NSNumber numberWithInt:C_DeleteMessage], @"FUxFU":[NSNumber numberWithInt:C_ReplyMessage]};
+
     
     NSString *musicDirPath = [bundle pathForResource:@"bensound" ofType:@""];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:musicDirPath];
+    musicPaths = [[NSMutableArray alloc] init];
+    NSString *file;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        if ([[file pathExtension] isEqualToString:@"mp3"]) {
+            NSURL *url = [bundle URLForResource:[NSString stringWithFormat:@"bensound/%@", file] withExtension:@""];
+            [musicPaths addObject:url];
+        }
+    }
     
+    taskState = TS_Normal;
+    musicIndex = 0;
+    [self musicChange];
 }
 
-- (void)issueStimuli:(NSString *)command {
+- (void)nextCommand {
+    if (taskState == TS_Normal) {
+        int r = arc4random() % (mode == M_Stationary ? 50 : 30);
+        if (r < 10) nowCommand = C_AnswerCall;
+        else if (r < 20) nowCommand = C_RejectCall;
+        else if (r < 30) nowCommand = C_PlayPause;
+        else if (r < 40) nowCommand = C_ReadMessage;
+        else if (r < 50) nowCommand = C_DeleteMessage;
+    } else if (taskState == TS_PlayingMusic) {
+        int r = arc4random() % 50;
+        if (r < 10) nowCommand = C_PlayPause;
+        else if (r < 30) nowCommand = C_PrevMusic;
+        else if (r < 50) nowCommand = C_NextMusic;
+    } else if (taskState == TS_ReadingMessage) {
+        
+    }
+}
+
+- (void)issueStimuli:(int)command {
     NSArray *nameList = @[@"张子豪", @"郭英超", @"陈远杰", @"马玉涛", @"周翔", @"陈佳颖", @"王雨涵", @"吴哲宇", @"陶红杰", @"陈阳"];
-    if ([command isEqualToString:@"Answer Call"]) {
+    if (command == C_AnswerCall) {
         NSString *name = nameList[arc4random() % [nameList count]];
         [self speakText:[NSString stringWithFormat:@"来电提示：%@", name] language:@"Chinese"];
-    } else if ([command isEqualToString:@"Reject Call"]) {
+    } else if (command == C_RejectCall) {
         [self speakText:@"来电提示：未知号码" language:@"Chinese"];
-    } else if ([command isEqualToString:@"Next Music"]) {
+    } else if (command == C_NextMusic) {
         [self speakText:@"下一首音乐" language:@"Chinese"];
-    } else if ([command isEqualToString:@"Prev Music"]) {
+    } else if (command == C_PrevMusic) {
         [self speakText:@"上一首音乐" language:@"Chinese"];
-    } else if ([command isEqualToString:@"Play/Pause"]) {
-        [self speakText:@"暂停音乐" language:@"Chinese"];
-    } else if ([command isEqualToString:@"Read Message"]) {
+    } else if (command == C_PlayPause) {
+        [self speakText:(taskState == TS_PlayingMusic ? @"暂停音乐" : @"播放音乐") language:@"Chinese"];
+    } else if (command == C_ReadMessage) {
         NSString *name = nameList[arc4random() % [nameList count]];
         [self speakText:[NSString stringWithFormat:@"新消息提示：%@", name] language:@"Chinese"];
-    } else if ([command isEqualToString:@"Delete Message"]) {
-        [self speakText:@"新消息提示：未知l号码" language:@"Chinese"];
-    } else if ([command isEqualToString:@"Reply Message"]) {
-        // do nothing
+    } else if (command == C_DeleteMessage) {
+        [self speakText:@"新消息提示：未知号码" language:@"Chinese"];
+    } else if (command == C_ReplyMessage) {
+        [self speakText:@"请输入语音" language:@"Chinese"];
     }
 }
 
@@ -194,6 +235,19 @@ NSDictionary *gestureToCommand;
     } else if ([command isEqualToString:@"Reply Message"]) {
         
     }
+}
+
+- (void)musicChange {
+    NSURL *url = (NSURL *)[musicPaths objectAtIndex:musicIndex];
+    nowPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:nil];
+}
+
+- (void)musicPlay {
+    [nowPlayer play];
+}
+
+- (void)musicPause {
+    [nowPlayer pause];
 }
 
 
@@ -253,11 +307,11 @@ NSDictionary *gestureToCommand;
 }
 
 - (IBAction)doClickButtonFalsePositive:(id)sender {
-    
+    [self musicPlay];
 }
 
 - (IBAction)doClickButtonFalseNegative:(id)sender {
-    
+    [self musicPause];
 }
 
 - (void)showInfoInUI:(NSString *)newInfo {
