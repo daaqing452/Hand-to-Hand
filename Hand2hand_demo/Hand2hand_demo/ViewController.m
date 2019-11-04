@@ -24,6 +24,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *buttonMode;
 @property (weak, nonatomic) IBOutlet UIButton *buttonExperiment;
 @property (weak, nonatomic) IBOutlet UIButton *buttonExperimentCommand;
+@property (weak, nonatomic) IBOutlet UIButton *buttonFalseUser;
 @property (weak, nonatomic) IBOutlet UIButton *buttonFalseNegative;
 
 @end
@@ -34,7 +35,7 @@
 
 WCSession *wcsession;
 NSBundle *bundle;
-Classifier *detector, *recognizerStationay;
+Classifier *detector, *recognizerStationay, *recognizerWalking, *recognizerRunning;
 NSFileManager *fileManager;
 NSString *documentPath;
 
@@ -50,16 +51,16 @@ NSString *documentPath;
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
-    NSString *fileNameDetect = [bundle pathForResource:@"detect_walking_sta" ofType:@"model"];
-    NSString *fileNameRecognizerStationary = [bundle pathForResource:@"opencv_gesture_20191103" ofType:@"model"];
-    detector = [[Classifier alloc] initWithSVM:fileNameDetect];
-    recognizerStationay = [[Classifier alloc] initWithSVM:fileNameRecognizerStationary];
+    detector = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"detect_walking_sta" ofType:@"model"]];
+    recognizerStationay = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"opencv_gesture_20191103" ofType:@"model"]];
+    recognizerWalking = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"]];
+    recognizerRunning = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"]];
     //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
     
     fileManager = [NSFileManager defaultManager];
     documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
-    //[self initExperiment];
+    [self initExperiment];
     
     UILog(@"init finished");
 }
@@ -122,13 +123,17 @@ double recognizing = false;
             [featuresLeft[tidx] removeObjectAtIndex:0];
             [featuresRight[tidx] removeObjectAtIndex:0];
             [featuresLeft[tidx] addObjectsFromArray:featuresRight[tidx]];
-            int resD = [detector classify:featuresLeft[tidx]];
-            //UILog(@"res %d", resD);
+            int resD = [detector classify:featuresLeft[tidx]], resR = -1;
             if (resD != 0) {
-                int resR = [recognizerStationay classify:featuresLeft[tidx]];
+                Classifier *recognizer;
+                if (mode == M_Stationary) recognizer = recognizerStationay;
+                else if (mode == M_Walking) recognizer = recognizerWalking;
+                else if (mode == M_Running) recognizer = recognizerRunning;
+                resR = [recognizer classify:featuresLeft[tidx]];
                 UILog(@"ans: %d", resR);
-                [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
+                if (!experimenting) [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
             }
+            if (experimenting) [self feed:resR];
             featuresLeft[tidx] = nil;
             featuresRight[tidx] = nil;
         } else {
@@ -144,10 +149,11 @@ double recognizing = false;
 enum Mode { M_Stationary, M_Walking, M_Running } mode = M_Stationary;
 enum TaskState { TS_Normal, TS_PlayingMusic, TS_ReadingMessage } taskState;
 enum Command { C_AnswerCall, C_RejectCall, C_NextMusic, C_PrevMusic, C_PlayPause, C_ReadMessage, C_DeleteMessage, C_ReplyMessage } nowCommand;
-bool experimenting = false;
-NSDictionary *predStationary;
-NSDictionary *predMoving;
+NSArray *predStationary, *predMoving;
 NSDictionary *mapping;
+NSMutableArray *feedArray;
+
+bool experimenting = false;
 int falseUser = 0;
 int falsePositive = 0;
 int falseNegative = 0;
@@ -158,8 +164,8 @@ int musicIndex;
 AVAudioPlayer *nowPlayer;
 
 - (void)initExperiment {
-    predStationary = @{@0:@"IxP", @1:@"IxB", @2:@"IxI", @3:@"IxFU", @4:@"FUxFU", @5:@"FDxFU", @6:@"PxFU", @7:@"FDxP"};
-    predMoving = @{@0:@"IxP", @1:@"IxB", @2:@"FDxP", @3:@"PxFU", @4:@"FDxFU"};
+    predStationary = @[@"IxP", @"IxB", @"IxI", @"IxFU", @"FUxFU", @"FDxFU", @"PxFU", @"FDxP"];
+    predMoving = @[@"IxP", @"IxB", @"FDxP", @"PxFU", @"FDxFU"];
     mapping = @{@"IxP":[NSNumber numberWithInt:C_AnswerCall], @"IxB":[NSNumber numberWithInt:C_RejectCall], @"FDxP":[NSNumber numberWithInt:C_NextMusic], @"PxFU":[NSNumber numberWithInt:C_PrevMusic], @"FDxFU":[NSNumber numberWithInt:C_PlayPause], @"IxFU":[NSNumber numberWithInt:C_ReadMessage], @"IxI":[NSNumber numberWithInt:C_DeleteMessage], @"FUxFU":[NSNumber numberWithInt:C_ReplyMessage]};
 
     NSString *musicDirPath = [bundle pathForResource:@"bensound" ofType:@""];
@@ -212,11 +218,8 @@ AVAudioPlayer *nowPlayer;
     [self issueStimuli:nowCommand];
 }
 
-- (void)ReceiveCommand:(int)command {
-    if (command == -1) {
-        falseNegative++;
-        UILog(@"False Negative");
-    } else if (nowCommand == -1) {
+- (void)receiveCommand:(int)command {
+    if (nowCommand == -1) {
         falsePositive++;
         UILog(@"False Positive");
     } else if (command != nowCommand) {
@@ -224,6 +227,31 @@ AVAudioPlayer *nowPlayer;
         UILog(@"False Recognition");
     } else {
         [self issueFeedback:command];
+        nowCommand = -1;
+    }
+}
+
+- (void)feed:(int)resR {
+    if (!experimenting) return;
+    if (resR == -1) {
+        if (feedArray.count > 0) {
+            bool flag = false;
+            for (int i = 0; i < feedArray.count; i++) {
+                int command = [feedArray[i] intValue];
+                if (command == nowCommand) flag = true;
+            }
+            int command = flag ? nowCommand : [feedArray[0] intValue];
+            [self receiveCommand:command];
+        }
+        [feedArray removeAllObjects];
+    } else {
+        int command = -1;
+        if (mode == M_Stationary) {
+            command = [(NSNumber *)[mapping valueForKey:predStationary[resR]] intValue];
+        } else {
+            command = [(NSNumber *)[mapping valueForKey:predMoving[resR]] intValue];
+        }
+        [feedArray addObject:[NSNumber numberWithInt:command]];
     }
 }
 
@@ -347,8 +375,18 @@ AVAudioPlayer *nowPlayer;
     [self speakText:@"0" language:@"Chinese"];
 }
 
+- (IBAction)doClickButtonFalseUser:(id)sender {
+    if (experimenting) {
+        falseUser++;
+        UILog(@"False User %d", falseUser);
+    }
+}
+
 - (IBAction)doClickButtonFalseNegative:(id)sender {
-    [self ReceiveCommand:-1];
+    if (experimenting) {
+        falseNegative++;
+        UILog(@"False Negative %d", falseNegative);
+    }
 }
 
 - (void)showInfoInUI:(NSString *)newInfo {
