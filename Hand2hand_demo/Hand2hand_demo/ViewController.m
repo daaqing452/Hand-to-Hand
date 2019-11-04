@@ -24,7 +24,6 @@
 @property (weak, nonatomic) IBOutlet UIButton *buttonMode;
 @property (weak, nonatomic) IBOutlet UIButton *buttonExperiment;
 @property (weak, nonatomic) IBOutlet UIButton *buttonExperimentCommand;
-@property (weak, nonatomic) IBOutlet UIButton *buttonFalsePositive;
 @property (weak, nonatomic) IBOutlet UIButton *buttonFalseNegative;
 
 @end
@@ -52,7 +51,7 @@ NSString *documentPath;
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
     NSString *fileNameDetect = [bundle pathForResource:@"detect_walking_sta" ofType:@"model"];
-    NSString *fileNameRecognizerStationary = [bundle pathForResource:@"opencv_nonoise" ofType:@"model"];
+    NSString *fileNameRecognizerStationary = [bundle pathForResource:@"opencv_gesture_20191103" ofType:@"model"];
     detector = [[Classifier alloc] initWithSVM:fileNameDetect];
     recognizerStationay = [[Classifier alloc] initWithSVM:fileNameRecognizerStationary];
     //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
@@ -60,7 +59,7 @@ NSString *documentPath;
     fileManager = [NSFileManager defaultManager];
     documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
-    [self initExperiment];
+    //[self initExperiment];
     
     UILog(@"init finished");
 }
@@ -145,10 +144,14 @@ double recognizing = false;
 enum Mode { M_Stationary, M_Walking, M_Running } mode = M_Stationary;
 enum TaskState { TS_Normal, TS_PlayingMusic, TS_ReadingMessage } taskState;
 enum Command { C_AnswerCall, C_RejectCall, C_NextMusic, C_PrevMusic, C_PlayPause, C_ReadMessage, C_DeleteMessage, C_ReplyMessage } nowCommand;
-bool expertimentStart = false;
+bool experimenting = false;
 NSDictionary *predStationary;
 NSDictionary *predMoving;
 NSDictionary *mapping;
+int falseUser = 0;
+int falsePositive = 0;
+int falseNegative = 0;
+int falseRecognition = 0;
 
 NSMutableArray *musicPaths;
 int musicIndex;
@@ -159,7 +162,6 @@ AVAudioPlayer *nowPlayer;
     predMoving = @{@0:@"IxP", @1:@"IxB", @2:@"FDxP", @3:@"PxFU", @4:@"FDxFU"};
     mapping = @{@"IxP":[NSNumber numberWithInt:C_AnswerCall], @"IxB":[NSNumber numberWithInt:C_RejectCall], @"FDxP":[NSNumber numberWithInt:C_NextMusic], @"PxFU":[NSNumber numberWithInt:C_PrevMusic], @"FDxFU":[NSNumber numberWithInt:C_PlayPause], @"IxFU":[NSNumber numberWithInt:C_ReadMessage], @"IxI":[NSNumber numberWithInt:C_DeleteMessage], @"FUxFU":[NSNumber numberWithInt:C_ReplyMessage]};
 
-    
     NSString *musicDirPath = [bundle pathForResource:@"bensound" ofType:@""];
     NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:musicDirPath];
     musicPaths = [[NSMutableArray alloc] init];
@@ -170,10 +172,21 @@ AVAudioPlayer *nowPlayer;
             [musicPaths addObject:url];
         }
     }
-    
+}
+
+- (void)experimentStart {
     taskState = TS_Normal;
     musicIndex = 0;
-    [self musicChange];
+    [self musicChange:0];
+    falseUser = falsePositive = falseNegative = falseRecognition = 0;
+    
+    [self.buttonExperiment setTitle:@"Exp. Start" forState:UIControlStateNormal];
+    experimenting = true;
+}
+
+- (void)experimentEnd {
+    [self.buttonExperiment setTitle:@"Exp. End" forState:UIControlStateNormal];
+    experimenting = false;
 }
 
 - (void)nextCommand {
@@ -190,14 +203,34 @@ AVAudioPlayer *nowPlayer;
         else if (r < 30) nowCommand = C_PrevMusic;
         else if (r < 50) nowCommand = C_NextMusic;
     } else if (taskState == TS_ReadingMessage) {
-        
+        int r = arc4random() % 50;
+        if (r < 20) nowCommand = C_ReplyMessage;
+        else if (r < 30) nowCommand = C_AnswerCall;
+        else if (r < 40) nowCommand = C_RejectCall;
+        else if (r < 50) nowCommand = C_PlayPause;
+    }
+    [self issueStimuli:nowCommand];
+}
+
+- (void)ReceiveCommand:(int)command {
+    if (command == -1) {
+        falseNegative++;
+        UILog(@"False Negative");
+    } else if (nowCommand == -1) {
+        falsePositive++;
+        UILog(@"False Positive");
+    } else if (command != nowCommand) {
+        falseRecognition++;
+        UILog(@"False Recognition");
+    } else {
+        [self issueFeedback:command];
     }
 }
 
 - (void)issueStimuli:(int)command {
     NSArray *nameList = @[@"张子豪", @"郭英超", @"陈远杰", @"马玉涛", @"周翔", @"陈佳颖", @"王雨涵", @"吴哲宇", @"陶红杰", @"陈阳"];
     if (command == C_AnswerCall) {
-        NSString *name = nameList[arc4random() % [nameList count]];
+        NSString *name = nameList[arc4random() % nameList.count];
         [self speakText:[NSString stringWithFormat:@"来电提示：%@", name] language:@"Chinese"];
     } else if (command == C_RejectCall) {
         [self speakText:@"来电提示：未知号码" language:@"Chinese"];
@@ -208,46 +241,56 @@ AVAudioPlayer *nowPlayer;
     } else if (command == C_PlayPause) {
         [self speakText:(taskState == TS_PlayingMusic ? @"暂停音乐" : @"播放音乐") language:@"Chinese"];
     } else if (command == C_ReadMessage) {
-        NSString *name = nameList[arc4random() % [nameList count]];
+        NSString *name = nameList[arc4random() % nameList.count];
         [self speakText:[NSString stringWithFormat:@"新消息提示：%@", name] language:@"Chinese"];
     } else if (command == C_DeleteMessage) {
         [self speakText:@"新消息提示：未知号码" language:@"Chinese"];
     } else if (command == C_ReplyMessage) {
-        [self speakText:@"请输入语音" language:@"Chinese"];
+        [self speakText:@"回复语音" language:@"Chinese"];
     }
 }
 
-- (void)issueFeedback:(NSString *)command {
-    if ([command isEqualToString:@"Answer Call"]) {
+- (void)issueFeedback:(int)command {
+    if (command == C_AnswerCall) {
         [self speakText:@"接听成功" language:@"Chinese"];
-    } else if ([command isEqualToString:@"Reject Call"]) {
+        taskState = TS_Normal;
+    } else if (command == C_RejectCall) {
         [self speakText:@"已挂断" language:@"Chinese"];
-    } else if ([command isEqualToString:@"Next Music"]) {
-        
-    } else if ([command isEqualToString:@"Prev Music"]) {
-        
-    } else if ([command isEqualToString:@"Play/Pause"]) {
-        
-    } else if ([command isEqualToString:@"Read Message"]) {
-        
-    } else if ([command isEqualToString:@"Delete Message"]) {
-        
-    } else if ([command isEqualToString:@"Reply Message"]) {
-        
+        taskState = TS_Normal;
+    } else if (command == C_NextMusic) {
+        [self musicChange:1];
+        taskState = TS_Normal;
+    } else if (command == C_PrevMusic) {
+        [self musicChange:-1];
+        taskState = TS_Normal;
+    } else if (command == C_PlayPause) {
+        if (taskState == TS_PlayingMusic) {
+            [nowPlayer pause];
+            taskState = TS_Normal;
+        } else {
+            [nowPlayer play];
+            taskState = TS_PlayingMusic;
+        }
+    } else if (command == C_ReadMessage) {
+        NSArray *messageList = @[@"上次多亏了你帮我度过难关", @"在干嘛，吃饭了吗", @"周末一起去故宫玩怎么样", @"记住我说的，凡事以自己为先", @"你今年多大啦", @"你昨晚干嘛去了", @"第三章第四题怎么做啊", @"最近手头有点紧，能不能借我点钱", @"我看到你朋友圈了，照片真好看", @"你看过变形金刚吗"];
+        NSString *message = messageList[arc4random() % [messageList count]];
+        [self speakText:message language:@"Chinese"];
+        taskState = TS_ReadingMessage;
+    } else if (command == C_DeleteMessage) {
+        [self speakText:@"删除成功" language:@"Chinese"];
+        taskState = TS_Normal;
+    } else if (command == C_ReplyMessage) {
+        [self speakText:@"语音开启请回复" language:@"Chinese"];
+        taskState = TS_Normal;
     }
 }
 
-- (void)musicChange {
+- (void)musicChange:(int)delta {
+    [nowPlayer stop];
+    nowPlayer.currentTime = 0;
+    musicIndex = (int)(musicIndex + musicPaths.count + delta) % musicPaths.count;
     NSURL *url = (NSURL *)[musicPaths objectAtIndex:musicIndex];
     nowPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:nil];
-}
-
-- (void)musicPlay {
-    [nowPlayer play];
-}
-
-- (void)musicPause {
-    [nowPlayer pause];
 }
 
 
@@ -293,12 +336,10 @@ AVAudioPlayer *nowPlayer;
 }
 
 - (IBAction)doClickButtonExperiment:(id)sender {
-    if (expertimentStart) {
-        [self.buttonExperiment setTitle:@"Exp. End" forState:UIControlStateNormal];
-        expertimentStart = false;
+    if (experimenting) {
+        [self experimentEnd];
     } else {
-        [self.buttonExperiment setTitle:@"Exp. Start" forState:UIControlStateNormal];
-        expertimentStart = true;
+        [self experimentStart];
     }
 }
 
@@ -306,12 +347,8 @@ AVAudioPlayer *nowPlayer;
     [self speakText:@"0" language:@"Chinese"];
 }
 
-- (IBAction)doClickButtonFalsePositive:(id)sender {
-    [self musicPlay];
-}
-
 - (IBAction)doClickButtonFalseNegative:(id)sender {
-    [self musicPause];
+    [self ReceiveCommand:-1];
 }
 
 - (void)showInfoInUI:(NSString *)newInfo {

@@ -89,26 +89,20 @@
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <state key="normal" title="XXX"/>
-                                <connections>
-                                    <action selector="doClickButtonFalsePositive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fih-XY-Evs"/>
-                                </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9mw-SC-9nE" userLabel="Button FalsePositive">
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9mw-SC-9nE" userLabel="Button XXX2">
                                 <rect key="frame" x="136" y="208" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <state key="normal" title="FP"/>
-                                <connections>
-                                    <action selector="doClickButtonFalsePositive:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ec4-oa-7CQ"/>
-                                </connections>
+                                <state key="normal" title="False User"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vtu-qx-GRB" userLabel="Button FalseNegative">
                                 <rect key="frame" x="258" y="208" width="101" height="60"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                <state key="normal" title="FN"/>
+                                <state key="normal" title="False Neg."/>
                                 <connections>
                                     <action selector="doClickButtonFalseNegative:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Yz0-Uv-uZ6"/>
                                 </connections>
@@ -123,7 +117,6 @@
                         <outlet property="buttonExperiment" destination="vG3-61-aqz" id="KH2-CE-sDD"/>
                         <outlet property="buttonExperimentCommand" destination="Ejn-oQ-cWm" id="zGo-8j-JXU"/>
                         <outlet property="buttonFalseNegative" destination="vtu-qx-GRB" id="asb-aR-ux1"/>
-                        <outlet property="buttonFalsePositive" destination="9mw-SC-9nE" id="fth-rj-Toj"/>
                         <outlet property="buttonMode" destination="5XX-I4-zpW" id="tlH-Gh-gI2"/>
                         <outlet property="buttonRecognition" destination="lTC-Y4-eKL" id="Fff-7a-90g"/>
                         <outlet property="textInfo" destination="ITG-Cz-MzG" id="a46-o6-eEV"/>
