@@ -18,14 +18,8 @@
 @interface ViewController () <WCSessionDelegate, CBPeripheralManagerDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextView *textInfo;
-@property (weak, nonatomic) IBOutlet UIButton *buttonCalibration;
-@property (weak, nonatomic) IBOutlet UIButton *buttonRecognition;
-@property (weak, nonatomic) IBOutlet UIButton *buttonClear;
 @property (weak, nonatomic) IBOutlet UIButton *buttonMode;
 @property (weak, nonatomic) IBOutlet UIButton *buttonExperiment;
-@property (weak, nonatomic) IBOutlet UIButton *buttonExperimentCommand;
-@property (weak, nonatomic) IBOutlet UIButton *buttonFalseUser;
-@property (weak, nonatomic) IBOutlet UIButton *buttonFalseNegative;
 
 @end
 
@@ -84,7 +78,6 @@ const int FEATURE_BUFFER = 20;
 const double EPS = 1e-7;
 const double MAX_ARRIVE_TIME_DIFF = 0.1;
 NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
-double recognizing = false;
 
 - (float)bytesToFloat:(Byte *)b {
     unsigned int c = ((unsigned int)b[0] << 24) + ((unsigned int)b[1] << 16) + ((unsigned int)b[2] << 8) + (b[3]);
@@ -133,7 +126,7 @@ double recognizing = false;
                 resR = [recognizer classify:featuresLeft[tidx]];
                 //NSLog(@"resR %d", resR);
                 if (!experimenting) {
-                    UILog(@"resR: %d", resR);
+                    UILog(@"resR: %@", mode == M_Stationary ? predStationary[resR] : predMoving[resR]);
                     [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
                 }
             }
@@ -149,7 +142,6 @@ double recognizing = false;
 
 
 //  experiment
-// ['IxP', 'IxB', 'IxI', 'IxFU', 'FUxFU', 'FDxFU', 'PxFU', 'FDxP']
 enum Mode { M_Stationary, M_Walking, M_Running } mode = M_Stationary;
 enum TaskState { TS_Normal, TS_PlayingMusic, TS_ReadingMessage } taskState;
 enum Command { C_AnswerCall, C_RejectCall, C_NextMusic, C_PrevMusic, C_PlayPause, C_ReadMessage, C_DeleteMessage, C_ReplyMessage } nowCommand;
@@ -157,15 +149,15 @@ NSArray *predStationary, *predMoving;
 NSDictionary *mapping;
 NSMutableArray *feedArray;
 
+NSString *logFileName;
+int nCommand = 0;
+int falseUser, falsePositive, falseNegative, falseRecognition;
 bool experimenting = false;
-int falseUser = 0;
-int falsePositive = 0;
-int falseNegative = 0;
-int falseRecognition = 0;
 
 NSMutableArray *musicPaths;
 int musicIndex;
 AVAudioPlayer *nowPlayer;
+
 
 - (void)initExperiment {
     predStationary = @[@"IxP", @"IxB", @"IxI", @"IxFU", @"FUxFU", @"FDxFU", @"PxFU", @"FDxP"];
@@ -191,6 +183,10 @@ AVAudioPlayer *nowPlayer;
     falseUser = falsePositive = falseNegative = falseRecognition = 0;
     feedArray = [[NSMutableArray alloc] init];
     
+    logFileName = [NSString stringWithFormat:@"exp-m%d-%@.txt", mode, [self getTimeString:@"YYYYMMdd-HHmmss"]];
+    [self logToFile:[NSString stringWithFormat:@"start m%d", mode]];
+    UILog(@"start %d", mode);
+    
     [self.buttonExperiment setTitle:@"Exp. Start" forState:UIControlStateNormal];
     experimenting = true;
 }
@@ -202,17 +198,17 @@ AVAudioPlayer *nowPlayer;
 
 - (void)nextCommand {
     if (taskState == TS_Normal) {
-        int r = arc4random() % (mode == M_Stationary ? 50 : 30);
+        int r = arc4random() % (mode == M_Stationary ? 60 : 40);
         if (r < 10) nowCommand = C_AnswerCall;
         else if (r < 20) nowCommand = C_RejectCall;
-        else if (r < 30) nowCommand = C_PlayPause;
-        else if (r < 40) nowCommand = C_ReadMessage;
-        else if (r < 50) nowCommand = C_DeleteMessage;
+        else if (r < 40) nowCommand = C_PlayPause;
+        else if (r < 50) nowCommand = C_ReadMessage;
+        else if (r < 60) nowCommand = C_DeleteMessage;
     } else if (taskState == TS_PlayingMusic) {
-        int r = arc4random() % 70;
+        int r = arc4random() % 40;
         if (r < 10) nowCommand = C_PlayPause;
-        else if (r < 40) nowCommand = C_PrevMusic;
-        else if (r < 70) nowCommand = C_NextMusic;
+        else if (r < 25) nowCommand = C_PrevMusic;
+        else if (r < 40) nowCommand = C_NextMusic;
     } else if (taskState == TS_ReadingMessage) {
         int r = arc4random() % 70;
         if (r < 40) nowCommand = C_ReplyMessage;
@@ -220,21 +216,24 @@ AVAudioPlayer *nowPlayer;
         else if (r < 60) nowCommand = C_RejectCall;
         else if (r < 70) nowCommand = C_PlayPause;
     }
-    UILog(@"new command %d", nowCommand);
+    nCommand++;
+    [self logToFile:[NSString stringWithFormat:@"new command %d", nowCommand]];
+    UILog(@"C%d: new command %d", nCommand, nowCommand);
     [self issueStimuli:nowCommand];
 }
 
 - (void)receiveCommand:(int)command {
     if (nowCommand == -1) {
-        falsePositive++;
-        UILog(@"false Positive");
+        [self logToFile:@"false positive"];
+        UILog(@"false positive %d", ++falsePositive);
     } else if (command != nowCommand) {
-        falseRecognition++;
-        UILog(@"false Recognition %d", command);
+        [self logToFile:[NSString stringWithFormat:@"false recognition %d", command]];
+        UILog(@"false recognition %d: %d", ++falseRecognition, command);
     } else {
         [self issueFeedback:command];
         nowCommand = -1;
-        UILog(@"true command %d", command);
+        [self logToFile:@"yes"];
+        UILog(@"yes %d", command);
     }
 }
 
@@ -268,7 +267,7 @@ AVAudioPlayer *nowPlayer;
         NSString *name = nameList[arc4random() % nameList.count];
         [self speakText:[NSString stringWithFormat:@"来电提示：%@", name] language:@"Chinese"];
     } else if (command == C_RejectCall) {
-        [self speakText:@"来电提示：未知号码" language:@"Chinese"];
+        [self speakText:@"来电提示：骚扰电话" language:@"Chinese"];
     } else if (command == C_NextMusic) {
         [self speakText:@"下一首音乐" language:@"Chinese"];
     } else if (command == C_PrevMusic) {
@@ -279,9 +278,9 @@ AVAudioPlayer *nowPlayer;
         NSString *name = nameList[arc4random() % nameList.count];
         [self speakText:[NSString stringWithFormat:@"新消息提示：%@", name] language:@"Chinese"];
     } else if (command == C_DeleteMessage) {
-        [self speakText:@"新消息提示：未知号码" language:@"Chinese"];
+        [self speakText:@"新消息提示：垃圾短信" language:@"Chinese"];
     } else if (command == C_ReplyMessage) {
-        [self speakText:@"回复语音" language:@"Chinese"];
+        [self speakText:@"开始回复" language:@"Chinese"];
     }
 }
 
@@ -295,11 +294,11 @@ AVAudioPlayer *nowPlayer;
     } else if (command == C_NextMusic) {
         [self musicChange:1];
         [nowPlayer play];
-        taskState = TS_Normal;
+        taskState = TS_PlayingMusic;
     } else if (command == C_PrevMusic) {
         [self musicChange:-1];
         [nowPlayer play];
-        taskState = TS_Normal;
+        taskState = TS_PlayingMusic;
     } else if (command == C_PlayPause) {
         if (taskState == TS_PlayingMusic) {
             [nowPlayer pause];
@@ -317,7 +316,7 @@ AVAudioPlayer *nowPlayer;
         [self speakText:@"删除成功" language:@"Chinese"];
         taskState = TS_Normal;
     } else if (command == C_ReplyMessage) {
-        [self speakText:@"语音开启请回复" language:@"Chinese"];
+        [self speakText:@"语音开启" language:@"Chinese"];
         taskState = TS_Normal;
     }
 }
@@ -328,6 +327,7 @@ AVAudioPlayer *nowPlayer;
     musicIndex = (int)(musicIndex + musicPaths.count + delta) % musicPaths.count;
     NSURL *url = (NSURL *)[musicPaths objectAtIndex:musicIndex];
     nowPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:nil];
+    [nowPlayer setVolume:0.3];
 }
 
 
@@ -339,20 +339,6 @@ AVAudioPlayer *nowPlayer;
     [self sendMessageByWatchConnectivity:@"start calibration"];
     [self sendMessageByCoreBluetooth:@"start calibration"];
     UILog(@"start calibration");
-}
-
-- (IBAction)doClickButtonRecognition:(id)sender {
-    if (recognizing) {
-        [self sendMessageByWatchConnectivity:@"recognition off"];
-        [self sendMessageByCoreBluetooth:@"recognition off"];
-        [self.buttonRecognition setTitle:@"Rec. Off" forState:UIControlStateNormal];
-        recognizing = false;
-    } else {
-        [self sendMessageByWatchConnectivity:@"recognition on"];
-        [self sendMessageByCoreBluetooth:@"recognition on"];
-        [self.buttonRecognition setTitle:@"Rec. On" forState:UIControlStateNormal];
-        recognizing = true;
-    }
 }
 
 - (IBAction)doClickButtonClear:(id)sender {
@@ -385,16 +371,49 @@ AVAudioPlayer *nowPlayer;
 }
 
 - (IBAction)doClickButtonFalseUser:(id)sender {
+    [self logToFile:@""];
     if (experimenting) {
-        falseUser++;
-        UILog(@"false User %d", falseUser);
+        [self logToFile:@"false user"];
+        UILog(@"false user %d", ++falseUser);
     }
 }
 
 - (IBAction)doClickButtonFalseNegative:(id)sender {
     if (experimenting) {
-        falseNegative++;
-        UILog(@"false Negative %d", falseNegative);
+        [self logToFile:@"false negative"];
+        UILog(@"false negative %d", ++falseNegative);
+    }
+}
+
+- (IBAction)doClickButtonFalsePositive:(id)sender {
+    if (experimenting) {
+        [self receiveCommand:nowCommand];
+    }
+}
+
+- (IBAction)doClickButtonShowFiles:(id)sender {
+    UILog(@"show files:");
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:documentPath];
+    NSString *file;
+    int fileNum = 0;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        NSString *filePath = [documentPath stringByAppendingPathComponent:file];
+        long long fileSize = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
+        if ([[file pathExtension] isEqualToString:@"txt"]) {
+            UILog(@"file (%.2fM): %@", fileSize / 1048576.0, file);
+            fileNum++;
+        }
+    }
+    UILog(@"number of files: %d", fileNum);
+}
+
+- (IBAction)doClickButtonDeleteFiles:(id)sender {
+    NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:documentPath];
+    NSString *file;
+    while ((file = [myDirectoryEnumerator nextObject])) {
+        NSString *filePath = [documentPath stringByAppendingPathComponent:file];
+        bool ifSuccess = [fileManager removeItemAtPath:filePath error:nil];
+        UILog(@"delete file %@: %@", ifSuccess ? @"Yes" : @"No", file);
     }
 }
 
@@ -411,24 +430,6 @@ AVAudioPlayer *nowPlayer;
     NSString *s = [self.textInfo text];
     s = [s stringByAppendingString:newInfo];
     [self.textInfo setText:s];
-}
-
-
-
-//
-//  file
-//
-- (NSString *)readDataFromBundle:(NSString *)fileName ofType:(NSString *)ofType {
-    NSString *filePath = [bundle pathForResource:fileName ofType:ofType];
-    
-    NSLog(@"%@", filePath);
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSData *data = [fileManager contentsAtPath:filePath];
-    NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    
-    NSLog(@"%@", [s substringToIndex:(random() % 10 + 1)]);
-    return s;
 }
 
 
@@ -556,6 +557,51 @@ CBMutableCharacteristic *characteristicMessageSend = nil;
 - (void)sendMessageByCoreBluetooth:(NSString *)message {
     if (characteristicMessageSend == nil) return;
     [peripheralManager updateValue:[message dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:characteristicMessageSend onSubscribedCentrals:nil];
+}
+
+
+
+//
+//  file
+//
+- (NSString *)readDataFromBundle:(NSString *)fileName ofType:(NSString *)ofType {
+    NSString *filePath = [bundle pathForResource:fileName ofType:ofType];
+    NSLog(@"%@", filePath);
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSData *data = [fileManager contentsAtPath:filePath];
+    NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSLog(@"%@", [s substringToIndex:(random() % 10 + 1)]);
+    return s;
+}
+
+- (void)logToFile:(NSString *)content {
+    double now = [[NSDate date] timeIntervalSince1970];
+    content = [NSString stringWithFormat:@"%lf %@\n", now, content];
+    [self writeFile:logFileName content:content];
+}
+
+- (void)writeFile:(NSString *)fileName content:(NSString *)content {
+    NSString *filePath = [documentPath stringByAppendingPathComponent:fileName];
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+    if (fileHandle == nil) {
+        bool ifSuccess = [content writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        NSLog(@"write file %@: %@", ifSuccess ? @"Yes" : @"No", fileName);
+    } else {
+        [fileHandle truncateFileAtOffset:[fileHandle seekToEndOfFile]];
+        [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
+        [fileHandle closeFile];
+        if (true) {
+            long long size = [[fileManager attributesOfItemAtPath:filePath error:nil] fileSize];
+            NSLog(@"write %lld", size);
+        }
+    }
+}
+
+- (NSString *)getTimeString:(NSString *)format {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:format];
+    NSDate *now = [NSDate date];
+    return [formatter stringFromDate:now];
 }
 
 @end

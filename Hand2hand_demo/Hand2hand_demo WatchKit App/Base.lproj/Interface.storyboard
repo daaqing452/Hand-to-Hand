@@ -12,24 +12,23 @@
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController">
                     <items>
                         <label width="136" height="77" alignment="left" text="Label" id="Izw-oB-Ao5" userLabel="Label 0"/>
-                        <label width="136" height="116" alignment="left" text="Rec. Off" id="Zxd-cU-sZi" userLabel="Label Recognition"/>
-                        <button width="1" alignment="left" title="Button" id="Wh2-1f-MrN"/>
+                        <label width="136" height="116" alignment="left" text="OK" id="Zxd-cU-sZi" userLabel="Label 1"/>
+                        <button width="1" alignment="left" title="Test" id="KVS-cT-B5v" userLabel="Button Test"/>
                         <button width="1" alignment="left" title="Comm: Null" id="UNy-GE-XmM" userLabel="Button Communication">
                             <connections>
                                 <action selector="doClickButtonCommunication:" destination="AgC-eL-Hgc" id="WwI-He-JmL"/>
                             </connections>
                         </button>
-                        <button width="1" alignment="left" title="Test" id="KVS-cT-B5v" userLabel="Button Test">
+                        <button width="1" alignment="left" title="Send Data: Off" id="Wh2-1f-MrN" userLabel="Button SendData">
                             <connections>
-                                <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="wLD-wy-Btl"/>
+                                <action selector="doClickButtonSendData:" destination="AgC-eL-Hgc" id="Og5-ZI-ERk"/>
                             </connections>
                         </button>
                     </items>
                     <connections>
                         <outlet property="buttonCommunication" destination="UNy-GE-XmM" id="k9z-OE-sEq"/>
-                        <outlet property="buttonTest" destination="KVS-cT-B5v" id="4p2-SH-6qe"/>
+                        <outlet property="buttonSendData" destination="Wh2-1f-MrN" id="zfL-nx-q6O"/>
                         <outlet property="label0" destination="Izw-oB-Ao5" id="DIc-V3-9t7"/>
-                        <outlet property="labelRecognition" destination="Zxd-cU-sZi" id="nRJ-N0-87w"/>
                     </connections>
                 </controller>
             </objects>

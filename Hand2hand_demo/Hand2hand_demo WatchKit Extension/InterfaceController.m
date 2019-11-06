@@ -19,9 +19,8 @@
 @interface InterfaceController () <WCSessionDelegate, CBCentralManagerDelegate, CBPeripheralDelegate, HKWorkoutSessionDelegate>
 
 @property (weak, nonatomic) IBOutlet WKInterfaceLabel *label0;
-@property (weak, nonatomic) IBOutlet WKInterfaceLabel *labelRecognition;
 @property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonCommunication;
-@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonTest;
+@property (weak, nonatomic) IBOutlet WKInterfaceButton *buttonSendData;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) HKWorkoutConfiguration *workoutConfiguration;
@@ -80,14 +79,6 @@ bool watchConnectivityTestFlag;
     } else if ([command isEqualToString:@"start calibration"]) {
         calibrationState = C_Listening;
         minValue0 = 0;
-    } else if ([command isEqualToString:@"recognition on"]) {
-        [self.labelRecognition setText:@"Rec. On"];
-        recognizing = true;
-    } else if ([command isEqualToString:@"recognition off"]) {
-        [self.labelRecognition setText:@"Rec. Off"];
-        recognizing = false;
-    } else if ([command isEqualToString:@"hello"]) {
-        LBLog(@"hello");
     } else {
         NSLog(@"recv: %@", command);
     }
@@ -162,8 +153,14 @@ bool watchConnectivityTestFlag;
     [self startCommunication];
 }
 
-- (IBAction)doClickButtonTest:(id)sender {
-    [self sendMessage:@"test"];
+- (IBAction)doClickButtonSendData:(id)sender {
+    if (sendingData) {
+        sendingData = false;
+        [self.buttonSendData setTitle:@"Send Data: Off"];
+    } else {
+        sendingData = true;
+        [self.buttonSendData setTitle:@"Send Data: On"];
+    }
 }
 
 
@@ -189,7 +186,7 @@ const double REPORT_ACC_THREHOLD = 100;
         }
         
         calibratedTicker += 0.01;
-        if (recognizing) {
+        if (sendingData) {
             [self addFrame:motion];
         }
         [self calibration:motion];
@@ -237,7 +234,7 @@ const int MOTION_ARRAY_CUT_OFF = 25;
 const int ENERGY_BIN_NUM = 5;
 const int ENERGY_BIN_CAPACITY = MOTION_ARRAY_CAPACITY / ENERGY_BIN_NUM;
 const double ENERGY_THRESHOLD = 10.0;
-bool recognizing = false;
+bool sendingData = false;
 double timeNow;
 NSMutableArray *arrays[AXES];
 
