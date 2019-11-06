@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="15400" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="15505" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
     <device id="watch38"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="15400"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15509"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="15501"/>
     </dependencies>
     <scenes>
         <!--Interface Controller-->
@@ -11,13 +11,14 @@
             <objects>
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController">
                     <items>
-                        <label width="136" alignment="left" text="Label" id="Izw-oB-Ao5" userLabel="Label 0"/>
+                        <label width="136" height="77" alignment="left" text="Label" id="Izw-oB-Ao5" userLabel="Label 0"/>
+                        <label width="136" height="116" alignment="left" text="Rec. Off" id="Zxd-cU-sZi" userLabel="Label Recognition"/>
+                        <button width="1" alignment="left" title="Button" id="Wh2-1f-MrN"/>
                         <button width="1" alignment="left" title="Comm: Null" id="UNy-GE-XmM" userLabel="Button Communication">
                             <connections>
                                 <action selector="doClickButtonCommunication:" destination="AgC-eL-Hgc" id="WwI-He-JmL"/>
                             </connections>
                         </button>
-                        <label width="136" alignment="left" text="Rec. Off" id="Zxd-cU-sZi" userLabel="Label Recognition"/>
                         <button width="1" alignment="left" title="Test" id="KVS-cT-B5v" userLabel="Button Test">
                             <connections>
                                 <action selector="doClickButtonTest:" destination="AgC-eL-Hgc" id="wLD-wy-Btl"/>
@@ -32,7 +33,7 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="41" y="90"/>
+            <point key="canvasLocation" x="41" y="154.5"/>
         </scene>
     </scenes>
 </document>

@@ -8,9 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		BF2B0890236BEDDC00E18CA8 /* bensound in Resources */ = {isa = PBXBuildFile; fileRef = BF2B088F236BEDDB00E18CA8 /* bensound */; };
-		BF55E9ED236FC1A10080F752 /* opencv_gesture_20191103.model in Resources */ = {isa = PBXBuildFile; fileRef = BF55E9EC236FC1A10080F752 /* opencv_gesture_20191103.model */; };
+		BF34696E2371632000A9572D /* opencv_gesture_20191105.model in Resources */ = {isa = PBXBuildFile; fileRef = BF34696D2371632000A9572D /* opencv_gesture_20191105.model */; };
 		BFE5BA1A2369323700080D56 /* detect_walking_sta.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE5BA182369323700080D56 /* detect_walking_sta.model */; };
 		BFE5BA1B2369323700080D56 /* recognition_walking.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE5BA192369323700080D56 /* recognition_walking.model */; };
+		BFE82CA623710DD500FBB0A6 /* opencv_gesture_20191104.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE82CA523710DD400FBB0A6 /* opencv_gesture_20191104.model */; };
 		BFE897472366B1E1000A3968 /* detect_walking_what.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE897462366B1E1000A3968 /* detect_walking_what.model */; };
 		BFE897492366B7B7000A3968 /* opencv_nonoise.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE897482366B7B7000A3968 /* opencv_nonoise.model */; };
 		BFE8974B2366C7A5000A3968 /* opencv_noise.model in Resources */ = {isa = PBXBuildFile; fileRef = BFE8974A2366C7A5000A3968 /* opencv_noise.model */; };
@@ -18,11 +19,12 @@
 
 /* Begin PBXFileReference section */
 		BF2B088F236BEDDB00E18CA8 /* bensound */ = {isa = PBXFileReference; lastKnownFileType = folder; path = bensound; sourceTree = "<group>"; };
-		BF55E9EC236FC1A10080F752 /* opencv_gesture_20191103.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opencv_gesture_20191103.model; path = ../../user_study/models/opencv_gesture_20191103.model; sourceTree = "<group>"; };
+		BF34696D2371632000A9572D /* opencv_gesture_20191105.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opencv_gesture_20191105.model; path = ../../user_study/models/opencv_gesture_20191105.model; sourceTree = "<group>"; };
 		BF98F8CE21F98BAA0025DA79 /* makeBundle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = makeBundle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF98F8D121F98BAA0025DA79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFE5BA182369323700080D56 /* detect_walking_sta.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = detect_walking_sta.model; path = ../../user_study/models/detect_walking_sta.model; sourceTree = "<group>"; };
 		BFE5BA192369323700080D56 /* recognition_walking.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = recognition_walking.model; path = ../../user_study/models/recognition_walking.model; sourceTree = "<group>"; };
+		BFE82CA523710DD400FBB0A6 /* opencv_gesture_20191104.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opencv_gesture_20191104.model; path = ../../user_study/models/opencv_gesture_20191104.model; sourceTree = "<group>"; };
 		BFE897462366B1E1000A3968 /* detect_walking_what.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = detect_walking_what.model; path = ../../user_study/models/detect_walking_what.model; sourceTree = "<group>"; };
 		BFE897482366B7B7000A3968 /* opencv_nonoise.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opencv_nonoise.model; path = ../../user_study/models/opencv_nonoise.model; sourceTree = "<group>"; };
 		BFE8974A2366C7A5000A3968 /* opencv_noise.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = opencv_noise.model; path = ../../user_study/models/opencv_noise.model; sourceTree = "<group>"; };
@@ -62,8 +64,9 @@
 				BFE897462366B1E1000A3968 /* detect_walking_what.model */,
 				BF98F8D121F98BAA0025DA79 /* Info.plist */,
 				BFE5BA182369323700080D56 /* detect_walking_sta.model */,
-				BF55E9EC236FC1A10080F752 /* opencv_gesture_20191103.model */,
 				BFE5BA192369323700080D56 /* recognition_walking.model */,
+				BFE82CA523710DD400FBB0A6 /* opencv_gesture_20191104.model */,
+				BF34696D2371632000A9572D /* opencv_gesture_20191105.model */,
 				BFE8974A2366C7A5000A3968 /* opencv_noise.model */,
 				BFE897482366B7B7000A3968 /* opencv_nonoise.model */,
 			);
@@ -129,9 +132,10 @@
 				BFE897492366B7B7000A3968 /* opencv_nonoise.model in Resources */,
 				BFE5BA1B2369323700080D56 /* recognition_walking.model in Resources */,
 				BF2B0890236BEDDC00E18CA8 /* bensound in Resources */,
-				BF55E9ED236FC1A10080F752 /* opencv_gesture_20191103.model in Resources */,
 				BFE5BA1A2369323700080D56 /* detect_walking_sta.model in Resources */,
+				BF34696E2371632000A9572D /* opencv_gesture_20191105.model in Resources */,
 				BFE8974B2366C7A5000A3968 /* opencv_noise.model in Resources */,
+				BFE82CA623710DD500FBB0A6 /* opencv_gesture_20191104.model in Resources */,
 				BFE897472366B1E1000A3968 /* detect_walking_what.model in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

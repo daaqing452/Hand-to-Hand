@@ -22,8 +22,8 @@
 		BF9B8FF92202A61E00CFD2E8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF9B8FF82202A61E00CFD2E8 /* Assets.xcassets */; };
 		BF9B900D2202A73000CFD2E8 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF9B900B2202A72F00CFD2E8 /* opencv2.framework */; };
 		BF9B90102202A7E300CFD2E8 /* Classifier.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF9B900F2202A7E300CFD2E8 /* Classifier.mm */; };
+		BFC017B2237189D200B67D86 /* makeBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BFC017B1237189D200B67D86 /* makeBundle.bundle */; };
 		BFC12A0B22151969003ACE2D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFC12A0A22151969003ACE2D /* HealthKit.framework */; };
-		BFE897452366A3FF000A3968 /* makeBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = BFE897442366A3FF000A3968 /* makeBundle.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +66,16 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BFC017C323728D7D00B67D86 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -93,10 +103,13 @@
 		BF9B900B2202A72F00CFD2E8 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
 		BF9B900F2202A7E300CFD2E8 /* Classifier.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Classifier.mm; sourceTree = "<group>"; };
 		BF9B90112202A80500CFD2E8 /* Classifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Classifier.h; sourceTree = "<group>"; };
+		BFC017B1237189D200B67D86 /* makeBundle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = makeBundle.bundle; path = "../../../../Library/Developer/Xcode/DerivedData/MakeBundle-dsixpeqyllxiuwbdtfqunlewxndq/Build/Products/Debug-maccatalyst/makeBundle.bundle"; sourceTree = "<group>"; };
+		BFC017B923728D7D00B67D86 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
+		BFC017BA23728D7D00B67D86 /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
+		BFC017BC23728D7D00B67D86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BFC12A042215195A003ACE2D /* Hand2hand_demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Hand2hand_demo.entitlements; sourceTree = "<group>"; };
 		BFC12A0A22151969003ACE2D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
 		BFC12A0C22151969003ACE2D /* Hand2hand_demo WatchKit Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Hand2hand_demo WatchKit Extension.entitlements"; sourceTree = "<group>"; };
-		BFE897442366A3FF000A3968 /* makeBundle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = makeBundle.bundle; path = "../../../../Library/Developer/Xcode/DerivedData/MakeBundle-dsixpeqyllxiuwbdtfqunlewxndq/Build/Products/Debug-iphonesimulator/makeBundle.bundle"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +138,7 @@
 				BF9B8FCA2202A61B00CFD2E8 /* Hand2hand_demo */,
 				BF9B8FE22202A61D00CFD2E8 /* Hand2hand_demo WatchKit App */,
 				BF9B8FF12202A61D00CFD2E8 /* Hand2hand_demo WatchKit Extension */,
+				BFC017B823728D7D00B67D86 /* Hand2hand_demo WatchKit Extension (Notification) */,
 				BF9B8FC92202A61B00CFD2E8 /* Products */,
 				BFC12A052215195A003ACE2D /* Frameworks */,
 			);
@@ -144,7 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				BFC12A042215195A003ACE2D /* Hand2hand_demo.entitlements */,
-				BFE897442366A3FF000A3968 /* makeBundle.bundle */,
+				BFC017B1237189D200B67D86 /* makeBundle.bundle */,
 				BF9B900B2202A72F00CFD2E8 /* opencv2.framework */,
 				BF9B8FCB2202A61B00CFD2E8 /* AppDelegate.h */,
 				BF9B8FCC2202A61B00CFD2E8 /* AppDelegate.m */,
@@ -183,6 +197,16 @@
 				BF9B8FFA2202A61E00CFD2E8 /* Info.plist */,
 			);
 			path = "Hand2hand_demo WatchKit Extension";
+			sourceTree = "<group>";
+		};
+		BFC017B823728D7D00B67D86 /* Hand2hand_demo WatchKit Extension (Notification) */ = {
+			isa = PBXGroup;
+			children = (
+				BFC017B923728D7D00B67D86 /* NotificationService.h */,
+				BFC017BA23728D7D00B67D86 /* NotificationService.m */,
+				BFC017BC23728D7D00B67D86 /* Info.plist */,
+			);
+			path = "Hand2hand_demo WatchKit Extension (Notification)";
 			sourceTree = "<group>";
 		};
 		BFC12A052215195A003ACE2D /* Frameworks */ = {
@@ -239,6 +263,7 @@
 				BF9B8FE92202A61D00CFD2E8 /* Sources */,
 				BF9B8FEA2202A61D00CFD2E8 /* Frameworks */,
 				BF9B8FEB2202A61D00CFD2E8 /* Resources */,
+				BFC017C323728D7D00B67D86 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
@@ -305,7 +330,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF9B8FD82202A61C00CFD2E8 /* LaunchScreen.storyboard in Resources */,
-				BFE897452366A3FF000A3968 /* makeBundle.bundle in Resources */,
+				BFC017B2237189D200B67D86 /* makeBundle.bundle in Resources */,
 				BF9B8FD52202A61C00CFD2E8 /* Assets.xcassets in Resources */,
 				BF9B8FD32202A61B00CFD2E8 /* Main.storyboard in Resources */,
 			);

@@ -163,9 +163,7 @@ bool watchConnectivityTestFlag;
 }
 
 - (IBAction)doClickButtonTest:(id)sender {
-    //[self sendMessageByCoreBluetooth:@"test"];
-    [self changeCommunication:@"null"];
-    [self connectByCoreBluetooth];
+    [self sendMessage:@"test"];
 }
 
 
@@ -256,7 +254,7 @@ NSMutableArray *arrays[AXES];
 - (void)addFrame:(CMDeviceMotion *)motion {
     timeNow = motion.timestamp - calibratedTimestamp;
     if (calibratedTicker - timeNow > 0.01) {
-        NSLog(@"delay %lf %lf", calibratedTicker, timeNow);
+        //NSLog(@"delay %lf %lf", calibratedTicker, timeNow);
         calibratedTicker -= 0.01;
         return;
     }

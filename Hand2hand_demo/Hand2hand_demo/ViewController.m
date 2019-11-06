@@ -52,7 +52,7 @@ NSString *documentPath;
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
     detector = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"detect_walking_sta" ofType:@"model"]];
-    recognizerStationay = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"opencv_gesture_20191103" ofType:@"model"]];
+    recognizerStationay = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"opencv_gesture_20191105" ofType:@"model"]];
     recognizerWalking = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"]];
     recognizerRunning = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"]];
     //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
@@ -124,14 +124,18 @@ double recognizing = false;
             [featuresRight[tidx] removeObjectAtIndex:0];
             [featuresLeft[tidx] addObjectsFromArray:featuresRight[tidx]];
             int resD = [detector classify:featuresLeft[tidx]], resR = -1;
+            //NSLog(@"resD %d", resD);
             if (resD != 0) {
                 Classifier *recognizer;
                 if (mode == M_Stationary) recognizer = recognizerStationay;
                 else if (mode == M_Walking) recognizer = recognizerWalking;
                 else if (mode == M_Running) recognizer = recognizerRunning;
                 resR = [recognizer classify:featuresLeft[tidx]];
-                UILog(@"ans: %d", resR);
-                if (!experimenting) [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
+                //NSLog(@"resR %d", resR);
+                if (!experimenting) {
+                    UILog(@"resR: %d", resR);
+                    [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
+                }
             }
             if (experimenting) [self feed:resR];
             featuresLeft[tidx] = nil;
@@ -166,7 +170,7 @@ AVAudioPlayer *nowPlayer;
 - (void)initExperiment {
     predStationary = @[@"IxP", @"IxB", @"IxI", @"IxFU", @"FUxFU", @"FDxFU", @"PxFU", @"FDxP"];
     predMoving = @[@"IxP", @"IxB", @"FDxP", @"PxFU", @"FDxFU"];
-    mapping = @{@"IxP":[NSNumber numberWithInt:C_AnswerCall], @"IxB":[NSNumber numberWithInt:C_RejectCall], @"FDxP":[NSNumber numberWithInt:C_NextMusic], @"PxFU":[NSNumber numberWithInt:C_PrevMusic], @"FDxFU":[NSNumber numberWithInt:C_PlayPause], @"IxFU":[NSNumber numberWithInt:C_ReadMessage], @"IxI":[NSNumber numberWithInt:C_DeleteMessage], @"FUxFU":[NSNumber numberWithInt:C_ReplyMessage]};
+    mapping = @{@"IxP":[NSNumber numberWithInt:C_RejectCall], @"IxB":[NSNumber numberWithInt:C_AnswerCall], @"FDxP":[NSNumber numberWithInt:C_NextMusic], @"PxFU":[NSNumber numberWithInt:C_PrevMusic], @"FDxFU":[NSNumber numberWithInt:C_PlayPause], @"IxFU":[NSNumber numberWithInt:C_ReadMessage], @"IxI":[NSNumber numberWithInt:C_DeleteMessage], @"FUxFU":[NSNumber numberWithInt:C_ReplyMessage]};
 
     NSString *musicDirPath = [bundle pathForResource:@"bensound" ofType:@""];
     NSDirectoryEnumerator *myDirectoryEnumerator = [fileManager enumeratorAtPath:musicDirPath];
@@ -185,6 +189,7 @@ AVAudioPlayer *nowPlayer;
     musicIndex = 0;
     [self musicChange:0];
     falseUser = falsePositive = falseNegative = falseRecognition = 0;
+    feedArray = [[NSMutableArray alloc] init];
     
     [self.buttonExperiment setTitle:@"Exp. Start" forState:UIControlStateNormal];
     experimenting = true;
@@ -204,30 +209,32 @@ AVAudioPlayer *nowPlayer;
         else if (r < 40) nowCommand = C_ReadMessage;
         else if (r < 50) nowCommand = C_DeleteMessage;
     } else if (taskState == TS_PlayingMusic) {
-        int r = arc4random() % 50;
+        int r = arc4random() % 70;
         if (r < 10) nowCommand = C_PlayPause;
-        else if (r < 30) nowCommand = C_PrevMusic;
-        else if (r < 50) nowCommand = C_NextMusic;
+        else if (r < 40) nowCommand = C_PrevMusic;
+        else if (r < 70) nowCommand = C_NextMusic;
     } else if (taskState == TS_ReadingMessage) {
-        int r = arc4random() % 50;
-        if (r < 20) nowCommand = C_ReplyMessage;
-        else if (r < 30) nowCommand = C_AnswerCall;
-        else if (r < 40) nowCommand = C_RejectCall;
-        else if (r < 50) nowCommand = C_PlayPause;
+        int r = arc4random() % 70;
+        if (r < 40) nowCommand = C_ReplyMessage;
+        else if (r < 50) nowCommand = C_AnswerCall;
+        else if (r < 60) nowCommand = C_RejectCall;
+        else if (r < 70) nowCommand = C_PlayPause;
     }
+    UILog(@"new command %d", nowCommand);
     [self issueStimuli:nowCommand];
 }
 
 - (void)receiveCommand:(int)command {
     if (nowCommand == -1) {
         falsePositive++;
-        UILog(@"False Positive");
+        UILog(@"false Positive");
     } else if (command != nowCommand) {
         falseRecognition++;
-        UILog(@"False Recognition");
+        UILog(@"false Recognition %d", command);
     } else {
         [self issueFeedback:command];
         nowCommand = -1;
+        UILog(@"true command %d", command);
     }
 }
 
@@ -242,8 +249,8 @@ AVAudioPlayer *nowPlayer;
             }
             int command = flag ? nowCommand : [feedArray[0] intValue];
             [self receiveCommand:command];
+            [feedArray removeAllObjects];
         }
-        [feedArray removeAllObjects];
     } else {
         int command = -1;
         if (mode == M_Stationary) {
@@ -287,9 +294,11 @@ AVAudioPlayer *nowPlayer;
         taskState = TS_Normal;
     } else if (command == C_NextMusic) {
         [self musicChange:1];
+        [nowPlayer play];
         taskState = TS_Normal;
     } else if (command == C_PrevMusic) {
         [self musicChange:-1];
+        [nowPlayer play];
         taskState = TS_Normal;
     } else if (command == C_PlayPause) {
         if (taskState == TS_PlayingMusic) {
@@ -372,20 +381,20 @@ AVAudioPlayer *nowPlayer;
 }
 
 - (IBAction)doClickButtonExperimentCommand:(id)sender {
-    [self speakText:@"0" language:@"Chinese"];
+    [self nextCommand];
 }
 
 - (IBAction)doClickButtonFalseUser:(id)sender {
     if (experimenting) {
         falseUser++;
-        UILog(@"False User %d", falseUser);
+        UILog(@"false User %d", falseUser);
     }
 }
 
 - (IBAction)doClickButtonFalseNegative:(id)sender {
     if (experimenting) {
         falseNegative++;
-        UILog(@"False Negative %d", falseNegative);
+        UILog(@"false Negative %d", falseNegative);
     }
 }
 
