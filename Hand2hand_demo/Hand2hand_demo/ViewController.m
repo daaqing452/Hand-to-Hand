@@ -45,10 +45,10 @@ NSString *documentPath;
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
-    detector = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"detect_walking_sta" ofType:@"model"]];
-    recognizerStationay = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"opencv_gesture_20191105" ofType:@"model"]];
-    recognizerWalking = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"]];
-    recognizerRunning = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"]];
+    detector = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"detect_new" ofType:@"model"] type:0];
+    recognizerStationay = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"opencv_gesture_20191108" ofType:@"model"] type:1];
+    recognizerWalking = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"] type:0];
+    recognizerRunning = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"] type:0];
     //[self readDataFromBundle:@"log-3-WatchL" ofType:@"txt"];
     
     fileManager = [NSFileManager defaultManager];
@@ -89,6 +89,20 @@ NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
     return x - (int)(x / y + 1e-7) * y;
 }
 
+- (NSMutableArray *)combineFeatures:(int)type left:(NSMutableArray *)left right:(NSMutableArray *)right {
+    NSMutableArray *featuresLR = [[NSMutableArray alloc] init];
+    [featuresLR addObjectsFromArray:left];
+    [featuresLR addObjectsFromArray:right];
+    if (type == 0) {
+        [featuresLR removeObjectsInRange:NSMakeRange(80, 16)];
+        [featuresLR removeObjectsInRange:NSMakeRange(32, 16)];
+    } else {
+        [featuresLR removeObjectsInRange:NSMakeRange(72, 8)];
+        [featuresLR removeObjectsInRange:NSMakeRange(24, 8)];
+    }
+    return featuresLR;
+}
+
 - (void)processFrames:(NSData *)data fromType:(NSString *)fromType {
     Byte *bytes = (Byte *)data.bytes;
     Byte ctrl = bytes[0];
@@ -111,31 +125,40 @@ NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
     } else {
         UILog(@"recv data from unknown watch");
     }
-    if (other != nil) {
-        if (fabs(timeArrive - [other[0] floatValue]) < MAX_ARRIVE_TIME_DIFF) {
-            [featuresLeft[tidx] removeObjectAtIndex:0];
-            [featuresRight[tidx] removeObjectAtIndex:0];
-            [featuresLeft[tidx] addObjectsFromArray:featuresRight[tidx]];
-            int resD = [detector classify:featuresLeft[tidx]], resR = -1;
-            //NSLog(@"resD %d", resD);
-            if (resD != 0) {
-                Classifier *recognizer;
-                if (mode == M_Stationary) recognizer = recognizerStationay;
-                else if (mode == M_Walking) recognizer = recognizerWalking;
-                else if (mode == M_Running) recognizer = recognizerRunning;
-                resR = [recognizer classify:featuresLeft[tidx]];
-                //NSLog(@"resR %d", resR);
-                if (!experimenting) {
-                    UILog(@"resR: %@", mode == M_Stationary ? predStationary[resR] : predMoving[resR]);
-                    [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
+    if (other == nil) return;
+    if (fabs(timeArrive - [other[0] floatValue]) < MAX_ARRIVE_TIME_DIFF) {
+        [featuresLeft[tidx] removeObjectAtIndex:0];
+        [featuresRight[tidx] removeObjectAtIndex:0];
+        NSMutableArray *featuresD = [self combineFeatures:detector.type left:featuresLeft[tidx] right:featuresRight[tidx]];
+        int resD = [detector classify:featuresD], resR = -1;
+        NSLog(@"resD %d", resD);
+        if (resD != 0) {
+            Classifier *recognizer;
+            if (mode == M_Stationary) recognizer = recognizerStationay;
+            else if (mode == M_Walking) recognizer = recognizerWalking;
+            else if (mode == M_Running) recognizer = recognizerRunning;
+            NSMutableArray *featuresR = [self combineFeatures:recognizer.type left:featuresLeft[tidx] right:featuresRight[tidx]];
+            resR = [recognizer classify:featuresR];
+            //NSLog(@"resR %d", resR);
+            if (!experimenting) {
+                UILog(@"resR: %@", mode == M_Stationary ? predStationary[resR] : predMoving[resR]);
+                [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
+                
+                if (resR == 4) {
+                    NSString *s = @"";
+                    for (int i = 0; i < featuresLeft[tidx].count; i++) {
+                        s = [s stringByAppendingFormat:@"%f ", [featuresLeft[tidx][i] floatValue]];
+                    }
+                    s = [s stringByAppendingFormat:@"\n"];
+                    [self writeFile:@"bad.txt" content:s];
                 }
             }
-            if (experimenting) [self feed:resR];
-            featuresLeft[tidx] = nil;
-            featuresRight[tidx] = nil;
-        } else {
-            NSLog(@"lr diff: %d %f %f", ctrl, timeArrive, [other[0] floatValue]);
         }
+        if (experimenting) [self feed:resR];
+        featuresLeft[tidx] = nil;
+        featuresRight[tidx] = nil;
+    } else {
+        NSLog(@"lr diff: %d %f %f", ctrl, timeArrive, [other[0] floatValue]);
     }
 }
 

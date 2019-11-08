@@ -544,7 +544,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "pcg.Hand2hand-demo.watchkitapp.watchkitextension";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -566,7 +566,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "pcg.Hand2hand-demo.watchkitapp.watchkitextension";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -583,7 +583,7 @@
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				IBSC_MODULE = Hand2hand_demo_WatchKit_Extension;
 				INFOPLIST_FILE = "Hand2hand_demo WatchKit App/Info.plist";
-				PRODUCT_BUNDLE_IDENTIFIER = "pcg.Hand2hand-demo.watchkitapp";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -600,7 +600,7 @@
 				DEVELOPMENT_TEAM = 2V33378F7P;
 				IBSC_MODULE = Hand2hand_demo_WatchKit_Extension;
 				INFOPLIST_FILE = "Hand2hand_demo WatchKit App/Info.plist";
-				PRODUCT_BUNDLE_IDENTIFIER = "pcg.Hand2hand-demo.watchkitapp";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -624,7 +624,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "pcg.Hand2hand-demo";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -645,7 +645,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "pcg.Hand2hand-demo";
+				PRODUCT_BUNDLE_IDENTIFIER = pcg.hand2hand;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

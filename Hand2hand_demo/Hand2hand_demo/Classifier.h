@@ -17,8 +17,9 @@
 
 @interface Classifier : NSObject
 
-- (id)initWithSVM:(NSString *)filePath;
+@property int type;
 
+- (id)initWithSVM:(NSString *)filePath type:(int)type;
 - (int)classify:(NSMutableArray *)features;
 
 @end

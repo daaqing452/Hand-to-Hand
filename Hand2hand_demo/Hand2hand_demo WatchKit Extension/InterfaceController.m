@@ -228,7 +228,7 @@ double calibratedTicker = 0;
 
 // recognition
 const double EPS = 1e-7;
-const int AXES = 8;
+const int AXES = 12;
 const int MOTION_ARRAY_CAPACITY = 50;
 const int MOTION_ARRAY_CUT_OFF = 25;
 const int ENERGY_BIN_NUM = 5;
@@ -255,7 +255,7 @@ NSMutableArray *arrays[AXES];
         calibratedTicker -= 0.01;
         return;
     }
-    double motionData[AXES] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.roll, motion.attitude.pitch};
+    double motionData[AXES] = {motion.userAcceleration.x, motion.userAcceleration.y, motion.userAcceleration.z, motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z, motion.attitude.roll, motion.attitude.pitch, motion.attitude.quaternion.w, motion.attitude.quaternion.x, motion.attitude.quaternion.y, motion.attitude.quaternion.z};
     for (int i = 0; i < AXES; i++) {
         [arrays[i] addObject:[NSNumber numberWithDouble:motionData[i]]];
     }

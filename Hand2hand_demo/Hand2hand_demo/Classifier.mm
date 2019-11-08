@@ -19,6 +19,7 @@ using namespace cv::ml;
 @interface Classifier()
 
 @property Ptr<SVM> svm;
+@property int featureLength;
 
 @end
 
@@ -26,24 +27,26 @@ using namespace cv::ml;
 
 @implementation Classifier
 
-const int FEATURES_LENGTH = 64;
 const double EPS = 1e-7;
 
-- (id)initWithSVM:(NSString *)filePath {
+- (id)initWithSVM:(NSString *)filePath type:(int)type {
     self = [super init];
     self.svm = SVM::load([filePath UTF8String]);
+    self.type = type;
+    if (self.type == 0) self.featureLength = 64;
+    else if (self.type == 1) self.featureLength = 80;
     return self;
 }
 
 - (int)classify:(NSArray *)features {
     int length = (int)features.count;
-    if (length != FEATURES_LENGTH) {
+    if (length != self.featureLength) {
         NSLog(@"feature length error");
         return -1;
     }
-    float *dataArray = new float[FEATURES_LENGTH];
-    for (int i = 0; i < FEATURES_LENGTH; i++) dataArray[i] = [features[i] floatValue];
-    Mat dataMat = Mat(1, FEATURES_LENGTH, CV_32F, dataArray);
+    float *dataArray = new float[self.featureLength];
+    for (int i = 0; i < self.featureLength; i++) dataArray[i] = [features[i] floatValue];
+    Mat dataMat = Mat(1, self.featureLength, CV_32F, dataArray);
     float result = self.svm->predict(dataMat);
     delete[] dataArray;
     return (int)(result + EPS);
