@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/label0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.077"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.036" />
+
+    <Button
+        android:id="@+id/button_rejectcall"
+        android:layout_width="140dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="40dp"
+        android:tag="1"
+        android:text="Reject Call"
+        app:layout_constraintStart_toEndOf="@+id/button_answercall"
+        app:layout_constraintTop_toTopOf="@+id/button_answercall" />
+
+    <Button
+        android:id="@+id/button_answercall"
+        android:layout_width="140dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="128dp"
+        android:tag="0"
+        android:text="Answer Call"
+        app:layout_constraintStart_toStartOf="@+id/button_exp"
+        app:layout_constraintTop_toBottomOf="@+id/button_exp" />
+
+    <Button
+        android:id="@+id/button_playpause"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="60dp"
+        android:tag="2"
+        android:text="Play/Pause"
+        app:layout_constraintStart_toStartOf="@+id/button_answercall"
+        app:layout_constraintTop_toBottomOf="@+id/button_answercall" />
+
+    <Button
+        android:id="@+id/button_readmessage"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="60dp"
+        android:enabled="false"
+        android:tag="5"
+        android:text="Read Message"
+        app:layout_constraintStart_toStartOf="@+id/button_answercall"
+        app:layout_constraintTop_toBottomOf="@+id/button_playpause" />
+
+    <Button
+        android:id="@+id/button_deletemessage"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="14dp"
+        android:enabled="false"
+        android:tag="6"
+        android:text="Delete Message"
+        app:layout_constraintStart_toEndOf="@+id/button_readmessage"
+        app:layout_constraintTop_toTopOf="@+id/button_readmessage" />
+
+    <Button
+        android:id="@+id/button_replymessage"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="14dp"
+        android:enabled="false"
+        android:tag="7"
+        android:text="Reply Message"
+        app:layout_constraintStart_toEndOf="@+id/button_deletemessage"
+        app:layout_constraintTop_toTopOf="@+id/button_readmessage" />
+
+    <Button
+        android:id="@+id/button_prevmusic"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="14dp"
+        android:tag="3"
+        android:text="Prev Music"
+        app:layout_constraintStart_toEndOf="@+id/button_playpause"
+        app:layout_constraintTop_toTopOf="@+id/button_playpause" />
+
+    <Button
+        android:id="@+id/button_nextmusic"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="14dp"
+        android:tag="4"
+        android:text="Next Music"
+        app:layout_constraintStart_toEndOf="@+id/button_prevmusic"
+        app:layout_constraintTop_toTopOf="@+id/button_playpause" />
+
+    <Button
+        android:id="@+id/button_exp"
+        android:layout_width="123dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="32dp"
+        android:text="Exp. End"
+        app:layout_constraintStart_toStartOf="@+id/label0"
+        app:layout_constraintTop_toBottomOf="@+id/label0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

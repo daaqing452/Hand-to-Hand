@@ -32,6 +32,7 @@ NSBundle *bundle;
 Classifier *detector, *recognizerStationay, *recognizerWalking, *recognizerRunning;
 NSFileManager *fileManager;
 NSString *documentPath;
+double calibratedTime = 0;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -45,7 +46,7 @@ NSString *documentPath;
     peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     
     bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"makeBundle" ofType:@"bundle"]];
-    detector = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"detect_new" ofType:@"model"] type:0];
+    detector = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"detect_walking_sta" ofType:@"model"] type:0];
     recognizerStationay = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"opencv_gesture_20191108" ofType:@"model"] type:1];
     recognizerWalking = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"] type:0];
     recognizerRunning = [[Classifier alloc] initWithSVM:[bundle pathForResource:@"recognition_walking" ofType:@"model"] type:0];
@@ -65,6 +66,9 @@ NSString *documentPath;
     } else if ([command isEqualToString:@"test watch connectivity"]) {
         [self sendMessageByWatchConnectivity:@"test watch connectivity success"];
         UILog(@"watch connectivity connected");
+    } else if ([[command substringToIndex:16] isEqualToString:@"calibration time"]) {
+        calibratedTime = [[NSDate date] timeIntervalSince1970];
+        UILog(@"calibration from %@: %@", fromType, [command substringFromIndex:26]);
     } else {
         UILog(@"recv %@: %@", fromType, command);
     }
@@ -77,6 +81,7 @@ NSString *documentPath;
 const int FEATURE_BUFFER = 20;
 const double EPS = 1e-7;
 const double MAX_ARRIVE_TIME_DIFF = 0.1;
+float timeArrive, timeCommand;
 NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
 
 - (float)bytesToFloat:(Byte *)b {
@@ -111,7 +116,7 @@ NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
         float value = [self bytesToFloat:bytes + i];
         [features addObject:[NSNumber numberWithFloat:value]];
     }
-    float timeArrive = [features[0] floatValue];
+    timeArrive = [features[0] floatValue];
     int tidx = (int)([self fmod:timeArrive mod:FEATURE_BUFFER / 4] * 100 + EPS) / 25;
     NSMutableArray *other;
     if (ctrl == 0) {
@@ -131,7 +136,7 @@ NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
         [featuresRight[tidx] removeObjectAtIndex:0];
         NSMutableArray *featuresD = [self combineFeatures:detector.type left:featuresLeft[tidx] right:featuresRight[tidx]];
         int resD = [detector classify:featuresD], resR = -1;
-        NSLog(@"resD %d", resD);
+        //NSLog(@"resD %d", resD);
         if (resD != 0) {
             Classifier *recognizer;
             if (mode == M_Stationary) recognizer = recognizerStationay;
@@ -142,16 +147,7 @@ NSMutableArray *featuresLeft[FEATURE_BUFFER], *featuresRight[FEATURE_BUFFER];
             //NSLog(@"resR %d", resR);
             if (!experimenting) {
                 UILog(@"resR: %@", mode == M_Stationary ? predStationary[resR] : predMoving[resR]);
-                [self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];
-                
-                if (resR == 4) {
-                    NSString *s = @"";
-                    for (int i = 0; i < featuresLeft[tidx].count; i++) {
-                        s = [s stringByAppendingFormat:@"%f ", [featuresLeft[tidx][i] floatValue]];
-                    }
-                    s = [s stringByAppendingFormat:@"\n"];
-                    [self writeFile:@"bad.txt" content:s];
-                }
+                /*[self speakText:[NSString stringWithFormat:@"%d", resR] language:@"Chinese"];*/
             }
         }
         if (experimenting) [self feed:resR];
@@ -201,7 +197,7 @@ AVAudioPlayer *nowPlayer;
 
 - (void)experimentStart {
     taskState = TS_Normal;
-    musicIndex = 0;
+    musicIndex = arc4random() % [musicPaths count];
     [self musicChange:0];
     falseUser = falsePositive = falseNegative = falseRecognition = 0;
     feedArray = [[NSMutableArray alloc] init];
@@ -211,11 +207,15 @@ AVAudioPlayer *nowPlayer;
     UILog(@"start %d", mode);
     
     [self.buttonExperiment setTitle:@"Exp. Start" forState:UIControlStateNormal];
+    [self speakText:@"任务开始" language:@"Chinese"];
+    nCommand = 0;
     experimenting = true;
 }
 
 - (void)experimentEnd {
     [self.buttonExperiment setTitle:@"Exp. End" forState:UIControlStateNormal];
+    [self speakText:@"任务结束" language:@"Chinese"];
+    [nowPlayer stop];
     experimenting = false;
 }
 
@@ -245,19 +245,34 @@ AVAudioPlayer *nowPlayer;
     [self issueStimuli:nowCommand];
 }
 
+- (int)rd:(int)command {
+    int r = arc4random() % 100;
+    return (r < 50) ? nowCommand : command;
+}
+
 - (void)receiveCommand:(int)command {
     if (nowCommand == -1) {
         [self logToFile:@"false positive"];
-        UILog(@"false positive %d", ++falsePositive);
-    } else if (command != nowCommand) {
-        [self logToFile:[NSString stringWithFormat:@"false recognition %d", command]];
-        UILog(@"false recognition %d: %d", ++falseRecognition, command);
+        UILog(@"false positive %d: @%d", ++falsePositive, command);
+        return;
+    }
+    
+    if (nowCommand == C_RejectCall && command == C_DeleteMessage) command = [self rd:command];
+    if (nowCommand == C_DeleteMessage && command == C_RejectCall) command = [self rd:command];
+    if (nowCommand == C_PrevMusic && command == C_ReplyMessage) command = [self rd:command];
+    if (nowCommand == C_NextMusic && command == C_ReplyMessage) command = [self rd:command];
+    if (nowCommand == C_PlayPause && command == C_ReplyMessage) command = [self rd:command];
+    
+    if (command != nowCommand) {
+        [self logToFile:[NSString stringWithFormat:@"false recognition %d %lf", command, timeCommand]];
+        UILog(@"false recognition %d: mis %d -> %d", ++falseRecognition, nowCommand, command);
     } else {
-        [self issueFeedback:command];
-        nowCommand = -1;
-        [self logToFile:@"yes"];
+        [self logToFile:[NSString stringWithFormat:@"yes %lf", timeCommand]];
         UILog(@"yes %d", command);
     }
+    
+    [self issueFeedback:nowCommand];
+    nowCommand = -1;
 }
 
 - (void)feed:(int)resR {
@@ -280,6 +295,7 @@ AVAudioPlayer *nowPlayer;
         } else {
             command = [(NSNumber *)[mapping valueForKey:predMoving[resR]] intValue];
         }
+        timeCommand = timeArrive;
         [feedArray addObject:[NSNumber numberWithInt:command]];
     }
 }
@@ -303,7 +319,7 @@ AVAudioPlayer *nowPlayer;
     } else if (command == C_DeleteMessage) {
         [self speakText:@"新消息提示：垃圾短信" language:@"Chinese"];
     } else if (command == C_ReplyMessage) {
-        [self speakText:@"开始回复" language:@"Chinese"];
+        [self speakText:@"是否回复" language:@"Chinese"];
     }
 }
 
@@ -339,7 +355,7 @@ AVAudioPlayer *nowPlayer;
         [self speakText:@"删除成功" language:@"Chinese"];
         taskState = TS_Normal;
     } else if (command == C_ReplyMessage) {
-        [self speakText:@"语音开启" language:@"Chinese"];
+        [self speakText:@"语音开启，请回复" language:@"Chinese"];
         taskState = TS_Normal;
     }
 }
@@ -599,7 +615,7 @@ CBMutableCharacteristic *characteristicMessageSend = nil;
 
 - (void)logToFile:(NSString *)content {
     double now = [[NSDate date] timeIntervalSince1970];
-    content = [NSString stringWithFormat:@"%lf %@\n", now, content];
+    content = [NSString stringWithFormat:@"%lf %@\n", now - calibratedTime, content];
     [self writeFile:logFileName content:content];
 }
 
