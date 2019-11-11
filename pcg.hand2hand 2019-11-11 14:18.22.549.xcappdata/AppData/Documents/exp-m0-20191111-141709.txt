@@ -1,6 +1,0 @@
-17.458076 start m0
-19.291260 new command 4
-22.293208 yes 21.309153
-26.370447 new command 4
-29.178632 false recognition 7 28.309317
-39.843789 new command 0
